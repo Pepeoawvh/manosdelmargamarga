@@ -1,0 +1,9 @@
+/* Banner1 */
+  .zoomImage {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .zoomImage:hover {
+    transform: scale(1.05);
+  }
+
