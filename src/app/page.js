@@ -5,7 +5,6 @@ import { firestoreDB } from "./lib/firebase/config";
 import ProductCard from "./components/product/ProductCard";
 import FeatureCard from "./components/FeatureCard";
 import HeroCarousel from "./components/HeroCarousel";
-import HowItWorks from "./components/HowItWorks";
 import WspButton from "./components/WspButton";
 
 export default function Home() {
@@ -138,7 +137,6 @@ export default function Home() {
             Lo que dicen nuestros clientes
           </h2>
 
-          <HowItWorks />
         </div>
       </section>
     </div>
