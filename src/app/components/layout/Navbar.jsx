@@ -34,7 +34,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 relative z-10">
             <Image
-              src="/images/logos/logo.png"
+              src="/images/logos/mmm.png"
               alt="Manos del Marga Marga"
               width={120}
               height={40}
