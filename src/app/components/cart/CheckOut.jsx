@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import ShippingInfoForm from './ShippingInfoForm';
 import OrderSummary from './OrderSummary';
-import MercadoPagoButton from './MercadoPagoButton';
 import Button from '../../components/ui/Button';
 
 const CheckOut = () => {
@@ -127,18 +126,7 @@ const CheckOut = () => {
                 {loading ? 'Procesando...' : 'Pagar vía WebPay'}
               </Button>
 
-              {preferenceId ? (
-                <MercadoPagoButton preferenceId={preferenceId} />
-              ) : (
-                <Button
-                  type="button"
-                  className="w-full py-3 flex items-center justify-center bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-                  disabled={loading || cart.length === 0}
-                  onClick={() => handleCheckout('mercadopago')}
-                >
-                  {loading ? 'Procesando...' : 'Pagar vía MercadoPago'}
-                </Button>
-              )}
+             
             </div>
           </div>
         </div>

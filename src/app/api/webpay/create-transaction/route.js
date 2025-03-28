@@ -15,6 +15,7 @@ export async function POST(request) {
     const orderId = uuidv4();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
+    // Crear la orden en Firestore
     const orderData = {
       id: orderId,
       cart,
@@ -28,8 +29,17 @@ export async function POST(request) {
     const ordersRef = collection(firestoreDB, 'orders');
     await addDoc(ordersRef, orderData);
 
+    // Configurar la transacción en WebPay
+    const webpayRequest = {
+      buy_order: orderId,
+      session_id: uuidv4(),
+      amount: summary.total,
+      return_url: `${baseUrl}/api/webpay/payment-confirmation`,
+    };
+
+    // Simular la respuesta de WebPay en el ambiente de integración
     const webpayResponse = {
-      url: 'https://webpay3gint.transbank.cl/webpayserver/initTransaction',
+      url: `${process.env.WEBPAY_HOST}/webpayserver/initTransaction`,
       token: `WEBPAY-TOKEN-${orderId.substring(0, 8)}`,
     };
 
