@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react';
+'use client'
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
+import Button  from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
 
 const CheckOut = () => {
   const router = useRouter();
@@ -25,7 +26,7 @@ const CheckOut = () => {
     notes: ''
   });
 
-  // Calculamos el envío y el total (ejemplo)
+  // Calculamos el envío y el total
   const shippingCost = subtotal > 30000 ? 0 : 3990;
   const total = subtotal + shippingCost;
 
@@ -44,14 +45,15 @@ const CheckOut = () => {
     
     for (const field of requiredFields) {
       if (!shippingInfo[field]) {
-        setError(`Por favor, completa el campo: ${getFieldLabel(field)}`);
+        setError(`El campo ${getFieldLabel(field)} es obligatorio`);
         return false;
       }
     }
     
     // Validar email
-    if (!/\S+@\S+\.\S+/.test(shippingInfo.email)) {
-      setError('Por favor, introduce un email válido');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(shippingInfo.email)) {
+      setError('El email no es válido');
       return false;
     }
     
@@ -68,8 +70,6 @@ const CheckOut = () => {
       address: 'Dirección',
       city: 'Ciudad',
       region: 'Región',
-      postalCode: 'Código Postal',
-      notes: 'Notas adicionales'
     };
     return labels[field] || field;
   };
@@ -78,14 +78,12 @@ const CheckOut = () => {
   const handleCheckout = async (e) => {
     e.preventDefault();
     
-    // Validar que haya productos en el carrito
-    if (cart.length === 0) {
-      setError('No hay productos en el carrito');
-      return;
-    }
-    
     // Validar formulario
-    if (!validateForm()) {
+    if (!validateForm()) return;
+    
+    // Verificar que el carrito no esté vacío
+    if (cart.length === 0) {
+      setError('El carrito está vacío');
       return;
     }
     
@@ -93,16 +91,12 @@ const CheckOut = () => {
     setError(null);
     
     try {
-      // Preparar los datos para el API
+      // Preparar datos para el backend
       const orderData = {
-        cart: cart.map(item => ({
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          quantity: item.quantity,
-          total: item.price * item.quantity
-        })),
+        cart: cart,
         customer: {
+          firstName: shippingInfo.firstName,
+          lastName: shippingInfo.lastName,
           name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
           email: shippingInfo.email,
           phone: shippingInfo.phone,
@@ -113,14 +107,14 @@ const CheckOut = () => {
           notes: shippingInfo.notes
         },
         summary: {
-          subtotal,
+          subtotal: subtotal,
           shipping: shippingCost,
-          total
+          total: total
         },
-        paymentMethod
+        paymentMethod: paymentMethod
       };
       
-      // Llamada al API para crear la transacción
+      // Enviar al endpoint de creación de transacción
       const response = await fetch('/api/create-transaction', {
         method: 'POST',
         headers: {
@@ -129,34 +123,23 @@ const CheckOut = () => {
         body: JSON.stringify(orderData),
       });
       
-      const data = await response.json();
+      const result = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Error al procesar la orden');
+        throw new Error(result.error || 'Hubo un error al procesar la compra');
       }
       
-      // Guardar la orden en localStorage antes de redirigir
-      localStorage.setItem('pendingOrder', JSON.stringify({
-        orderId: data.orderId,
-        cart,
-        shippingInfo,
-        total
-      }));
-      
-      // Redireccionar según el método de pago
-      if (data.url) {
-        // Redirección a la pasarela de pago (WebPay o MercadoPago)
-        window.location.href = data.url;
-        return;
+      // Para ambos métodos de pago redirigimos a la URL proporcionada
+      if (result.url) {
+        clearCart(); // Limpiar carrito antes de redirigir
+        window.location.href = result.url; // Usar window.location para redirección completa
+      } else {
+        throw new Error('No se recibió una URL de redirección');
       }
-      
-      // Si es otro método o pago exitoso directo
-      clearCart();
-      router.push(`/order-confirmation?id=${data.orderId}`);
       
     } catch (err) {
-      console.error('Error en el checkout:', err);
-      setError(err.message || 'Ocurrió un error al procesar tu orden');
+      console.error('Error en checkout:', err);
+      setError(err.message || 'Hubo un error al procesar la compra');
     } finally {
       setLoading(false);
     }
@@ -381,7 +364,7 @@ const CheckOut = () => {
                     <span className="block font-medium">WebPay</span>
                     <span className="block text-sm text-gray-500">Paga con tarjeta de crédito o débito</span>
                   </span>
-                  <img src="/images/payment/webpay-logo.png" alt="WebPay" className="h-8 ml-auto" />
+                  <img src="/webpay-logo.png" alt="WebPay" className="h-8 ml-auto" />
                 </label>
                 
                 <label className="flex items-center p-3 border rounded-md bg-white cursor-pointer hover:bg-gray-50">
@@ -397,7 +380,7 @@ const CheckOut = () => {
                     <span className="block font-medium">MercadoPago</span>
                     <span className="block text-sm text-gray-500">Múltiples opciones de pago</span>
                   </span>
-                  <img src="/images/payment/mercadopago-logo.png" alt="MercadoPago" className="h-8 ml-auto" />
+                  <img src="/mercadopago-logo.svg" alt="MercadoPago" className="h-8 ml-auto" />
                 </label>
               </div>
             </div>

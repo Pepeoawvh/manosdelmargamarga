@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { firestoreDB } from '../../lib/firebase/config'; // Ajustado para usar firestoreDB
+import { firestoreDB } from '../../lib/firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import mercadopago from 'mercadopago'; // Importar SDK de MercadoPago
+import mercadopago from 'mercadopago';
 
-// Configuración de MercadoPago
+// Configuración de MercadoPago con el token correcto
 mercadopago.configure({
-  access_token: process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-123456789012345678901234-123456' // Reemplaza con tu token real
+  access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
 });
 
 export async function POST(request) {
@@ -36,7 +36,6 @@ export async function POST(request) {
       createdAt: serverTimestamp()
     };
     
-    // Guardar la orden en Firestore
     const ordersRef = collection(firestoreDB, 'orders');
     await addDoc(ordersRef, orderData);
     
@@ -57,67 +56,111 @@ export async function POST(request) {
       });
     } 
     else if (paymentMethod === 'mercadopago') {
-      // Configurar el ítem para MercadoPago según la documentación oficial
-      const preference = {
-        items: cart.map(item => ({
+      // Obtener el costo de envío del resumen
+      const shippingCost = summary.shipping || 0;
+      
+      try {
+        console.log('Preparando preferencia para MercadoPago...');
+        
+        // Formatear los items para MercadoPago
+        // MercadoPago requiere que los precios sean números enteros
+        const items = cart.map(item => ({
           id: item.id,
           title: item.title,
           description: item.description || 'Producto de MMM',
+          category_id: 'productos',
           quantity: item.quantity,
-          currency_id: 'CLP', // Moneda chilena
-          unit_price: parseInt(item.price) // MercadoPago requiere que el precio sea numérico
-        })),
-        payer: {
-          name: customer.firstName,
-          surname: customer.lastName,
-          email: customer.email,
-          phone: {
-            number: customer.phone
+          unit_price: Number(item.price), // Convertir explícitamente a número
+          currency_id: 'CLP',
+        }));
+        
+        console.log('Items formateados:', items);
+        
+        // Configurar la preferencia de MercadoPago
+        const preference = {
+          items,
+          payer: {
+            name: customer.firstName,
+            surname: customer.lastName,
+            email: customer.email,
+            phone: {
+              area_code: "",
+              number: customer.phone
+            },
+            address: {
+              street_name: customer.address,
+              zip_code: customer.postalCode || '0000000'
+            }
           },
-          address: {
-            street_name: customer.address,
-            zip_code: customer.postalCode
-          }
-        },
-        back_urls: {
-          success: `${baseUrl}/payment-result?status=success&source=mercadopago&orderId=${orderId}`,
-          failure: `${baseUrl}/payment-result?status=failure&source=mercadopago&orderId=${orderId}`,
-          pending: `${baseUrl}/payment-result?status=pending&source=mercadopago&orderId=${orderId}`,
-        },
-        auto_return: "approved",
-        external_reference: orderId,
-        statement_descriptor: "MMM Store", // Descripción que aparecerá en el resumen de la tarjeta
-        shipments: {
-          cost: shippingCost,
-          mode: "not_specified",
-        },
-        notification_url: `${baseUrl}/api/mercadopago-webhook`,
-      };
-
-      try {
+          back_urls: {
+            success: `${baseUrl}/payment-success?orderId=${orderId}`,
+            failure: `${baseUrl}/payment-failure?orderId=${orderId}`,
+            pending: `${baseUrl}/payment-pending?orderId=${orderId}`,
+          },
+          auto_return: "approved",
+          external_reference: orderId,
+          statement_descriptor: "MMM Store",
+          shipments: {
+            cost: shippingCost,
+            mode: "not_specified",
+          },
+          notification_url: `${baseUrl}/api/mercadopago-webhook`,
+        };
+        
+        console.log('Creando preferencia en MercadoPago:', JSON.stringify(preference));
+        
         // Crear la preferencia en MercadoPago
         const response = await mercadopago.preferences.create(preference);
         
-        // Obtener URL de pago de MercadoPago
-        const mercadoPagoUrl = response.body.init_point; // URL de producción
-        // const mercadoPagoUrl = response.body.sandbox_init_point; // URL para pruebas
+        console.log('Respuesta de MercadoPago:', response);
+        
+        if (!response.body) {
+          throw new Error('Respuesta inválida de MercadoPago');
+        }
+        
+        // Guardar la preferencia en Firestore para referencia futura
+        const paymentsRef = collection(firestoreDB, 'payments');
+        await addDoc(paymentsRef, {
+          orderId: orderId,
+          preferenceId: response.body.id,
+          status: 'pending',
+          provider: 'mercadopago',
+          createdAt: serverTimestamp()
+        });
+        
+        // URL para el ambiente de producción
+        const mercadoPagoUrl = response.body.init_point;
         
         return NextResponse.json({
           orderId,
-          url: mercadoPagoUrl,
           preferenceId: response.body.id,
+          url: mercadoPagoUrl,
           message: 'Redirigiendo a MercadoPago...'
         });
       } catch (mpError) {
-        console.error('Error al crear preferencia en MercadoPago:', mpError);
+        console.error('Error detallado al crear preferencia en MercadoPago:', mpError);
+        
+        // Registrar el error en Firestore
+        const errorsRef = collection(firestoreDB, 'errors');
+        await addDoc(errorsRef, {
+          type: 'mercadopago_create_preference',
+          message: mpError.message,
+          stack: mpError.stack,
+          timestamp: serverTimestamp()
+        });
+        
         return NextResponse.json(
-          { error: 'Error al crear preferencia en MercadoPago' },
+          { 
+            error: 'Error al crear preferencia en MercadoPago', 
+            details: mpError.message,
+            stack: process.env.NODE_ENV === 'development' ? mpError.stack : undefined
+          }, 
           { status: 500 }
         );
       }
     }
     
-    // Para otros métodos de pago (por ejemplo, transferencia bancaria)
+    // Para otros métodos de pago
     return NextResponse.json({
       orderId,
       message: 'Orden creada exitosamente'
@@ -126,7 +169,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error al crear la transacción:', error);
     return NextResponse.json(
-      { error: 'Error al procesar la transacción' }, 
+      { error: 'Error al procesar la transacción', details: error.message }, 
       { status: 500 }
     );
   }
