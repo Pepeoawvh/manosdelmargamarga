@@ -24,22 +24,19 @@ const InventoryManager = ({ onEdit }) => {
     setMounted(true);
   }, []);
 
-  // Efecto para suscribirse a cambios en tiempo real
   useEffect(() => {
     if (!mounted) return;
-    
+  
     console.log('Configurando listener de Firestore para productos...');
     const unsubscribe = onSnapshot(
       collection(firestoreDB, 'productosmmm'),
       (snapshot) => {
-        // No actualizar si no tenemos cambios
         if (snapshot.empty) return;
-        
+  
         console.log(`Productos actualizados en tiempo real: ${snapshot.size} documentos`);
+        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setProducts(products); // Reemplaza el estado completo
         setLastUpdate(new Date());
-        
-        // Forzar actualización desde el hook
-        refreshProducts();
       },
       (error) => {
         console.error("Error en listener de Firestore:", error);
@@ -49,10 +46,9 @@ const InventoryManager = ({ onEdit }) => {
         });
       }
     );
-    
-    // Limpiar suscripción cuando se desmonte
-    return () => unsubscribe();
-  }, [mounted, refreshProducts]);
+  
+    return () => unsubscribe(); // Limpiar el listener al desmontar
+  }, [mounted]);
 
   // Manejador para actualización manual
   const handleRefresh = async () => {
@@ -106,8 +102,8 @@ const InventoryManager = ({ onEdit }) => {
   // Manejador para agregar producto
   const handleAddProduct = async (productData) => {
     try {
-      const result = await addProduct(productData);
-      
+      const result = await addProduct(productData); // Agrega el producto a Firestore
+  
       if (result.success) {
         setUpdateStatus({
           message: 'Producto agregado correctamente',
@@ -126,7 +122,6 @@ const InventoryManager = ({ onEdit }) => {
       });
     }
   };
-
   // Filtrar productos por nombre y categoría
   const filteredProducts = products.filter(product => {
     const matchesText = product?.title?.toLowerCase?.().includes(filterText?.toLowerCase?.() || '') || false;

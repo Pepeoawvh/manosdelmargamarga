@@ -1,43 +1,24 @@
-'use client'
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+'use client';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { firestoreDB } from '../lib/firebase/config';
+import { useEffect } from 'react';
 
 export default function PaymentFailure() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
-  const [orderDetails, setOrderDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const tbkToken = searchParams.get('TBK_TOKEN');
+  const tbkOrdenCompra = searchParams.get('TBK_ORDEN_COMPRA');
   
+  const handleRetryPayment = () => {
+    // Redirige al checkout manteniendo los datos
+    router.push('/checkout?retry=true');
+  };
+
+  // Registrar información de la transacción fallida para depuración
   useEffect(() => {
-    // Obtener detalles del pedido
-    const fetchOrderDetails = async () => {
-      if (!orderId) return;
-      
-      try {
-        const ordersRef = collection(firestoreDB, 'orders');
-        const q = query(ordersRef, where('id', '==', orderId));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          setOrderDetails({
-            id: orderId,
-            ...querySnapshot.docs[0].data()
-          });
-        }
-      } catch (error) {
-        console.error('Error al obtener detalles del pedido:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchOrderDetails();
-  }, [orderId]);
-  
+    console.log('Pago fallido:', { tbkToken, tbkOrdenCompra });
+  }, [tbkToken, tbkOrdenCompra]);
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 md:p-8">
@@ -49,45 +30,32 @@ export default function PaymentFailure() {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800">Pago no completado</h2>
           <p className="text-gray-600 mt-2">
-            Lo sentimos, hubo un problema con tu pago.
+            Lo sentimos, hubo un problema con tu pago. Puedes intentar nuevamente con otro método de pago.
           </p>
         </div>
-        
-        {loading ? (
-          <div className="animate-pulse flex flex-col gap-3">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-          </div>
-        ) : orderDetails ? (
-          <div className="bg-gray-50 rounded p-4 mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              <span className="font-medium">Número de pedido:</span> {orderDetails.id}
-            </p>
-            {orderDetails.customer && (
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Nombre:</span> {orderDetails.customer.name}
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No se encontraron detalles del pedido.</p>
-        )}
-        
+
         <div className="mt-6 flex flex-col gap-3">
-          <Link 
-            href={`/checkout?orderId=${orderId}`}
+          <button
+            onClick={handleRetryPayment}
             className="block w-full py-2 px-4 bg-emerald-600 text-white text-center rounded hover:bg-emerald-700 transition-colors"
           >
-            Intentar pago nuevamente
-          </Link>
+            Intentar con otro método de pago
+          </button>
           
-          <Link 
+          <Link
             href="/catalogo"
-            className="block w-full py-2 px-4 border border-gray-300 text-gray-700 text-center rounded hover:bg-gray-50 transition-colors"
+            className="block w-full py-2 px-4 bg-gray-200 text-gray-800 text-center rounded hover:bg-gray-300 transition-colors"
           >
             Volver al catálogo
           </Link>
         </div>
+
+        {tbkToken && (
+          <p className="text-center text-xs text-gray-500 mt-4">
+            ID de transacción: {tbkToken}
+            {tbkOrdenCompra && <span> | Orden: {tbkOrdenCompra}</span>}
+          </p>
+        )}
       </div>
     </div>
   );
