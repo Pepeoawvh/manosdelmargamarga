@@ -1,11 +1,13 @@
-'use client';
-import useAdminPanel from '../hooks/admin/useAdminPanel';
-import ProductForm from '../components/product/ProductForm';
-import InventoryManager from '../components/admin/InventoryManager';
-import TabSystem from '../components/ui/TabSystem';
-import OrderTable from '../components/admin/OrderTable';
-import OrderDetails from '../components/admin/OrderDetails';
-import { useState, useEffect } from 'react';
+"use client";
+import useAdminPanel from "../hooks/admin/useAdminPanel";
+import ProductForm from "../components/product/ProductForm";
+import InventoryManager from "../components/admin/InventoryManager";
+import TabSystem from "../components/ui/TabSystem";
+import OrderTable from "../components/admin/OrderTable";
+import CarouselManager from "@/app/components/admin/CarouselManager";
+import SalesReport from "../components/admin/SalesReport";
+import Dashboard from "../components/admin/Dashboard";
+import { useState, useEffect } from "react";
 
 export default function AdminPanel() {
   const {
@@ -55,7 +57,7 @@ export default function AdminPanel() {
 
   // Sanitización de inputs
   const sanitizeInput = (input) => {
-    return input.trim().replace(/[<>]/g, '');
+    return input.trim().replace(/[<>]/g, "");
   };
 
   // Handlers para cambios en inputs
@@ -73,67 +75,49 @@ export default function AdminPanel() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValidEmail(email)) {
-      alert('Por favor, ingresa un correo electrónico válido');
+      alert("Por favor, ingresa un correo electrónico válido");
       return;
     }
     if (password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
+      alert("La contraseña debe tener al menos 6 caracteres");
       return;
     }
     handleLogin(e);
   };
 
   // Componente para la pestaña del Dashboard
-  const DashboardTab = () => (
-    <div className="bg-white border border-gray-200 rounded shadow-sm p-4">
-      <h2 className="text-lg font-medium text-gray-700 mb-3">Panel de Control</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-emerald-50 border border-emerald-200 rounded p-3">
-          <h3 className="text-sm font-medium text-emerald-800">Productos</h3>
-          <p className="text-xl font-bold text-emerald-700">{products.length}</p>
-          <p className="text-xs text-emerald-600">Total de productos en inventario</p>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded p-3">
-          <h3 className="text-sm font-medium text-amber-800">Destacados</h3>
-          <p className="text-xl font-bold text-amber-700">
-            {products.filter((p) => p.featured).length}
-          </p>
-          <p className="text-xs text-amber-600">Productos destacados en inicio</p>
-        </div>
-        <div className="bg-blue-50 border border-blue-200 rounded p-3">
-          <h3 className="text-sm font-medium text-blue-800">Categorías</h3>
-          <p className="text-xl font-bold text-blue-700">8</p>
-          <p className="text-xs text-blue-600">Categorías de productos</p>
-        </div>
-      </div>
-      <div className="mt-4 border-t pt-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Acciones Rápidas</h3>
-        <div className="flex flex-wrap gap-2">
-          <button className="bg-amber-600 text-white py-1 px-2 text-xs rounded hover:bg-amber-700">
-            Ver Pedidos
-          </button>
-        </div>
-      </div>
-    </div>
+  const DashboardTab = ({ onChangeTab, onOpenAddProductForm }) => (
+    <Dashboard 
+      products={products} 
+      orders={orders} 
+      onChangeTab={onChangeTab}
+      onOpenAddProductForm={onOpenAddProductForm}
+    />
   );
-
   const OrdersTab = () => {
     const [expandedOrderId, setExpandedOrderId] = useState(null);
     const [expandedSection, setExpandedSection] = useState(null);
-  
+
     const toggleExpandedSection = (section) => {
       setExpandedSection((prev) => (prev === section ? null : section));
     };
-  
+
     // Validar que `orders` sea un array antes de usar `.find()`
-    const expandedOrder = Array.isArray(orders) ? orders.find((order) => order.id === expandedOrderId) : null;
-  
+    const expandedOrder = Array.isArray(orders)
+      ? orders.find((order) => order.id === expandedOrderId)
+      : null;
+
     // Logging para verificar disponibilidad de la función
-    console.log("¿assignOrderNumber está disponible?", typeof assignOrderNumber === 'function');
-  
+    console.log(
+      "¿assignOrderNumber está disponible?",
+      typeof assignOrderNumber === "function"
+    );
+
     return (
       <div className="p-4">
-        <h2 className="text-lg font-medium text-gray-700 mb-4">Gestión de Pedidos</h2>
+        <h2 className="text-lg font-medium text-gray-700 mb-4">
+          Gestión de Pedidos
+        </h2>
         <OrderTable
           orders={Array.isArray(orders) ? orders : []}
           expandedOrderId={expandedOrderId}
@@ -143,7 +127,7 @@ export default function AdminPanel() {
           getPaymentStatusText={getPaymentStatusText}
           getStatusClass={getStatusClass}
           formatDate={formatDate}
-          formatAddress={formatAddress} 
+          formatAddress={formatAddress}
           updateOrderStatus={updateOrderStatus}
           assignOrderNumber={assignOrderNumber} // AQUÍ ESTÁ EL CAMBIO - Añadir esta prop
         />
@@ -176,7 +160,7 @@ export default function AdminPanel() {
                 value={email}
                 onChange={handleEmailChange}
                 className={`w-full p-2 border rounded focus:ring-primary focus:border-primary ${
-                  email && !isValidEmail(email) ? 'border-red-500' : ''
+                  email && !isValidEmail(email) ? "border-red-500" : ""
                 }`}
                 required
                 pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}"
@@ -188,7 +172,9 @@ export default function AdminPanel() {
                 suppressHydrationWarning
               />
               {email && !isValidEmail(email) && (
-                <p className="text-red-500 text-xs mt-1">Por favor un correo válido</p>
+                <p className="text-red-500 text-xs mt-1">
+                  Por favor un correo válido
+                </p>
               )}
             </div>
             <div>
@@ -214,8 +200,8 @@ export default function AdminPanel() {
               type="submit"
               className={`w-full py-2 rounded transition-colors ${
                 isValidEmail(email) && password.length >= 6
-                  ? 'bg-emerald-700 text-white hover:bg-emerald-600'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? "bg-emerald-700 text-white hover:bg-emerald-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
               disabled={!isValidEmail(email) || password.length < 6}
             >
@@ -230,26 +216,42 @@ export default function AdminPanel() {
   // Definir pestañas para el sistema
   const tabs = [
     {
-      label: 'Dashboard',
-      content: <DashboardTab />,
+      label: "Dashboard",
+      content: <DashboardTab 
+        onChangeTab={(tabName) => {
+          // Encontrar el índice de la pestaña por nombre
+          const tabIndex = tabs.findIndex(tab => tab.label === tabName);
+          if (tabIndex !== -1) {
+            // Cambiar a la pestaña seleccionada
+            document.querySelectorAll('button[role="tab"]')[tabIndex]?.click();
+          }
+        }} 
+        onOpenAddProductForm={() => setShowForm(true)} // Agrega esta función
+      />,
     },
     {
-      label: 'Inventario',
-      content: <InventoryManager onEdit={(product) => setEditingProduct(product)} />,
+      label: "Inventario",
+      content: (
+        <InventoryManager onEdit={(product) => setEditingProduct(product)} />
+      ),
     },
     {
-      label: 'Pedidos',
+      label: "Pedidos",
       content: <OrdersTab />,
     },
     {
-      label: 'Configuración',
-      content: <div className="p-4 text-sm text-gray-500">Configuración de la tienda en desarrollo...</div>,
+      label: "Carrusel",
+      content: <CarouselManager />,
     },
-  ];
+    {
+      label: "Informes de Ventas",
+      content: <SalesReport />,
+    },
+     ];
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 select-none">
+      <div className="w-full bg-white p-4 border-2 border-emerald-800  shadow-lg rounded-md mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-lg font-bold">Panel de Administración</h1>
           <div className="flex items-center space-x-3">
@@ -269,7 +271,9 @@ export default function AdminPanel() {
             <div className="bg-white rounded-lg overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
               <div className="p-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-700">Editar Producto</h3>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Editar Producto
+                  </h3>
                   <button
                     onClick={() => {
                       setEditingProduct(null);
@@ -291,6 +295,30 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+      {/* Modal para agregar nuevo producto */}
+{showForm && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-700">
+            Agregar Nuevo Producto
+          </h3>
+          <button
+            onClick={() => setShowForm(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+        <ProductForm
+          onSubmit={handleAddProduct}
+          onCancel={() => setShowForm(false)}
+        />
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

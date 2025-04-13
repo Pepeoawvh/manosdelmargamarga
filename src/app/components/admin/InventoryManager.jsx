@@ -1,7 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
 import useProducts from '../../hooks/shared/useProducts';
 import ProductForm from '../product/ProductForm';
 import CategoryFilter from './CategoryFilter';
@@ -24,31 +22,7 @@ const InventoryManager = ({ onEdit }) => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-  
-    console.log('Configurando listener de Firestore para productos...');
-    const unsubscribe = onSnapshot(
-      collection(firestoreDB, 'productosmmm'),
-      (snapshot) => {
-        if (snapshot.empty) return;
-  
-        console.log(`Productos actualizados en tiempo real: ${snapshot.size} documentos`);
-        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProducts(products); // Reemplaza el estado completo
-        setLastUpdate(new Date());
-      },
-      (error) => {
-        console.error("Error en listener de Firestore:", error);
-        setUpdateStatus({
-          message: "Error al recibir actualizaciones en tiempo real",
-          isError: true
-        });
-      }
-    );
-  
-    return () => unsubscribe(); // Limpiar el listener al desmontar
-  }, [mounted]);
+
 
   // Manejador para actualización manual
   const handleRefresh = async () => {

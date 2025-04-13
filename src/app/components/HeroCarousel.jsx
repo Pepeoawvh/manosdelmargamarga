@@ -1,148 +1,175 @@
-'use client'
-import { useState, useEffect } from 'react';
-import Slide1 from './slides/Slide1';
-import Slide2 from './slides/Slide2';
-import Slide3 from './slides/Slide3';
+import React, { useState, useEffect } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
+import { firestoreDB } from '../lib/firebase/config';
 
-const HeroCarousel = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+// Importar estilos de Swiper
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
-  const slides = [
-    {
-      Component: Slide1,
-      props: {
-        title: "Invitaciones de Boda Virtuales",
-        description: "Diseños modernos y ecológicos para tu día especial",
-        imageUrl: "/images/backgrounds/Herobg.svg",
-        buttons: [
-          {
-            text: "Ver Catálogo",
-            href: "/ecoproducts",
-            variant: "primary"
-          },
-          {
-            text: "Contactar",
-            href: "/contact",
-            variant: "outline"
-          }
-        ]
-      }
-    },
-    {
-Component: Slide2,
-  props: {
-    imageUrl: "/images/backgrounds/Digitales.svg",
-    mobileImageUrl: "/images/backgrounds/DigitalesSF.svg", 
-    overlayPosition: "left",
-    overlayGradient: "from-emerald-800/20 to-transparent",
-    desktopObjectFit: "contain",
-    desktopObjectPosition: "center", // Centrado para pantallas grandes
-    mobileObjectFit: "contain",
-    mobileObjectPosition: "center", // Centrado para móviles
-  }
-    },
-    {
-      Component: Slide3,
-      props: {
-        imageUrl: "/images/backgrounds/Desktop-Image3.svg",
-        mobileImageUrl: "/images/backgrounds/Valores.png", // Imagen específica para móvil
-        card: {
-          title: "",
-          description: "",
-          position: "right",
-          backgroundColor: "bg-white/80",
-          textColor: "text-emerald-800"
-        }
-      }
-    }
-  ];
-
-  // Manejo automático del cambio de slides
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) => 
-        prevSlide === slides.length - 1 ? 0 : prevSlide + 1
-      );
-    }, 9000); // Tiempo entre cambios de slide
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Funciones para navegación manual
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
-
-  return (
-    <div className="relative overflow-hidden">
-      {/* Contenedor principal de slides con transición suavizada */}
-      <div 
-        className="flex transition-transform duration-1000 ease-out" 
-        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-      >
-        {slides.map(({ Component, props }, index) => (
-          <div key={index} className="w-full flex-shrink-0">
-            <Component {...props} />
-          </div>
-        ))}
-      </div>
-
-      {/* Controles de navegación */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full transition-colors"
-        aria-label="Anterior"
-      >
-        <svg 
-          className="w-6 h-6 text-emerald-800" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      <button
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 p-2 rounded-full transition-colors"
-        aria-label="Siguiente"
-      >
-        <svg 
-          className="w-6 h-6 text-emerald-800" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-      
-      {/* Indicadores de posición */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentSlide === index 
-                ? 'bg-emerald-800' 
-                : 'bg-white hover:bg-emerald-800/50'
-            }`}
-            aria-label={`Ir a slide ${index + 1}`}
-          />
-        ))}
+// Componente para slide tipo "full" (imagen + texto + botones)
+const FullSlide = ({ slide }) => (
+  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+    <div 
+      className="absolute inset-0 bg-cover bg-center" 
+      style={{ backgroundImage: `url(${slide.imageUrl})` }}
+    >
+      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+    </div>
+    <div className="relative h-full flex items-center">
+      <div className="container mx-auto px-4 md:px-6 text-white">
+        <h1 className="text-3xl md:text-5xl font-bold mb-4">{slide.title}</h1>
+        <p className="text-lg md:text-xl mb-8 max-w-2xl">{slide.description}</p>
+        <div className="flex flex-wrap gap-4">
+          {slide.primaryButton.show && (
+            <a 
+              href={slide.primaryButton.url} 
+              className="px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-opacity-90"
+            >
+              {slide.primaryButton.text}
+            </a>
+          )}
+          {slide.secondaryButton.show && (
+            <a 
+              href={slide.secondaryButton.url} 
+              className="px-6 py-3 bg-transparent border border-white text-white font-medium rounded-md hover:bg-white hover:bg-opacity-10"
+            >
+              {slide.secondaryButton.text}
+            </a>
+          )}
+        </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-export default HeroCarousel;
+// Componente para slide tipo "image" (solo imagen)
+const ImageSlide = ({ slide }) => (
+  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+    <img 
+      src={slide.imageUrl} 
+      alt="Slide" 
+      className="w-full h-full object-cover" 
+    />
+  </div>
+);
+
+// Componente para slide tipo "imageText" (imagen + texto)
+const ImageTextSlide = ({ slide }) => (
+  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+    <div 
+      className="absolute inset-0 bg-cover bg-center" 
+      style={{ backgroundImage: `url(${slide.imageUrl})` }}
+    >
+      <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+    </div>
+    <div className="relative h-full flex items-center">
+      <div className="container mx-auto px-4 md:px-6 text-white">
+        <h1 className="text-3xl md:text-5xl font-bold mb-4">{slide.title}</h1>
+        <p className="text-lg md:text-xl mb-8 max-w-2xl">{slide.description}</p>
+      </div>
+    </div>
+  </div>
+);
+
+// Componente principal HeroCarousel
+export default function HeroCarousel() {
+  const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Añadir estado de error
+
+  useEffect(() => {
+    try {
+      // Simplificar la consulta inicialmente para diagnosticar
+      const q = query(
+        collection(firestoreDB, 'carousel-slides'),
+        orderBy('order', 'asc')
+        // Eliminar el filtro 'where' temporalmente
+      );
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        console.log('Slides obtenidos:', snapshot.docs.length); // Logging para debug
+        
+        const slidesData = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Slide data:', data); // Verificar estructura
+          return {
+            id: doc.id,
+            ...data,
+            // Asegurar que estos campos existan para evitar errores
+            primaryButton: data.primaryButton || { show: false, text: '', url: '' },
+            secondaryButton: data.secondaryButton || { show: false, text: '', url: '' }
+          };
+        });
+        
+        // Filtrar por active aquí, si es necesario
+        const activeSlides = slidesData.filter(slide => slide.active !== false);
+        console.log('Slides activos:', activeSlides.length);
+        
+        setSlides(activeSlides);
+        setLoading(false);
+      }, (error) => {
+        console.error("Error cargando slides:", error);
+        setError(error.message);
+        setLoading(false);
+      });
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error en el hook de carrusel:", error);
+      setError(error.message);
+      setLoading(false);
+    }
+  }, []);
+
+  // Mostrar mensaje de error si hay algún problema
+  if (error) {
+    console.error("Error renderizando carousel:", error);
+    return (
+      <div className="h-[500px] bg-gray-100 flex items-center justify-center">
+        <p className="text-red-500">Error cargando carrusel</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="h-[500px] bg-gray-100 animate-pulse"></div>;
+  }
+
+  if (slides.length === 0) {
+    return (
+      <div className="h-[500px] bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">No hay slides disponibles</p>
+      </div>
+    );
+  }
+
+  return (
+    <Swiper
+      modules={[Autoplay, Pagination, Navigation]}
+      spaceBetween={0}
+      slidesPerView={1}
+      autoplay={{
+        delay: 5000,
+        disableOnInteraction: false,
+      }}
+      pagination={{ clickable: true }}
+      navigation
+      className="hero-carousel"
+    >
+      {slides.map((slide) => (
+        <SwiperSlide key={slide.id}>
+          {slide.type === 'full' ? (
+            <FullSlide slide={slide} />
+          ) : slide.type === 'image' ? (
+            <ImageSlide slide={slide} />
+          ) : (
+            <ImageTextSlide slide={slide} />
+          )}
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  );
+}
