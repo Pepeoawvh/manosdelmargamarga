@@ -11,6 +11,7 @@ const TabSystem = ({ tabs }) => {
           {tabs.map((tab, index) => (
             <button
               key={index}
+              role="tab" // Agregar este atributo
               onClick={() => setActiveTab(index)}
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === index

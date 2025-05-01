@@ -2,15 +2,82 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import CartButton from '../cart/CartButton';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState('');
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const menuItems = [
+    {
+      name: 'Tienda',
+      path: '/catalogo',
+      color: 'yellow',
+      submenu: [
+        "Regalos Corporativos",
+        "Papelería Germinable",
+        "Papel con Semillas",
+        "Celebraciones",
+        "Materiales y Herramientas",
+        "Ofertas",
+        "Celebraciones",
+        "Eventos"
+      ]
+    },
+    { 
+      name: 'Nosotras', 
+      path: '/nosotras',
+      color: 'pink'
+    },
+    { 
+      name: 'Sostenible', 
+      path: '/sostenible',
+      color: 'green'
+    },
+    {
+      name: 'Tutoriales',
+      path: '/tutoriales',
+      color: 'blue',
+      submenu: [
+        "¿Cómo plantar?",
+        "Ayuda para diseñadores",
+        "¿Cómo funciona un pedido?"
+      ]
+    },
+    { 
+      name: 'Contacto', 
+      path: '/contacto',
+      color: 'gray'
+    }
+  ];
+
+  const getActiveColorClass = (color) => {
+    const colorClasses = {
+      yellow: 'bg-yellow-50 text-yellow-700',
+      pink: 'bg-pink-50 text-pink-700',
+      green: 'bg-green-50 text-green-700',
+      blue: 'bg-sky-50 text-sky-700',
+      gray: 'bg-gray-50 text-gray-700'
+    };
+    return colorClasses[color] || colorClasses.gray;
+  };
+
+  const getHoverColorClass = (color) => {
+    const colorClasses = {
+      yellow: 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50',
+      pink: 'text-gray-700 hover:text-pink-600 hover:bg-pink-50',
+      green: 'text-gray-700 hover:text-green-600 hover:bg-green-50',
+      blue: 'text-gray-700 hover:text-sky-600 hover:bg-sky-50',
+      gray: 'text-gray-700 hover:text-gray-600 hover:bg-gray-50'
+    };
+    return colorClasses[color] || colorClasses.gray;
+  };
   
-  // Detectar scroll para cambiar estilo
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -19,12 +86,32 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
-  // Cerrar menú al cambiar de página
+
   useEffect(() => {
     setIsMenuOpen(false);
-  }, [pathname]);
-  
+    setActiveDropdown('');
+  }, [pathname, searchParams]);
+
+  const handleMenuItemClick = async (item, subItem = null) => {
+    if (subItem) {
+      const newPath = `${item.path}?categoria=${encodeURIComponent(subItem)}`;
+      
+      if (pathname === item.path) {
+        window.location.href = newPath;
+      } else {
+        await router.push(newPath);
+      }
+      
+      setActiveDropdown('');
+      setIsMenuOpen(false);
+    } else if (!item.submenu) {
+      await router.push(item.path);
+      setIsMenuOpen(false);
+    } else {
+      setActiveDropdown(activeDropdown === item.name ? '' : item.name);
+    }
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
       isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/90 backdrop-blur-sm py-3'
@@ -41,51 +128,54 @@ const Navbar = () => {
               className="h-10 w-auto"
             />
           </Link>
-          
+
           {/* Menú Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link 
-              href="/catalogo" 
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                pathname === '/catalogo' 
-                  ? 'text-emerald-700 bg-emerald-50' 
-                  : 'text-gray-700 hover:text-emerald-600 hover:bg-gray-50'
-              }`}
-            >
-              Productos
-            </Link>
-            <Link 
-              href="/servicios" 
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                pathname === '/servicios' 
-                  ? 'text-emerald-700 bg-emerald-50' 
-                  : 'text-gray-700 hover:text-emerald-600 hover:bg-gray-50'
-              }`}
-            >
-              Servicios
-            </Link>
-            <Link 
-              href="/nosotros" 
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                pathname === '/nosotros' 
-                  ? 'text-emerald-700 bg-emerald-50' 
-                  : 'text-gray-700 hover:text-emerald-600 hover:bg-gray-50'
-              }`}
-            >
-              Nosotros
-            </Link>
-            <Link 
-              href="/contacto" 
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                pathname === '/contacto' 
-                  ? 'text-emerald-700 bg-emerald-50' 
-                  : 'text-gray-700 hover:text-emerald-600 hover:bg-gray-50'
-              }`}
-            >
-              Contacto
-            </Link>
+            {menuItems.map((item) => (
+              <div key={item.name} className="relative group">
+                <button
+                  onClick={() => handleMenuItemClick(item)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                    pathname === item.path
+                      ? getActiveColorClass(item.color)
+                      : getHoverColorClass(item.color)
+                  }`}
+                >
+                  {item.name}
+                  {item.submenu && (
+                    <svg
+                      className={`ml-1 h-4 w-4 transition-transform ${
+                        activeDropdown === item.name ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
+                
+                {/* Dropdown para desktop */}
+                {item.submenu && activeDropdown === item.name && (
+                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      {item.submenu.map((subItem) => (
+                        <button
+                          key={subItem}
+                          onClick={() => handleMenuItemClick(item, subItem)}
+                          className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(item.color)}`}
+                        >
+                          {subItem}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-          
+
           {/* Botones de acción */}
           <div className="flex items-center">
             <CartButton />
@@ -108,73 +198,52 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Menú móvil */}
         <div className={`md:hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen 
-            ? 'max-h-60 opacity-100 visible mt-2' 
-            : 'max-h-0 opacity-0 invisible'
+          isMenuOpen ? 'max-h-[32rem] opacity-100 visible mt-2' : 'max-h-0 opacity-0 invisible'
         }`}>
           <div className="flex flex-col py-2 bg-white border rounded-lg shadow-lg">
-            <Link 
-              href="/catalogo" 
-              className={`px-4 py-2 text-sm ${
-                pathname === '/catalogo' 
-                  ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Productos
-            </Link>
-            <Link 
-              href="/servicios" 
-              className={`px-4 py-2 text-sm ${
-                pathname === '/servicios' 
-                  ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Servicios
-            </Link>
-            <Link 
-              href="/nosotros" 
-              className={`px-4 py-2 text-sm ${
-                pathname === '/nosotros' 
-                  ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Nosotros
-            </Link>
-            <Link 
-              href="/contacto" 
-              className={`px-4 py-2 text-sm ${
-                pathname === '/contacto' 
-                  ? 'bg-emerald-50 text-emerald-700 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Contacto
-            </Link>
-            
-            {/* Enlaces a categorías en móvil */}
-            <hr className="my-2 border-gray-100" />
-            <p className="px-4 py-1 text-xs text-gray-500 font-medium">Categorías</p>
-            {[
-              "Bolitas de Semilla",
-              "Papeles",
-              "Brandeables",
-              "Celebraciones",
-              "Figuras",
-              "Tarjetas"
-            ].map(category => (
-              <Link 
-                key={category}
-                href={`/catalogo?categoria=${encodeURIComponent(category)}`} 
-                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                {category}
-              </Link>
+            {menuItems.map((item) => (
+              <div key={item.name}>
+                <button
+                  onClick={() => handleMenuItemClick(item)}
+                  className={`w-full text-left px-4 py-2 text-sm flex justify-between items-center ${
+                    pathname === item.path
+                      ? getActiveColorClass(item.color)
+                      : getHoverColorClass(item.color)
+                  }`}
+                >
+                  {item.name}
+                  {item.submenu && (
+                    <svg
+                      className={`ml-1 h-4 w-4 transition-transform ${
+                        activeDropdown === item.name ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
+                
+                {/* Submenú móvil */}
+                {item.submenu && activeDropdown === item.name && (
+                  <div className="bg-gray-50">
+                    {item.submenu.map((subItem) => (
+                      <button
+                        key={subItem}
+                        onClick={() => handleMenuItemClick(item, subItem)}
+                        className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(item.color)}`}
+                      >
+                        {subItem}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

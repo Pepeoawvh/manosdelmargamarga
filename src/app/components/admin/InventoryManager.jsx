@@ -1,7 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
 import useProducts from '../../hooks/shared/useProducts';
 import ProductForm from '../product/ProductForm';
 import CategoryFilter from './CategoryFilter';
@@ -24,35 +22,7 @@ const InventoryManager = ({ onEdit }) => {
     setMounted(true);
   }, []);
 
-  // Efecto para suscribirse a cambios en tiempo real
-  useEffect(() => {
-    if (!mounted) return;
-    
-    console.log('Configurando listener de Firestore para productos...');
-    const unsubscribe = onSnapshot(
-      collection(firestoreDB, 'productosmmm'),
-      (snapshot) => {
-        // No actualizar si no tenemos cambios
-        if (snapshot.empty) return;
-        
-        console.log(`Productos actualizados en tiempo real: ${snapshot.size} documentos`);
-        setLastUpdate(new Date());
-        
-        // Forzar actualización desde el hook
-        refreshProducts();
-      },
-      (error) => {
-        console.error("Error en listener de Firestore:", error);
-        setUpdateStatus({
-          message: "Error al recibir actualizaciones en tiempo real",
-          isError: true
-        });
-      }
-    );
-    
-    // Limpiar suscripción cuando se desmonte
-    return () => unsubscribe();
-  }, [mounted, refreshProducts]);
+
 
   // Manejador para actualización manual
   const handleRefresh = async () => {
@@ -106,8 +76,8 @@ const InventoryManager = ({ onEdit }) => {
   // Manejador para agregar producto
   const handleAddProduct = async (productData) => {
     try {
-      const result = await addProduct(productData);
-      
+      const result = await addProduct(productData); // Agrega el producto a Firestore
+  
       if (result.success) {
         setUpdateStatus({
           message: 'Producto agregado correctamente',
@@ -126,7 +96,6 @@ const InventoryManager = ({ onEdit }) => {
       });
     }
   };
-
   // Filtrar productos por nombre y categoría
   const filteredProducts = products.filter(product => {
     const matchesText = product?.title?.toLowerCase?.().includes(filterText?.toLowerCase?.() || '') || false;

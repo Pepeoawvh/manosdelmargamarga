@@ -64,7 +64,7 @@ const CartItem = ({ item }) => {
             >
               -
             </button>
-            <span className="px-2">{item.quantity}</span>
+            <span className="text-emerald-500 px-2">{item.quantity}</span>
             <button 
               onClick={() => handleQuantityChange(1)}
               className="px-2 py-1 text-gray-600 hover:bg-gray-100"
