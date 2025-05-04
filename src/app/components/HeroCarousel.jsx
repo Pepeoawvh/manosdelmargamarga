@@ -11,7 +11,7 @@ import 'swiper/css/navigation';
 
 // Componente para slide tipo "full" (imagen + texto + botones)
 const FullSlide = ({ slide }) => (
-  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
     <div 
       className="absolute inset-0 bg-cover bg-center" 
       style={{ backgroundImage: `url(${slide.imageUrl})` }}
@@ -47,7 +47,7 @@ const FullSlide = ({ slide }) => (
 
 // Componente para slide tipo "image" (solo imagen)
 const ImageSlide = ({ slide }) => (
-  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
     <img 
       src={slide.imageUrl} 
       alt="Slide" 
@@ -58,7 +58,7 @@ const ImageSlide = ({ slide }) => (
 
 // Componente para slide tipo "imageText" (imagen + texto)
 const ImageTextSlide = ({ slide }) => (
-  <div className="relative h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
     <div 
       className="absolute inset-0 bg-cover bg-center" 
       style={{ backgroundImage: `url(${slide.imageUrl})` }}
