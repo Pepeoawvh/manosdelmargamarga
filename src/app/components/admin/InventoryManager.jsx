@@ -1,151 +1,105 @@
 'use client'
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import useProducts from '../../hooks/shared/useProducts';
 import ProductForm from '../product/ProductForm';
-import CategoryFilter from './CategoryFilter';
+// Si tienes CategoryFilter, descomenta la siguiente línea
+// import CategoryFilter from './CategoryFilter';
 
-const InventoryManager = ({ onEdit }) => {
-  // Estados
-  const { products, loading, error, updateInventory, refreshProducts, deleteProduct, addProduct } = useProducts();
+const InventoryManager = () => {
+  const { products, loading, error, updateInventory, refreshProducts, deleteProduct, addProduct, updateProduct } = useProducts();
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [quantityChange, setQuantityChange] = useState('');
   const [filterText, setFilterText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [updateStatus, setUpdateStatus] = useState({ message: '', isError: false });
-  const [mounted, setMounted] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Efecto para manejar la hidratación
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Filtrado de productos
+  const filteredProducts = products
+    ? products.filter(product =>
+        (!filterText || product.title.toLowerCase().includes(filterText.toLowerCase())) &&
+        (!selectedCategory || (product.categories && product.categories.includes(selectedCategory)))
+      )
+    : [];
 
-
-
-  // Manejador para actualización manual
+  // Refrescar productos
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    try {
+    await refreshProducts();
+    setIsRefreshing(false);
+    setLastUpdate(new Date());
+  };
+
+  // Actualizar stock
+  const handleUpdateStock = async (productId) => {
+    if (!quantityChange) return;
+    const result = await updateInventory(productId, Number(quantityChange));
+    if (result.success) {
+      setUpdateStatus({ message: 'Stock actualizado correctamente', isError: false });
+      setQuantityChange('');
+      setSelectedProduct(null);
       await refreshProducts();
-      setUpdateStatus({
-        message: "Datos actualizados correctamente",
-        isError: false
-      });
       setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
+    } else {
+      setUpdateStatus({ message: result.error || 'Error al actualizar stock', isError: true });
+    }
+  };
+
+  // Eliminar producto
+  const handleDeleteWithConfirmation = async (productId, productTitle) => {
+    if (window.confirm(`¿Seguro que deseas eliminar el producto "${productTitle}"?`)) {
+      const result = await deleteProduct(productId);
+      if (result.success) {
+        setUpdateStatus({ message: 'Producto eliminado', isError: false });
+        await refreshProducts();
+        setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
+      } else {
+        setUpdateStatus({ message: result.error || 'Error al eliminar producto', isError: true });
+      }
+    }
+  };
+
+  // Agregar producto
+  const handleAddProduct = async (productData) => {
+    const result = await addProduct(productData);
+    if (result.success) {
+      setUpdateStatus({ message: 'Producto agregado correctamente', isError: false });
+      setShowAddForm(false);
+      await refreshProducts();
+      setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
+    } else {
+      setUpdateStatus({ message: result.error || 'Error al agregar producto', isError: true });
+    }
+  };
+
+  // Editar producto
+  const handleEditProduct = async (productData) => {
+    try {
+      const result = await updateProduct(productData.id, productData); // <-- CORRECTO
+      if (result.success) {
+        setUpdateStatus({
+          message: 'Producto actualizado correctamente',
+          isError: false
+        });
+        setShowEditForm(false);
+        setEditingProduct(null);
+        await refreshProducts();
+        setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
+      } else {
+        throw new Error(result.error || 'Error desconocido al actualizar');
+      }
     } catch (error) {
       setUpdateStatus({
         message: `Error al actualizar: ${error.message}`,
         isError: true
       });
-    } finally {
-      setIsRefreshing(false);
-      setLastUpdate(new Date());
     }
   };
-
-  // Manejador para eliminar con confirmación
-  const handleDeleteWithConfirmation = async (productId, productName) => {
-    const confirmDelete = window.confirm(`¿Estás seguro de que deseas eliminar el producto "${productName || 'Sin nombre'}"?\n\nEsta acción no se puede deshacer.`);
-    
-    if (confirmDelete) {
-      try {
-        console.log(`Eliminando producto: ${productId}`);
-        const result = await deleteProduct(productId);
-        
-        if (result.success) {
-          setUpdateStatus({
-            message: 'Producto eliminado correctamente',
-            isError: false
-          });
-          setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
-        } else {
-          throw new Error(result.error || 'Error desconocido al eliminar');
-        }
-      } catch (error) {
-        console.error('Error al eliminar producto:', error);
-        setUpdateStatus({
-          message: `Error al eliminar: ${error.message}`,
-          isError: true
-        });
-      }
-    }
-  };
-
-  // Manejador para agregar producto
-  const handleAddProduct = async (productData) => {
-    try {
-      const result = await addProduct(productData); // Agrega el producto a Firestore
-  
-      if (result.success) {
-        setUpdateStatus({
-          message: 'Producto agregado correctamente',
-          isError: false
-        });
-        setShowAddForm(false); // Cerrar el formulario
-        setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
-      } else {
-        throw new Error(result.error || 'Error desconocido al agregar');
-      }
-    } catch (error) {
-      console.error('Error al agregar producto:', error);
-      setUpdateStatus({
-        message: `Error al agregar: ${error.message}`,
-        isError: true
-      });
-    }
-  };
-  // Filtrar productos por nombre y categoría
-  const filteredProducts = products.filter(product => {
-    const matchesText = product?.title?.toLowerCase?.().includes(filterText?.toLowerCase?.() || '') || false;
-    const matchesCategory = !selectedCategory || 
-      (product?.categories && 
-       Array.isArray(product.categories) && 
-       product.categories.includes(selectedCategory));
-    
-    return matchesText && matchesCategory;
-  });
-
-  // Manejador para cambiar categoría
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-  };
-
-  const handleUpdateStock = async (productId) => {
-    if (!quantityChange) return;
-    
-    const change = parseInt(quantityChange);
-    const result = await updateInventory(productId, change);
-    
-    if (result.success) {
-      setUpdateStatus({ 
-        message: `Stock actualizado correctamente (${change > 0 ? '+' : ''}${change})`, 
-        isError: false 
-      });
-      setQuantityChange('');
-      setSelectedProduct(null);
-      setTimeout(() => setUpdateStatus({ message: '', isError: false }), 3000);
-    } else {
-      setUpdateStatus({ 
-        message: result.error || 'Error al actualizar stock', 
-        isError: true 
-      });
-    }
-  };
-
-  // Solución para error de hidratación
-  if (!mounted) {
-    return <div className="bg-white border border-gray-200 rounded shadow-sm p-4">
-      <div className="animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-        <div className="h-32 bg-gray-100 rounded"></div>
-      </div>
-    </div>;
-  }
-
-  if (loading) return <div className="text-center py-4">Cargando inventario...</div>;
-  if (error) return <div className="text-red-500 py-4">{error}</div>;
 
   return (
     <>
@@ -172,16 +126,15 @@ const InventoryManager = ({ onEdit }) => {
                 {lastUpdate.toLocaleTimeString()}
               </span>
             )}
-            
-            {/* Filtro por categoría */}
+            {/* Si tienes CategoryFilter, descomenta esto:
             <div className="ml-4">
               <CategoryFilter 
                 selectedCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
+                onCategoryChange={setSelectedCategory}
               />
             </div>
+            */}
           </div>
-          
           <div className="flex items-center space-x-2">
             <input
               type="text"
@@ -199,31 +152,11 @@ const InventoryManager = ({ onEdit }) => {
             </button>
           </div>
         </div>
-        
         {updateStatus.message && (
           <div className={`px-3 py-1.5 text-xs ${updateStatus.isError ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
             {updateStatus.message}
           </div>
         )}
-        
-        {/* Muestra la categoría seleccionada */}
-        {selectedCategory && (
-          <div className="px-3 py-1.5 bg-blue-50 flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="text-xs text-blue-600">
-                Filtrando por categoría: <strong>{selectedCategory}</strong>
-              </span>
-            </div>
-            <button 
-              onClick={() => setSelectedCategory('')}
-              className="ml-2 text-xs text-blue-600 hover:text-blue-800"
-              title="Limpiar filtro"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-        
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -279,11 +212,7 @@ const InventoryManager = ({ onEdit }) => {
                       {product.categories && product.categories.map((category, index) => (
                         <span 
                           key={index}
-                          className={`inline-block px-2 py-0.5 rounded-full mr-1 mb-1 ${
-                            category === selectedCategory
-                              ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}
+                          className="inline-block px-2 py-0.5 rounded-full mr-1 mb-1 bg-gray-100 text-gray-700"
                         >
                           {category}
                         </span>
@@ -331,7 +260,10 @@ const InventoryManager = ({ onEdit }) => {
                             Stock
                           </button>
                           <button
-                            onClick={() => onEdit && onEdit(product)}
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setShowEditForm(true);
+                            }}
                             className="py-1 px-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
                             title="Editar producto"
                           >
@@ -367,7 +299,6 @@ const InventoryManager = ({ onEdit }) => {
             </tbody>
           </table>
         </div>
-        
         <div className="border-t px-3 py-2 text-xs text-gray-500">
           <p>
             • Ingrese valores positivos para añadir stock<br />
@@ -376,8 +307,7 @@ const InventoryManager = ({ onEdit }) => {
           </p>
         </div>
       </div>
-
-      {/* Modal para agregar nuevo producto */}
+      {/* Formulario para agregar producto */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -393,6 +323,27 @@ const InventoryManager = ({ onEdit }) => {
             <ProductForm 
               onSubmit={handleAddProduct} 
               onCancel={() => setShowAddForm(false)}
+            />
+          </div>
+        </div>
+      )}
+      {/* Formulario para editar producto */}
+      {showEditForm && editingProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Editar Producto</h3>
+              <button 
+                onClick={() => setShowEditForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <ProductForm 
+              product={editingProduct}
+              onSubmit={handleEditProduct}
+              onCancel={() => setShowEditForm(false)}
             />
           </div>
         </div>

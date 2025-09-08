@@ -289,7 +289,7 @@ export default function PaymentSuccess() {
     if (responseCode.raiz === 0 && status.raiz === 'AUTHORIZED') {
       console.log('✅ Transacción APROBADA según campos de raíz');
       return {
-        text: 'Pago aprobado',
+        text: 'Su Pago ha sido aprobado. Gracias por su compra.',
         class: 'bg-green-100 text-green-800'
       };
     }
@@ -408,19 +408,18 @@ export default function PaymentSuccess() {
           
           {/* Información del pedido */}
           <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-            <div className="bg-gray-100 px-3 py-1 rounded-full">
+                      {/* Mostrar el estado traducido */}
+            <div className={`px-3 w-full py-1 rounded-full font-medium ${paymentStatusInfo.class}`}>
+              {paymentStatusInfo.text}
+            </div>
+            <div className="bg-gray-100 px-3 py-1 rounded-full w-full">
               <span className="font-medium">Pedido:</span> #{orderDetails.response_code || 
                 orderDetails.authorization_code || 
                 orderDetails.transactionDetails?.response_code || 
                 orderDetails.id.slice(-6).toUpperCase()}
             </div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full">
+            <div className="bg-gray-100 px-3  py-1 rounded-full w-full ">
               <span className="font-medium">Fecha:</span> {formatDate(orderDetails.createdAt)}
-            </div>
-            
-            {/* Mostrar el estado traducido */}
-            <div className={`px-3 py-1 rounded-full font-medium ${paymentStatusInfo.class}`}>
-              {paymentStatusInfo.text}
             </div>
           </div>
           

@@ -1,15 +1,18 @@
+'use client'
+
 import { useState, useEffect } from 'react';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '../../hooks/shared/useProducts';
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
+    id: product?.id, // importante para edición
     title: product?.title || '',
     subtitle: product?.subtitle || '',
     description: product?.description || '',
     price: product?.price || '',
     stock: product?.stock || 0,
-    categories: product?.categories || [],
-    subcategories: product?.subcategories || [],
+    categories: Array.isArray(product?.categories) ? product?.categories : [],
+    subcategories: Array.isArray(product?.subcategories) ? product?.subcategories : [],
     image: product?.image || '',
     featured: product?.featured || false,
   });
@@ -31,38 +34,27 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const availableSubcategories = getAvailableSubcategories();
 
   const handleCategoryChange = (category) => {
-    console.log('Cambiando categoría:', category);
-    
     setFormData(prev => {
-      // Determinar las nuevas categorías
       let newCategories;
       if (prev.categories.includes(category)) {
         newCategories = prev.categories.filter(c => c !== category);
       } else {
         newCategories = [...prev.categories, category];
       }
-
-      // Filtrar las subcategorías para mantener solo las válidas
       const validSubcategories = prev.subcategories.filter(sub => {
         return newCategories.some(cat => 
           PRODUCT_SUBCATEGORIES[cat] && PRODUCT_SUBCATEGORIES[cat].includes(sub)
         );
       });
-      
-      console.log('Nuevas categorías:', newCategories);
-      console.log('Subcategorías válidas:', validSubcategories);
-
       return {
         ...prev,
         categories: newCategories,
         subcategories: validSubcategories
       };
     });
-  };
+  };  
 
   const handleSubcategoryChange = (subcategory) => {
-    console.log('Cambiando subcategoría:', subcategory);
-    
     setFormData(prev => {
       if (prev.subcategories.includes(subcategory)) {
         return {
@@ -80,37 +72,27 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('------ ENVIANDO FORMULARIO ------');
-    console.log('Datos del formulario que se enviarán:', formData);
-    
     // Validar campos obligatorios
     if (!formData.title.trim()) {
-      console.error('Error: Título vacío');
       alert('El título es obligatorio');
       return;
     }
-    
     if (!formData.image.trim()) {
-      console.error('Error: URL de imagen vacía');
       alert('La URL de la imagen es obligatoria');
       return;
     }
-    
     if (!formData.categories || formData.categories.length === 0) {
-      console.error('Error: No hay categorías seleccionadas');
       alert('Debes seleccionar al menos una categoría');
       return;
     }
-    
-    // Formatear datos para envío
+    // Formatear datos para envío y forzar arrays
     const dataToSubmit = {
       ...formData,
       price: formData.price === '' ? 0 : Number(formData.price),
-      stock: formData.stock === '' ? 0 : Number(formData.stock)
+      stock: formData.stock === '' ? 0 : Number(formData.stock),
+      categories: Array.isArray(formData.categories) ? formData.categories : [],
+      subcategories: Array.isArray(formData.subcategories) ? formData.subcategories : [],
     };
-    
-    console.log('Datos finales formateados para envío:', dataToSubmit);
-    
     onSubmit(dataToSubmit);
   };
 
@@ -173,8 +155,6 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 required
               />
             </div>
-
-            
           </div>
           
           {/* Columna derecha */}
@@ -187,7 +167,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                   <input
                     type="number"
                     min="0"
-                    step="100"
+                    step="1"
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
                     className="w-full pl-5 py-1 px-2 text-xs border border-gray-300 rounded"
