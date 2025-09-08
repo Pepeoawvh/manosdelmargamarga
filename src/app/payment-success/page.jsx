@@ -402,24 +402,9 @@ export default function PaymentSuccess() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 md:p-8">
-    {paymentStatusInfo.text === 'Pago aprobado' && (
-  <div className="mb-6 bg-green-50 border border-green-200 p-4 rounded-md">
-    <p className="text-green-700 text-center font-medium">
-      ¡Su pago ha sido confirmado!
-    </p>
-  </div>
-)}
-
-{paymentStatusInfo.text === 'Pago rechazado' && (
-  <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-md">
-    <p className="text-red-700 text-center font-medium">
-      El pago fue rechazado. Por favor, intenta nuevamente.
-    </p>
-  </div>
-)}
         
         <div className="text-center mb-6">
-          <p className="text-gray-600 mt-2">Detalle de tu pedido:</p>
+          <p className="text-gray-600 mt-2">Detalle de su pedido:</p>
           
           {/* Información del pedido */}
           <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm">
