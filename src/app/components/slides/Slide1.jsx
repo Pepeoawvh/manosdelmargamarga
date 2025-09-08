@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const Slide1 = ({ title, description, imageUrl, buttons }) => {
   return (
-    <div className="relative h-[70vh] w-full flex items-center justify-center">
+    <div className="relative h-[50vh] w-full flex items-center justify-center">
       <Image
         src={imageUrl}
         alt="Background"

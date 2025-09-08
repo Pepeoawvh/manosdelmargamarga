@@ -6,6 +6,29 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
   // Estado local para controlar tooltips de ayuda
   const [showTooltip, setShowTooltip] = useState({});
 
+  // --- Helpers de input ---
+  const preventEmailSpace = (e) => {
+    if (e.key === " ") e.preventDefault();
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    const allowedControlKeys = new Set([
+      "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End",
+    ]);
+    const isCtrlCombo = e.ctrlKey || e.metaKey; // copiar/pegar/cortar/select all
+    const isNumberKey = /^[0-9]$/.test(e.key);
+
+    if (allowedControlKeys.has(e.key) || isCtrlCombo) return;
+    if (!isNumberKey) e.preventDefault();
+  };
+
+  const handlePhonePaste = (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData("text");
+    const digitsOnly = paste.replace(/\D/g, "").slice(0, 9);
+    setShippingInfo((prev) => ({ ...prev, phone: digitsOnly }));
+  };
+
   // Asegurémonos de que invoiceInfo siempre existe al inicializar
   useEffect(() => {
     if (!shippingInfo.invoiceInfo) {
@@ -22,15 +45,15 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
       }));
     }
   }, [shippingInfo, setShippingInfo]);
-  
-  // Función para sincronizar el email de facturación cuando se marca "mismo email"
+
+  // Sincronizar el email de facturación cuando se marca "mismo email"
   useEffect(() => {
     if (shippingInfo.invoiceInfo?.useSameEmail && shippingInfo.email) {
       setShippingInfo((prev) => ({
         ...prev,
         invoiceInfo: {
           ...prev.invoiceInfo,
-          invoiceEmail: prev.email,
+          invoiceEmail: (prev.email || "").replace(/\s+/g, "").toLowerCase(),
         },
       }));
     }
@@ -58,58 +81,65 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
   ];
 
   // Sanitizar input para prevenir XSS
-  const sanitizeInput = (value) => {
-    if (typeof value !== 'string') return value;
-    return value
-      .replace(/<[^>]*>/g, '') // Eliminar etiquetas HTML
-      .replace(/javascript:/gi, '') // Prevenir javascript: URLs
-      .trim(); // Eliminar espacios en blanco al inicio/final
+  const sanitizeInput = (value, { trimEdges = true } = {}) => {
+    if (typeof value !== "string") return value;
+    let v = value
+      .replace(/<[^>]*>/g, "")     // quita etiquetas HTML
+      .replace(/javascript:/gi, ""); // quita javascript: URLs
+    if (trimEdges) v = v.trim();     // recorta bordes solo si corresponde
+    return v;
   };
 
   // Maneja cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    // Sanitizar input para prevenir XSS
-    let sanitizedValue = type === "checkbox" ? checked : sanitizeInput(value);
-    // Filtrar números para nombres y comuna
+
+    // Campos donde SÍ necesitamos permitir espacios cómodamente:
+    const looseFields = new Set([
+      "address",
+      "notes",
+      "invoiceInfo.businessAddress",
+      "invoiceInfo.additionalNotes",
+    ]);
+
+    const shouldTrim = !looseFields.has(name);
+    let sanitizedValue = type === "checkbox"
+      ? checked
+      : sanitizeInput(value, { trimEdges: shouldTrim });
+
+    // Sólo letras para nombres/comuna
     if (
-      name === "firstName" || 
-      name === "lastName" || 
-      name === "city" || 
+      name === "firstName" ||
+      name === "lastName" ||
+      name === "city" ||
       name === "invoiceInfo.representativeName"
     ) {
-      sanitizedValue = typeof sanitizedValue === 'string' ? 
-        sanitizedValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, '') : 
-        sanitizedValue;
-    
+      sanitizedValue = typeof sanitizedValue === "string"
+        ? sanitizedValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "")
+        : sanitizedValue;
+    }
+
+    // Evitar espacios en emails (principal y facturación) y normalizar en minúsculas
+    if (name === "email" || name === "invoiceInfo.invoiceEmail") {
+      sanitizedValue = String(sanitizedValue).replace(/\s+/g, "").toLowerCase();
+    }
+
+    // Solo números en teléfono
+    if (name === "phone") {
+      sanitizedValue = String(sanitizedValue).replace(/\D/g, "").slice(0, 9);
     }
 
     if (name.includes(".")) {
-      // Maneja campos anidados (para facturación)
       const [parent, child] = name.split(".");
-
-      // Asegurarse de que el objeto parent existe
       if (!shippingInfo[parent]) {
-        setShippingInfo((prev) => ({
-          ...prev,
-          [parent]: {},
-        }));
+        setShippingInfo((prev) => ({ ...prev, [parent]: {} }));
       }
-
       setShippingInfo((prev) => ({
         ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: sanitizedValue,
-        },
+        [parent]: { ...prev[parent], [child]: sanitizedValue },
       }));
     } else {
-      // Maneja campos en el nivel principal
-      setShippingInfo((prev) => ({
-        ...prev,
-        [name]: sanitizedValue,
-      }));
+      setShippingInfo((prev) => ({ ...prev, [name]: sanitizedValue }));
     }
   };
 
@@ -119,16 +149,11 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
 
     // Eliminar todos los caracteres no numéricos ni K/k (excepto el guión)
     rut = rut.replace(/[^0-9kK-]/g, "");
-    
-    // Eliminar cualquier guión existente para manejar todo por nuestra cuenta
+    // Eliminar guiones existentes
     rut = rut.replace(/-/g, "");
-    
-    // Limitar a un máximo de 9 caracteres (8 para el cuerpo + 1 para el dígito verificador)
-    if (rut.length > 9) {
-      rut = rut.slice(0, 9);
-    }
-    
-    // Formatear: añadir guión antes del último dígito solo si hay al menos 2 caracteres
+    // Limitar a un máximo de 9 caracteres (8 cuerpo + 1 DV)
+    if (rut.length > 9) rut = rut.slice(0, 9);
+    // Añadir guión antes del último dígito si hay al menos 2 caracteres
     if (rut.length >= 2) {
       const cuerpo = rut.slice(0, -1);
       const dv = rut.slice(-1).toUpperCase();
@@ -140,8 +165,8 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
       setShippingInfo((prev) => ({
         ...prev,
         invoiceInfo: {
-          businessRut: rut,
           representativeName: "",
+          businessRut: rut,
           businessAddress: "",
           invoiceEmail: "",
           useSameEmail: false,
@@ -221,6 +246,8 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="email"
               value={shippingInfo.email}
               onChange={handleChange}
+              onKeyDown={preventEmailSpace}
+              autoComplete="email"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
               required
             />
@@ -238,6 +265,10 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="phone"
               value={shippingInfo.phone}
               onChange={handleChange}
+              onKeyDown={handlePhoneKeyDown}
+              onPaste={handlePhonePaste}
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="912345678"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
               maxLength={9}
@@ -246,6 +277,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
           </div>
         </div>
       </div>
+
       <div className="grid text-xs grid-cols-1 md:grid-cols-2 gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -306,6 +338,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
           />
         </div>
       </div>
+
       <div className="grid text-xs grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label
@@ -376,24 +409,22 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   required={shippingInfo.needsInvoice}
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="businessRut"
                   className="block font-medium text-gray-700 mb-1"
                 >
                   RUT empresa*
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="businessRut"
-                    value={invoiceInfo.businessRut || ""}
-                    onChange={handleRutChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    placeholder="12345678-9"
-                    required={shippingInfo.needsInvoice}
-                  />
-                </div>
+                <input
+                  type="text"
+                  id="businessRut"
+                  value={invoiceInfo.businessRut || ""}
+                  onChange={handleRutChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="12345678-9"
+                  required={shippingInfo.needsInvoice}
+                />
                 <button
                   type="button"
                   className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
@@ -432,8 +463,8 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   required={shippingInfo.needsInvoice}
                 />
               </div>
-              
-              <div className="flex text-xm flex-col">
+
+              <div className="flex text-xs flex-col">
                 <div className="flex items-center justify-between mb-1">
                   <label
                     htmlFor="invoiceEmail"
@@ -448,23 +479,25 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                       name="invoiceInfo.useSameEmail"
                       checked={invoiceInfo.useSameEmail || false}
                       onChange={handleChange}
-                      className="h-3 w-3 text-xm text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-3 w-3 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                     />
                     <label
                       htmlFor="useSameEmail"
-                      className="ml-1 text-xm text-gray-600"
+                      className="ml-1 text-xs text-gray-600"
                     >
                       Mismo email
-                    </label>  
+                    </label>
                   </div>
                 </div>
-              
+
                 <input
                   type="email"
                   id="invoiceEmail"
                   name="invoiceInfo.invoiceEmail"
                   value={invoiceInfo.invoiceEmail || ""}
                   onChange={handleChange}
+                  onKeyDown={preventEmailSpace}
+                  autoComplete="email"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   required={shippingInfo.needsInvoice && !invoiceInfo.useSameEmail}
                   disabled={invoiceInfo.useSameEmail}

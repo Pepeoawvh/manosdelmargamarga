@@ -150,7 +150,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             </div>
             
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">URL de la imagen</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">URL de la imagen w320xh360</label>
               <input
                 type="url"
                 value={formData.image}

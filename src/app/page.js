@@ -6,6 +6,7 @@ import ProductCard from "./components/product/ProductCard";
 import FeatureCard from "./components/FeatureCard";
 import HeroCarousel from "./components/HeroCarousel";
 import WspButton from "./components/WspButton";
+import BotoneraInfo from "./components/BotoneraInfo";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -70,12 +71,13 @@ export default function Home() {
     <div className="min-h-screen">
       <WspButton />
       <HeroCarousel />
+      <BotoneraInfo/>
 
       {/* Productos destacados */}
       <section className="py-20 bg-[#ffffff7a]">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-emerald-800">
-            Diseños Destacados
+            Productos Destacados
           </h2>
           {loading ? (
             <div className="text-center py-8">

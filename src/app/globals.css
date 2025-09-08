@@ -61,4 +61,10 @@ a {
   .scrollbar-admin {
     @apply scrollbar scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 hover:scrollbar-thumb-blue-400 scrollbar-thumb-rounded-full;
   }
+
+
+}
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
 }

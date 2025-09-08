@@ -83,9 +83,9 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md"
               >
-                <option value="full">Completo (Imagen + Texto + Botones)</option>
-                <option value="image">Solo Imagen</option>
-                <option value="imageText">Imagen + Texto</option>
+                <option value="full">Completo (Imagen + Texto + Botones) 1120x500px</option>
+                <option value="image">Solo Imagen 1120x500px</option>
+                <option value="imageText">Imagen + Texto 1120x500px</option>
               </select>
             </div>
 

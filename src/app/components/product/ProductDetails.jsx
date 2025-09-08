@@ -19,7 +19,7 @@ const ProductDetails = ({ productId }) => {
       
       setLoading(true);
       try {
-        const docRef = doc(firestoreDB, 'products', productId);
+        const docRef = doc(firestoreDB, 'productosmmm', productId);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -77,7 +77,7 @@ const ProductDetails = ({ productId }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white mt-12 rounded-lg shadow-sm overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-6">
         {/* Columna de imágenes */}
         <div>

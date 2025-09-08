@@ -11,7 +11,7 @@ import 'swiper/css/navigation';
 
 // Componente para slide tipo "full" (imagen + texto + botones)
 const FullSlide = ({ slide }) => (
-  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[500px] w-full">
     <div 
       className="absolute inset-0 bg-cover bg-center" 
       style={{ backgroundImage: `url(${slide.imageUrl})` }}
@@ -22,7 +22,7 @@ const FullSlide = ({ slide }) => (
       <div className="container mx-auto px-4 md:px-6 text-white">
         <h1 className="text-3xl md:text-5xl font-bold mb-4">{slide.title}</h1>
         <p className="text-lg md:text-xl mb-8 max-w-2xl">{slide.description}</p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex  flex-wrap gap-4">
           {slide.primaryButton.show && (
             <a 
               href={slide.primaryButton.url} 
@@ -47,7 +47,7 @@ const FullSlide = ({ slide }) => (
 
 // Componente para slide tipo "image" (solo imagen)
 const ImageSlide = ({ slide }) => (
-  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[500px] w-full">
     <img 
       src={slide.imageUrl} 
       alt="Slide" 
@@ -58,7 +58,7 @@ const ImageSlide = ({ slide }) => (
 
 // Componente para slide tipo "imageText" (imagen + texto)
 const ImageTextSlide = ({ slide }) => (
-  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[700px] w-full">
+  <div className="relative mt-28 h-[500px] md:h-[600px] lg:h-[500px] w-full">
     <div 
       className="absolute inset-0 bg-cover bg-center" 
       style={{ backgroundImage: `url(${slide.imageUrl})` }}
@@ -147,29 +147,29 @@ export default function HeroCarousel() {
   }
 
   return (
-    <Swiper
-      modules={[Autoplay, Pagination, Navigation]}
-      spaceBetween={0}
-      slidesPerView={1}
-      autoplay={{
-        delay: 5000,
-        disableOnInteraction: false,
-      }}
-      pagination={{ clickable: true }}
-      navigation
-      className="hero-carousel"
-    >
-      {slides.map((slide) => (
-        <SwiperSlide key={slide.id}>
-          {slide.type === 'full' ? (
-            <FullSlide slide={slide} />
-          ) : slide.type === 'image' ? (
-            <ImageSlide slide={slide} />
-          ) : (
-            <ImageTextSlide slide={slide} />
-          )}
-        </SwiperSlide>
-      ))}
-    </Swiper>
+   <Swiper
+  modules={[Autoplay, Pagination, Navigation]}
+  spaceBetween={0}
+  slidesPerView={1}
+  autoplay={{
+    delay: 5000,
+    disableOnInteraction: false,
+  }}
+  pagination={{ clickable: false }}
+  navigation
+  className="hero-carousel h-[500px] md:h-[600px] lg:h-[500px]"
+>
+  {slides.map((slide) => (
+    <SwiperSlide key={slide.id}>
+      {slide.type === 'full' ? (
+        <FullSlide slide={slide} />
+      ) : slide.type === 'image' ? (
+        <ImageSlide slide={slide} />
+      ) : (
+        <ImageTextSlide slide={slide} />
+      )}
+    </SwiperSlide>
+  ))}
+</Swiper>
   );
 }

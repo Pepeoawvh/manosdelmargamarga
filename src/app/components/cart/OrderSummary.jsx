@@ -29,7 +29,7 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
             <span>Envío</span>
             <span>
               {shippingCost === 0 ? (
-                <span className="text-emerald-600 font-medium">¡Gratis!</span>
+                <span className="text-amber-600 font-medium">¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!</span>
               ) : (
                 `$${shippingCost.toLocaleString()}`
               )}

@@ -40,7 +40,7 @@ const CheckOut = () => {
     shippingType: 'Por pagar todo Chile'
   });
 
-  const shippingCost = subtotal > 30000 ? 0 : 3990;
+  const shippingCost = subtotal > 5 ? 0 : 3990;
   const total = subtotal + shippingCost;
 
   // Cargar datos guardados si hay un reintento de pago
