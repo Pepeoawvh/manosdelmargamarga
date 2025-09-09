@@ -23,6 +23,13 @@ export const PRODUCT_SUBCATEGORIES = {
   'Tarjetas': ['Tarjetas de Presentación', 'Tarjetones']
 };
 
+// 🔹 Función utilitaria para limpiar undefined
+const cleanObject = (obj) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== undefined)
+  );
+};
+
 export default function useProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,19 +69,27 @@ export default function useProducts() {
       if (!productData.categories || productData.categories.length === 0) {
         throw new Error('El producto debe tener al menos una categoría');
       }
+
+      // Eliminar `id` y undefined
+      const { id, ...rest } = productData;
+      const cleanedProduct = cleanObject(rest);
+
       const newProduct = {
-        ...productData,
-        stock: Number(productData.stock),
-        price: Number(productData.price),
-        categories: Array.isArray(productData.categories) ? productData.categories : [],
-        subcategories: Array.isArray(productData.subcategories) ? productData.subcategories : [],
+        ...cleanedProduct,
+        stock: Number(cleanedProduct.stock || 0),
+        price: Number(cleanedProduct.price || 0),
+        categories: Array.isArray(cleanedProduct.categories) ? cleanedProduct.categories : [],
+        subcategories: Array.isArray(cleanedProduct.subcategories) ? cleanedProduct.subcategories : [],
         createdAt: new Date()
       };
+
       const docRef = await addDoc(collection(firestoreDB, 'productosmmm'), newProduct);
+
       setProducts(prevProducts => [
         ...prevProducts, 
         { id: docRef.id, ...newProduct }
       ]);
+
       return { success: true, id: docRef.id };
     } catch (error) {
       return { success: false, error: error.message };
@@ -101,10 +116,12 @@ export default function useProducts() {
       if (!productToUpdate) throw new Error('Producto no encontrado');
       const newStock = productToUpdate.stock + quantityChange;
       if (newStock < 0) throw new Error('Stock insuficiente');
+
       await updateDoc(doc(firestoreDB, 'productosmmm', productId), {
         stock: newStock,
         lastUpdated: new Date()
       });
+
       updateLocalProduct(productId, { stock: newStock });
       return { success: true };
     } catch (error) {
@@ -122,16 +139,20 @@ export default function useProducts() {
     }
   };
 
-  // Cambios aquí: forzar arrays antes de actualizar
   const updateProduct = async (productId, productData) => {
     try {
+      // Limpiar id y undefined
+      const { id, ...rest } = productData;
+      const cleanedProduct = cleanObject(rest);
+
       await updateDoc(doc(firestoreDB, 'productosmmm', productId), {
-        ...productData,
-        categories: Array.isArray(productData.categories) ? productData.categories : [],
-        subcategories: Array.isArray(productData.subcategories) ? productData.subcategories : [],
+        ...cleanedProduct,
+        categories: Array.isArray(cleanedProduct.categories) ? cleanedProduct.categories : [],
+        subcategories: Array.isArray(cleanedProduct.subcategories) ? cleanedProduct.subcategories : [],
         updatedAt: new Date()
       });
-      updateLocalProduct(productId, productData);
+
+      updateLocalProduct(productId, cleanedProduct);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

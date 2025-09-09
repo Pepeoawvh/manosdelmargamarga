@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '../../hooks/shared/useProducts';
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
-    id: product?.id, // importante para edición
     title: product?.title || '',
     subtitle: product?.subtitle || '',
     description: product?.description || '',
@@ -85,6 +84,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       alert('Debes seleccionar al menos una categoría');
       return;
     }
+
     // Formatear datos para envío y forzar arrays
     const dataToSubmit = {
       ...formData,
@@ -93,6 +93,12 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       categories: Array.isArray(formData.categories) ? formData.categories : [],
       subcategories: Array.isArray(formData.subcategories) ? formData.subcategories : [],
     };
+
+    // 🔹 Solo incluir id si es edición
+    if (product?.id) {
+      dataToSubmit.id = product.id;
+    }
+
     onSubmit(dataToSubmit);
   };
 
