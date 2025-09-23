@@ -1,17 +1,18 @@
-'use client'
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import CartButton from '../cart/CartButton';
-import { FiSearch } from 'react-icons/fi';
+"use client";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import CartButton from "../cart/CartButton";
+import { FiSearch } from "react-icons/fi";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeDropdown, setActiveDropdown] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
+  const tiendaDropdownRef = useRef(null);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -19,9 +20,9 @@ const Navbar = () => {
 
   const menuItems = [
     {
-      name: 'Tienda',
-      path: '/catalogo',
-      color: 'yellow',
+      name: "Tienda",
+      path: "/catalogo",
+      color: "yellow",
       submenu: [
         "Regalos Corporativos",
         "Papelería Germinable",
@@ -30,87 +31,112 @@ const Navbar = () => {
         "Materiales y Herramientas",
         "Ofertas",
         "Celebraciones",
-        "Eventos"
-      ]
-    },
-    { 
-      name: 'Nosotras', 
-      path: '/nosotras',
-      color: 'pink'
-    },
-    { 
-      name: 'Sostenible', 
-      path: '/sostenible',
-      color: 'green'
+        "Eventos",
+      ],
     },
     {
-      name: 'Tutoriales',
-      path: '/tutoriales',
-      color: 'blue',
-      submenu: [
-        "¿Cómo plantar?",
-        "Ayuda para diseñadores",
-        "¿Cómo funciona un pedido?"
-      ]
+      name: "Nosotras",
+      path: "/nosotras",
+      color: "pink",
     },
-    { 
-      name: 'Contacto', 
-      path: '/contacto',
-      color: 'gray'
-    }
+    {
+      name: "Sostenible",
+      path: "/sostenible",
+      color: "green",
+    },
+    {
+      name: "Tutoriales",
+      path: "/tutoriales",
+      color: "blue",
+      submenu: [
+        "¿Como plantar?",
+        "Ayuda para diseñadores",
+        "¿Cómo funciona un pedido?",
+      ],
+    },
+    {
+      name: "Contacto",
+      path: "/contacto",
+      color: "gray",
+    },
   ];
 
   const getActiveColorClass = (color) => {
     const colorClasses = {
-      yellow: 'bg-yellow-50 text-yellow-700',
-      pink: 'bg-pink-50 text-pink-700',
-      green: 'bg-green-50 text-green-700',
-      blue: 'bg-sky-50 text-sky-700',
-      gray: 'bg-gray-50 text-gray-700'
+      yellow: "bg-yellow-50 text-yellow-700",
+      pink: "bg-pink-50 text-pink-700",
+      green: "bg-green-50 text-green-700",
+      blue: "bg-sky-50 text-sky-700",
+      gray: "bg-gray-50 text-gray-700",
     };
     return colorClasses[color] || colorClasses.gray;
   };
 
   const getHoverColorClass = (color) => {
     const colorClasses = {
-      yellow: 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50',
-      pink: 'text-gray-700 hover:text-pink-600 hover:bg-pink-50',
-      green: 'text-gray-700 hover:text-green-600 hover:bg-green-50',
-      blue: 'text-gray-700 hover:text-sky-600 hover:bg-sky-50',
-      gray: 'text-gray-700 hover:text-gray-600 hover:bg-gray-50'
+      yellow: "text-gray-700 hover:text-yellow-600 hover:bg-yellow-50",
+      pink: "text-gray-700 hover:text-pink-600 hover:bg-pink-50",
+      green: "text-gray-700 hover:text-green-600 hover:bg-green-50",
+      blue: "text-gray-700 hover:text-sky-600 hover:bg-sky-50",
+      gray: "text-gray-700 hover:text-gray-600 hover:bg-gray-50",
     };
     return colorClasses[color] || colorClasses.gray;
   };
-  
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        tiendaDropdownRef.current &&
+        !tiendaDropdownRef.current.contains(event.target)
+      ) {
+        setActiveDropdown("");
+      }
+    }
+    if (activeDropdown === "Tienda") {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activeDropdown]);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     setIsMenuOpen(false);
-    setActiveDropdown('');
+    setActiveDropdown("");
   }, [pathname, searchParams]);
 
   const handleMenuItemClick = async (item, subItem = null) => {
     if (subItem) {
-      const newPath = `${item.path}?categoria=${encodeURIComponent(subItem)}`;
-      if (pathname === item.path) {
-        window.location.href = newPath;
-      } else {
+      if (item.name === "Tienda") {
+        // 👉 ir al catálogo con query param
+        const newPath = `${item.path}?categoria=${encodeURIComponent(subItem)}`;
         await router.push(newPath);
+      } else if (item.name === "Tutoriales") {
+        // 👉 ir a /tutoriales/comoplantar, /tutoriales/ayuda-para-diseñadores, etc.
+        const slug = subItem
+          .toLowerCase()
+          .replace(/[¿?]/g, "") // quitar signos de interrogación
+          .replace(/\s+/g, "-"); // espacios por guion
+        await router.push(`${item.path}/${slug}`);
       }
-      setActiveDropdown('');
+      setActiveDropdown("");
       setIsMenuOpen(false);
     } else if (!item.submenu) {
       await router.push(item.path);
       setIsMenuOpen(false);
     } else {
-      setActiveDropdown(activeDropdown === item.name ? '' : item.name);
+      setActiveDropdown(activeDropdown === item.name ? "" : item.name);
     }
   };
 
@@ -127,14 +153,18 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/90 backdrop-blur-sm py-3'
-      }`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white shadow-md py-2"
+            : "bg-white/90 backdrop-blur-sm py-3"
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-4">
           {/* Vista Desktop */}
           <div className="hidden md:block">
             {/* Modo normal (sin scroll) - 2 filas */}
-            <div className={`${!isScrolled ? 'block' : 'hidden'} space-y-4`}>
+            <div className={`${!isScrolled ? "block" : "hidden"} space-y-4`}>
               {/* Primera fila - Logo centrado */}
               <div className="flex justify-center">
                 <Link href="/" className="flex-shrink-0">
@@ -170,44 +200,138 @@ const Navbar = () => {
 
                 <div className="flex items-center space-x-4 mx-4">
                   {menuItems.map((item) => (
-                    <div key={item.name} className="relative group">
-                      <button
-                        onClick={() => handleMenuItemClick(item)}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
-                          pathname === item.path
-                            ? getActiveColorClass(item.color)
-                            : getHoverColorClass(item.color)
-                        }`}
-                      >
-                        {item.name}
-                        {item.submenu && (
-                          <svg
-                            className={`ml-1 h-4 w-4 transition-transform ${
-                              activeDropdown === item.name ? 'rotate-180' : ''
+                    <div
+                      key={item.name}
+                      className="relative group"
+                      ref={
+                        item.name === "Tienda" ? tiendaDropdownRef : undefined
+                      }
+                    >
+                      {item.name === "Tienda" ? (
+                        <div className="flex items-center">
+                          {/* Botón palabra "Tienda" */}
+                          <button
+                            onClick={() => router.push(item.path)}
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              pathname === item.path
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
                             }`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                            style={{
+                              borderTopRightRadius: 0,
+                              borderBottomRightRadius: 0,
+                              zIndex: 20,
+                            }}
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        )}
-                      </button>
-
-                      {item.submenu && activeDropdown === item.name && (
-                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                          <div className="py-1">
-                            {item.submenu.map((subItem) => (
-                              <button
-                                key={subItem}
-                                onClick={() => handleMenuItemClick(item, subItem)}
-                                className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(item.color)}`}
-                              >
-                                {subItem}
-                              </button>
-                            ))}
-                          </div>
+                            {item.name}
+                          </button>
+                          {/* Botón flecha */}
+                          <button
+                            onClick={() =>
+                              setActiveDropdown(
+                                activeDropdown === item.name ? "" : item.name
+                              )
+                            }
+                            className={`px-2 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              activeDropdown === item.name
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
+                            }`}
+                            style={{
+                              borderTopLeftRadius: 0,
+                              borderBottomLeftRadius: 0,
+                              zIndex: 20,
+                            }}
+                            aria-label="Abrir submenú Tienda"
+                          >
+                            <svg
+                              className={`ml-0 h-4 w-4 transition-transform ${
+                                activeDropdown === item.name ? "rotate-180" : ""
+                              }`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </button>
+                          {/* Submenú */}
+                          {item.submenu && activeDropdown === item.name && (
+                            <div className="absolute left-0 top-full mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                              <div className="py-1">
+                                {item.submenu.map((subItem) => (
+                                  <button
+                                    key={subItem}
+                                    onClick={() =>
+                                      handleMenuItemClick(item, subItem)
+                                    }
+                                    className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
+                                      item.color
+                                    )}`}
+                                  >
+                                    {subItem}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleMenuItemClick(item)}
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              pathname === item.path
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
+                            }`}
+                          >
+                            {item.name}
+                            {item.submenu && (
+                              <svg
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  activeDropdown === item.name
+                                    ? "rotate-180"
+                                    : ""
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                          {item.submenu && activeDropdown === item.name && (
+                            <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                              <div className="py-1">
+                                {item.submenu.map((subItem) => (
+                                  <button
+                                    key={subItem}
+                                    onClick={() =>
+                                      handleMenuItemClick(item, subItem)
+                                    }
+                                    className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
+                                      item.color
+                                    )}`}
+                                  >
+                                    {subItem}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
@@ -220,7 +344,7 @@ const Navbar = () => {
             </div>
 
             {/* Modo compacto (con scroll) - 1 fila */}
-            <div className={`${isScrolled ? 'block' : 'hidden'}`}>
+            <div className={`${isScrolled ? "block" : "hidden"}`}>
               <div className="flex items-center justify-between">
                 {/* Logo pequeño */}
                 <Link href="/" className="flex-shrink-0">
@@ -252,44 +376,138 @@ const Navbar = () => {
                   </form>
 
                   {menuItems.map((item) => (
-                    <div key={item.name} className="relative group">
-                      <button
-                        onClick={() => handleMenuItemClick(item)}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
-                          pathname === item.path
-                            ? getActiveColorClass(item.color)
-                            : getHoverColorClass(item.color)
-                        }`}
-                      >
-                        {item.name}
-                        {item.submenu && (
-                          <svg
-                            className={`ml-1 h-4 w-4 transition-transform ${
-                              activeDropdown === item.name ? 'rotate-180' : ''
+                    <div
+                      key={item.name}
+                      className="relative group"
+                      ref={
+                        item.name === "Tienda" ? tiendaDropdownRef : undefined
+                      }
+                    >
+                      {item.name === "Tienda" ? (
+                        <div className="flex items-center">
+                          {/* Botón palabra "Tienda" */}
+                          <button
+                            onClick={() => router.push(item.path)}
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              pathname === item.path
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
                             }`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                            style={{
+                              borderTopRightRadius: 0,
+                              borderBottomRightRadius: 0,
+                              zIndex: 20,
+                            }}
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        )}
-                      </button>
-
-                      {item.submenu && activeDropdown === item.name && (
-                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                          <div className="py-1">
-                            {item.submenu.map((subItem) => (
-                              <button
-                                key={subItem}
-                                onClick={() => handleMenuItemClick(item, subItem)}
-                                className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(item.color)}`}
-                              >
-                                {subItem}
-                              </button>
-                            ))}
-                          </div>
+                            {item.name}
+                          </button>
+                          {/* Botón flecha */}
+                          <button
+                            onClick={() =>
+                              setActiveDropdown(
+                                activeDropdown === item.name ? "" : item.name
+                              )
+                            }
+                            className={`px-2 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              activeDropdown === item.name
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
+                            }`}
+                            style={{
+                              borderTopLeftRadius: 0,
+                              borderBottomLeftRadius: 0,
+                              zIndex: 20,
+                            }}
+                            aria-label="Abrir submenú Tienda"
+                          >
+                            <svg
+                              className={`ml-0 h-4 w-4 transition-transform ${
+                                activeDropdown === item.name ? "rotate-180" : ""
+                              }`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </button>
+                          {/* Submenú */}
+                          {item.submenu && activeDropdown === item.name && (
+                            <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                              <div className="py-1">
+                                {item.submenu.map((subItem) => (
+                                  <button
+                                    key={subItem}
+                                    onClick={() =>
+                                      handleMenuItemClick(item, subItem)
+                                    }
+                                    className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
+                                      item.color
+                                    )}`}
+                                  >
+                                    {subItem}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleMenuItemClick(item)}
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
+                              pathname === item.path
+                                ? getActiveColorClass(item.color)
+                                : getHoverColorClass(item.color)
+                            }`}
+                          >
+                            {item.name}
+                            {item.submenu && (
+                              <svg
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  activeDropdown === item.name
+                                    ? "rotate-180"
+                                    : ""
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                          {item.submenu && activeDropdown === item.name && (
+                            <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                              <div className="py-1">
+                                {item.submenu.map((subItem) => (
+                                  <button
+                                    key={subItem}
+                                    onClick={() =>
+                                      handleMenuItemClick(item, subItem)
+                                    }
+                                    className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
+                                      item.color
+                                    )}`}
+                                  >
+                                    {subItem}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
@@ -327,9 +545,19 @@ const Navbar = () => {
                   stroke="currentColor"
                 >
                   {isMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   )}
                 </svg>
               </button>
@@ -337,9 +565,13 @@ const Navbar = () => {
           </div>
 
           {/* Menú móvil desplegable */}
-          <div className={`md:hidden transition-all duration-300 ease-in-out ${
-            isMenuOpen ? 'max-h-[32rem] opacity-100 visible mt-2' : 'max-h-0 opacity-0 invisible'
-          }`}>
+          <div
+            className={`md:hidden transition-all duration-300 ease-in-out ${
+              isMenuOpen
+                ? "max-h-[32rem] opacity-100 visible mt-2"
+                : "max-h-0 opacity-0 invisible"
+            }`}
+          >
             <div className="bg-white border rounded-lg shadow-lg">
               <form onSubmit={handleSearch} className="p-4 border-b">
                 <div className="flex">
@@ -372,24 +604,31 @@ const Navbar = () => {
                     {item.submenu && (
                       <svg
                         className={`ml-1 h-4 w-4 transition-transform ${
-                          activeDropdown === item.name ? 'rotate-180' : ''
+                          activeDropdown === item.name ? "rotate-180" : ""
                         }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     )}
                   </button>
-                  
+
                   {item.submenu && activeDropdown === item.name && (
                     <div className="bg-gray-50">
                       {item.submenu.map((subItem) => (
                         <button
                           key={subItem}
                           onClick={() => handleMenuItemClick(item, subItem)}
-                          className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(item.color)}`}
+                          className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(
+                            item.color
+                          )}`}
                         >
                           {subItem}
                         </button>
@@ -405,29 +644,32 @@ const Navbar = () => {
 
       {/* Barra de anuncio */}
       {showAnnouncement && (
-        <div className={`fixed left-0 right-0 bg-emerald-700 text-white py-2 px-4 transition-all duration-300 z-30 ${
-          isScrolled ? 'top-[56px]' : 'top-[140px]'
-        }`}>
+        <div
+          className={`fixed left-0 right-0 bg-emerald-700 text-white py-2 px-4 transition-all duration-300 z-30 ${
+            isScrolled ? "top-[56px]" : "top-[140px]"
+          }`}
+        >
           <div className="max-w-6xl text-center mx-auto px-4 flex justify-center items-center">
             <p className="text-sm font-medium">
-              ¿Necesitas cotización para Agencia, Fondos, Institución o Empresa? Haz click en botón WhatsApp.
+              ¿Necesitas cotización para Agencia, Fondos, Institución o Empresa?
+              Haz click en botón WhatsApp.
             </p>
-            <button 
+            <button
               onClick={handleCloseAnnouncement}
               className="ml-4 p-1 hover:bg-emerald-600 rounded-full transition-colors"
               aria-label="Cerrar anuncio"
             >
-              <svg 
-                className="w-5 h-5" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M6 18L18 6M6 6l12 12" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
             </button>

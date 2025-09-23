@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { firestoreDB } from '../lib/firebase/config';
 import ProductCard from '../components/product/ProductCard';
 import Button from '../components/ui/Button';
@@ -45,65 +45,52 @@ export default function Products() {
     setIsMounted(true);
   }, []);
 
+useEffect(() => {
+  const categoria = searchParams.get('categoria') || '';
+  setFilters((prev) => ({
+    ...prev,
+    category: categoria,
+    subcategory: '' // limpiar subcategoría si cambia categoría
+  }));
+}, [searchParams]);
+
   // Cargar productos
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        console.log('Iniciando carga de productos desde Firestore...');
-        
-        // Verifica si firestoreDB está disponible
         if (!firestoreDB) {
-          console.error('firestoreDB no está definido');
           setLoadingError('Error de conexión a la base de datos');
           setLoading(false);
           return;
         }
-        
-        // Crea una referencia a la colección
         const productosRef = collection(firestoreDB, 'productosmmm');
         const q = query(productosRef);
-        
-        console.log('Ejecutando consulta a Firestore...');
         const querySnapshot = await getDocs(q);
-        console.log(`Documentos recuperados: ${querySnapshot.size}`);
-        
         if (querySnapshot.empty) {
-          console.log('No se encontraron productos en la base de datos');
           setProducts([]);
           setLoading(false);
           return;
         }
-        
         const productsData = [];
-        
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          console.log(`Producto recuperado: ${doc.id} - ${data.title || 'Sin título'}`);
-          
           productsData.push({
             id: doc.id,
             ...data
           });
         });
-        
-        console.log(`Total de productos cargados: ${productsData.length}`);
         setProducts(productsData);
-        
-        // Extraer productos destacados
+
+        // Destacados y ofertas SOLO con stock > 0
         const featured = productsData.filter(product => product.featured && product.stock > 0);
-        console.log(`Productos destacados encontrados: ${featured.length}`);
-        setFeaturedProducts(featured.slice(0, 6)); // Limitamos a 6 productos destacados
-        
-        // Extraer ofertas
+        setFeaturedProducts(featured.slice(0, 6));
         const offers = productsData.filter(product => 
           product.categories && 
           product.categories.includes('Ofertas') && 
           product.stock > 0
         );
-        console.log(`Ofertas encontradas: ${offers.length}`);
-        setOfferProducts(offers.slice(0, 3)); // Limitamos a 3 ofertas
+        setOfferProducts(offers.slice(0, 3));
       } catch (error) {
-        console.error('Error al cargar productos:', error);
         setLoadingError(`Error al cargar productos: ${error.message}`);
       } finally {
         setLoading(false);
@@ -135,8 +122,8 @@ export default function Products() {
     // Filtrar por destacados
     const featuredMatch = !filters.featured || product.featured === true;
     
-    // Filtrar por stock
-    const stockMatch = !filters.inStock || (product.stock && product.stock > 0);
+    // SIEMPRE filtrar por stock > 0 (fix principal)
+    const stockMatch = product.stock && product.stock > 0;
     
     // Filtrar por término de búsqueda
     const searchMatch = !searchTerm || 
@@ -149,20 +136,15 @@ export default function Products() {
   // Obtener subcategorías disponibles según la categoría seleccionada
   const availableSubcategories = () => {
     if (!filters.category) return [];
-    
-    // Si hay subcategorías predefinidas para esta categoría, usarlas
     if (PRODUCT_SUBCATEGORIES[filters.category]) {
       return PRODUCT_SUBCATEGORIES[filters.category];
     }
-    
-    // En caso contrario, buscar en los productos
     const subcategories = new Set();
     products.forEach(product => {
       if (product.categories && product.categories.includes(filters.category) && product.subcategories) {
         product.subcategories.forEach(sub => subcategories.add(sub));
       }
     });
-    
     return Array.from(subcategories);
   };
 
@@ -194,7 +176,6 @@ export default function Products() {
     setShowCategories(true);
   };
 
-  // No renderizar nada durante SSR
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-white pt-24">
@@ -220,7 +201,6 @@ export default function Products() {
           Explora nuestra colección de productos artesanales en papel reciclado
         </p>
 
-        {/* Mostrar error de carga si existe */}
         {loadingError && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 font-medium">{loadingError}</p>
@@ -228,9 +208,6 @@ export default function Products() {
           </div>
         )}
 
-        
-
-        {/* Buscador */}
         <div className="mb-8 p-4 bg-white rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="w-full">
@@ -239,7 +216,6 @@ export default function Products() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
-                  // Si hay un término de búsqueda, mostrar los productos
                   if (e.target.value) {
                     setShowCategories(false);
                   } else if (!filters.category) {
@@ -267,7 +243,6 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Etiquetas de filtros activos */}
         {(filters.category || filters.subcategory || filters.featured || filters.inStock || searchTerm) && (
           <div className="flex flex-wrap gap-2 mb-6">
             {filters.category && (
@@ -321,110 +296,110 @@ export default function Products() {
         )}
 
         {loading ? (
-  <div className="py-8 text-center">
-    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mb-2"></div>
-    <p className="text-emerald-700">Cargando productos...</p>
-  </div>
-) : showCategories && !searchTerm ? (
-  <>
-    {/* PRIMERO: Categorías */}
-    <h2 className="text-2xl font-bold mb-6 text-center text-emerald-800">
-      Nuestras Categorías
-    </h2>
-    
-    {products.length === 0 && !loading && !loadingError ? (
-      <div className="text-center py-8">
-        <p className="text-gray-600">
-          No hay productos disponibles en este momento.
-        </p>
-      </div>
-    ) : (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        {PRODUCT_CATEGORIES.map((category) => {
-          const count = products.filter(p => 
-            p.categories && 
-            p.categories.includes(category) && 
-            p.stock > 0
-          ).length;
-          
-          return (
-            <div 
-              key={category}
-              onClick={() => handleCategorySelect(category)}
-              className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-emerald-500"
-            >
-              <div className="text-4xl mb-3">{categoryIcons[category] || '📦'}</div>
-              <h3 className="text-lg font-medium text-center">{category}</h3>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                {count} {count === 1 ? 'producto' : 'productos'}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    )}
-    
-    {/* SEGUNDO: Destacados y Ofertas */}
-    {(featuredProducts.length > 0 || offerProducts.length > 0) && (
-      <div className="mt-8">
-        {featuredProducts.length > 0 && (
+          <div className="py-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mb-2"></div>
+            <p className="text-emerald-700">Cargando productos...</p>
+          </div>
+        ) : showCategories && !searchTerm ? (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-emerald-700 flex items-center">
-                <span className="mr-2">★</span> Productos Destacados
-              </h2>
-              <Button 
-                onClick={() => {
-                  setFilters({...filters, featured: true});
-                  setShowCategories(false);
-                }}
-                variant="text"
-                size="sm"
-              >
-                Ver todos <span className="ml-1">→</span>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {featuredProducts.slice(0, 3).map((product) => (
-                <ProductCard 
-                  key={product.id}
-                  product={product}
-                  showInfo={true}
-                />
-              ))}
-            </div>
-          </>
-        )}
+            {/* PRIMERO: Categorías */}
+            <h2 className="text-2xl font-bold mb-6 text-center text-emerald-800">
+              Nuestras Categorías
+            </h2>
+            
+            {products.length === 0 && !loading && !loadingError ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">
+                  No hay productos disponibles en este momento.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                {PRODUCT_CATEGORIES.map((category) => {
+                  const count = products.filter(p => 
+                    p.categories && 
+                    p.categories.includes(category) && 
+                    p.stock > 0
+                  ).length;
+                  
+                  return (
+                    <div 
+                      key={category}
+                      onClick={() => handleCategorySelect(category)}
+                      className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-emerald-500"
+                    >
+                      <div className="text-4xl mb-3">{categoryIcons[category] || '📦'}</div>
+                      <h3 className="text-lg font-medium text-center">{category}</h3>
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        {count} {count === 1 ? 'producto' : 'productos'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* SEGUNDO: Destacados y Ofertas */}
+            {(featuredProducts.length > 0 || offerProducts.length > 0) && (
+              <div className="mt-8">
+                {featuredProducts.length > 0 && (
+                  <>
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-bold text-emerald-700 flex items-center">
+                        <span className="mr-2">★</span> Productos Destacados
+                      </h2>
+                      <Button 
+                        onClick={() => {
+                          setFilters({...filters, featured: true});
+                          setShowCategories(false);
+                        }}
+                        variant="text"
+                        size="sm"
+                      >
+                        Ver todos <span className="ml-1">→</span>
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                      {featuredProducts.slice(0, 3).map((product) => (
+                        <ProductCard 
+                          key={product.id}
+                          product={product}
+                          showInfo={true}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
 
-        {offerProducts.length > 0 && (
-          <>
-            <div className="flex justify-between items-center mb-4 mt-8">
-              <h2 className="text-2xl font-bold text-red-600 flex items-center">
-                <span className="mr-2">🏷️</span> Ofertas Especiales
-              </h2>
-              <Button 
-                onClick={() => handleCategorySelect('Ofertas')}
-                variant="text"
-                size="sm"
-              >
-                Ver todas <span className="ml-1">→</span>
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {offerProducts.map((product) => (
-                <ProductCard 
-                  key={product.id}
-                  product={product}
-                  showInfo={true}
-                />
-              ))}
-            </div>
+                {offerProducts.length > 0 && (
+                  <>
+                    <div className="flex justify-between items-center mb-4 mt-8">
+                      <h2 className="text-2xl font-bold text-red-600 flex items-center">
+                        <span className="mr-2">🏷️</span> Ofertas Especiales
+                      </h2>
+                      <Button 
+                        onClick={() => handleCategorySelect('Ofertas')}
+                        variant="text"
+                        size="sm"
+                      >
+                        Ver todas <span className="ml-1">→</span>
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {offerProducts.map((product) => (
+                        <ProductCard 
+                          key={product.id}
+                          product={product}
+                          showInfo={true}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </>
-        )}
-      </div>
-    )}
-  </>
-) : (
+        ) : (
           <>
             {/* Vista de productos filtrados */}
             {filters.category && (
@@ -461,9 +436,6 @@ export default function Products() {
                         onChange={(e) => setFilters({ ...filters, inStock: e.target.checked })}
                         className="h-4 w-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
                       />
-                      <label htmlFor="inStock" className="ml-2 text-sm text-gray-700">
-                        En stock
-                      </label>
                     </div>
                   </div>
                 </div>

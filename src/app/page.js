@@ -31,8 +31,7 @@ export default function Home() {
           id: doc.id,
           ...doc.data(),
         }));
-        setFeaturedProducts(products);
-      } catch (error) {
+setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (error) {
         console.error("Error fetching featured products:", error);
       } finally {
         setLoading(false);
