@@ -194,7 +194,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen text-emerald-800 bg-gray-50 pt-12">
+    <div className="min-h-screen text-emerald-800 bg-gray-50 pt-20">
       <main className="max-w-6xl mx-auto px-4 py-2">
         <h1 className="text-4xl font-bold text-center">Nuestros Productos</h1>
         <p className="text-center mt-4 text-gray-600 mb-8">
@@ -314,7 +314,7 @@ useEffect(() => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-12">
                 {PRODUCT_CATEGORIES.map((category) => {
                   const count = products.filter(p => 
                     p.categories && 
@@ -326,11 +326,11 @@ useEffect(() => {
                     <div 
                       key={category}
                       onClick={() => handleCategorySelect(category)}
-                      className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-emerald-500"
+                      className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-emerald-500"
                     >
-                      <div className="text-4xl mb-3">{categoryIcons[category] || '📦'}</div>
-                      <h3 className="text-lg font-medium text-center">{category}</h3>
-                      <p className="text-xs text-gray-500 mt-2 text-center">
+                      <div className="text-2xl mb-3">{categoryIcons[category] || '📦'}</div>
+                      <h3 className="text-md font-medium text-center">{category}</h3>
+                      <p className="text-xs text-gray-700 mt-2 text-center">
                         {count} {count === 1 ? 'producto' : 'productos'}
                       </p>
                     </div>
