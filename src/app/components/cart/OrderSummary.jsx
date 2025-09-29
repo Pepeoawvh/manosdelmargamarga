@@ -22,14 +22,14 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
         ))}
         <div className="mt-4 space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
+            <span>Subtotal:</span>
             <span>${subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>Envío</span>
-            <span>
+            <span>Envío:</span>
+            <span className="flex items-center px-4">
               {shippingCost === 0 ? (
-                <span className="text-amber-600 font-medium">¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!</span>
+                <span className="text-amber-600 font-medium">¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!</span>
               ) : (
                 `$${shippingCost.toLocaleString()}`
               )}

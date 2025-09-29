@@ -6,6 +6,7 @@ import ShippingInfoForm from './ShippingInfoForm';
 import OrderSummary from './OrderSummary';
 import PaymentMethods from './PaymentMethods';
 import Button from '../../components/ui/Button';
+import BuyWspButton from './BuyWspButton'; // Importamos el botón de WhatsApp
 
 // Importar funciones necesarias de Firebase Firestore
 import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
@@ -40,7 +41,7 @@ const CheckOut = () => {
     shippingType: 'Por pagar todo Chile'
   });
 
-  const shippingCost = subtotal > 5 ? 0 : 3990;
+  const shippingCost = subtotal > 5 ? 0 : 0;
   const total = subtotal + shippingCost;
 
   // Cargar datos guardados si hay un reintento de pago
@@ -59,85 +60,6 @@ const CheckOut = () => {
       setMessage('Tus datos se han recuperado. Puedes intentar con otro método de pago.');
     }
   }, [isRetry, savedShippingInfo]);
-
-  const handleCheckout = async () => {
-    if (!validateForm()) return;
-  
-    if (cart.length === 0) {
-      setError('El carrito está vacío');
-      return;
-    }
-  
-    setLoading(true);
-    setError(null);
-    setMessage('');
-  
-    try {
-      // Guardar información de envío para futura referencia
-      const infoWithPaymentMethod = { ...shippingInfo, lastPaymentMethod: paymentMethod };
-      saveShippingInfo(infoWithPaymentMethod);
-  
-      // Indicar que hay un pago en progreso
-      startPaymentAttempt();
-  
-      // Preparar datos de la orden
-      const orderData = {
-        cart,
-        customer: shippingInfo,
-        summary: { subtotal, shipping: shippingCost, total },
-        paymentMethod
-      };
-  
-      // El endpoint del backend se encargará de guardar la orden en Firestore
-      const endpoint = paymentMethod === 'mercadopago'
-        ? '/api/mercadopago/create-transaction'
-        : '/api/webpay/create-transaction';
-  
-      console.log('Enviando datos al endpoint:', endpoint);
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        cancelPaymentAttempt();
-        throw new Error(errorData.error || 'Error al procesar la compra');
-      }
-      
-      const result = await response.json();
-      console.log('Respuesta recibida del servidor:', result);
-  
-      if (paymentMethod === 'webpay' && result.url && result.token) {
-        // No se necesita acceder a orderDoc.id aquí - el token ya está en result
-        
-        setMessage('Redirigiendo a la pasarela de pago WebPay...');
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = result.url;
-  
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'token_ws';
-        tokenInput.value = result.token;
-  
-        form.appendChild(tokenInput);
-        document.body.appendChild(form);
-  
-        setTimeout(() => {
-          form.submit();
-        }, 500);
-      }
-    } catch (err) {
-      console.error('Error en checkout:', err);
-      setError(err.message || 'Error al procesar la compra');
-      cancelPaymentAttempt();
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const validateForm = () => {
     const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'region'];
@@ -209,9 +131,9 @@ const CheckOut = () => {
             <ShippingInfoForm shippingInfo={shippingInfo} setShippingInfo={setShippingInfo} />
 
             {/* Métodos de pago */}
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <PaymentMethods paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
-            </div>
+            </div> */}
           </div>
 
           {/* Columna 2: Resumen del pedido y botones de pago */}
@@ -224,8 +146,9 @@ const CheckOut = () => {
             />
 
             {/* Botón de pago */}
-            <div className=" flex justify-center space-y-4 mt-4">
-              <Button
+            <div className="flex justify-center space-y-4 mt-4">
+              {/* Botón de Transbank comentado temporalmente */}
+              {/* <Button
                 type="button"
                 className="w-2/5 py-3 flex items-center justify-center bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
                 disabled={loading || cart.length === 0}
@@ -242,7 +165,17 @@ const CheckOut = () => {
                 ) : (
                   `Pagar con ${paymentMethod === 'webpay' ? 'WebPay' : 'MercadoPago'}`
                 )}
-              </Button>
+              </Button> */}
+
+              {/* Botón de WhatsApp */}
+              <BuyWspButton
+                orderData={{
+                  customer: shippingInfo,
+                  cart,
+                  summary: { subtotal, shippingCost, total },
+                }}
+                phoneNumber="56322121504" // Número de WhatsApp de la empresa
+              />
             </div>
           </div>
         </div>

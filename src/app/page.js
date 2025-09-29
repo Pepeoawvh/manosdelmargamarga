@@ -105,34 +105,9 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white text-emerald-800">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12">
-            ¿Por qué elegirnos?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              title="Diseños Exclusivos"
-              description="Creamos invitaciones únicas que reflejan tu estilo"
-              icon="✨"
-            />
-            <FeatureCard
-              title="Eco-friendly"
-              description="Contribuimos al medio ambiente con invitaciones digitales"
-              icon="🌱"
-            />
-            <FeatureCard
-              title="Personalización"
-              description="Adaptamos cada detalle a tus necesidades"
-              icon="🎨"
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-12 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-emerald-800">
             ¡Contactanos por Whatsapp!

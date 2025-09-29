@@ -5,53 +5,49 @@ import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CartButton from "../cart/CartButton";
 import { FiSearch } from "react-icons/fi";
+import { PRODUCT_CATEGORIES } from "../../hooks/shared/useProducts"; 
 
-/**
- * Navbar completo corregido:
- * - Cierra dropdowns al click fuera (navRef)
- * - Submenús posicionados con top-full para no montarse encima
- * - slugify() que normaliza y quita tildes (y un slugMap para excepciones)
- * - Mantiene estructura desktop / compact / mobile similar al original
- */
+const ANNOUNCE_REAPPEAR_MINUTES = 10;
+const SCROLL_CLOSE_DELAY_MS = 5000;
+const ANNOUNCE_ANIM_MS = 300;
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAnnouncement, setShowAnnouncement] = useState(true);
 
-  // Referencia al nav (para detectar clicks fuera de TODO el navbar)
+  // Estado "base" que indica si la barra debería mostrarse (lógica)
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+  // Estados para manejar animación y montaje
+  const [announceMounted, setAnnounceMounted] = useState(false);
+  const [announceActive, setAnnounceActive] = useState(false);
+
+  // refs para timeouts / listeners seguros
+  const scrollCloseTimeoutRef = useRef(null);
+  const announceUnmountTimeoutRef = useRef(null);
+
+  // refs para click-outside
   const navRef = useRef(null);
-  // refs para cada menú (útiles si quieres posicionar dinámicamente)
   const dropdownRefs = useRef({});
 
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Map puntual para slugs donde quieras forzar algo distinto (opcional)
   const tutorialSlugMap = {
     "¿Como plantar?": "como-plantar",
-    "¿Cómo funciona un pedido?": "como-funciona-un-pedido",
-    "Ayuda para diseñadores": "ayuda-para-disenadores",
+    "¿Cómo funciona un pedido?": "como-trabajamos",
+    "Ayuda para diseñadores": "protocolo-grafico",
   };
 
   const menuItems = [
-    {
-      name: "Tienda",
-      path: "/catalogo",
-      color: "yellow",
-      submenu: [
-        "Regalos Corporativos",
-        "Papelería Germinable",
-        "Papel con Semillas",
-        "Celebraciones",
-        "Materiales y Herramientas",
-        "Ofertas",
-        "Eventos",
-      ],
-    },
+     {
+    name: "Tienda",
+    path: "/catalogo",
+    color: "yellow",
+    submenu: PRODUCT_CATEGORIES, // Usar categorías dinámicas
+  },
     { name: "Nosotras", path: "/nosotras", color: "pink" },
     { name: "Sostenible", path: "/sostenible", color: "green" },
     {
@@ -89,64 +85,150 @@ const Navbar = () => {
     return colorClasses[color] || colorClasses.gray;
   };
 
-  // slugify robusto: normaliza, quita tildes, caracteres no-alfanum y espacios -> guiones
   const slugify = (str) => {
     if (!str) return "";
-    // Primero intentamos el mapa de excepciones
     if (tutorialSlugMap[str]) return tutorialSlugMap[str];
-
     return str
       .toLowerCase()
-      .normalize("NFD") // separa las letras y los acentos
-      .replace(/[\u0300-\u036f]/g, "") // remueve acentos
-      .replace(/[¿?¡!]/g, "") // remover signos especiales en español
-      .replace(/[^a-z0-9\s-]/g, "") // quitar otros caracteres no permitidos
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[¿?¡!]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
       .trim()
-      .replace(/\s+/g, "-"); // espacios por guion
+      .replace(/\s+/g, "-");
   };
 
-  // 1) Cerrar dropdown / menu al hacer click fuera del nav
+  // ---------- CLICK OUTSIDE para cerrar dropdowns/menus ----------
   useEffect(() => {
     function handleClickOutside(event) {
-      // Si navRef no existe, no hacemos nada
       if (!navRef.current) return;
-
       if (!navRef.current.contains(event.target)) {
         setActiveDropdown("");
-        setIsMenuOpen(false); // también cerramos el menú móvil si fuera el caso
+        setIsMenuOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 2) Scroll para cambiar estado comprimido
+  // ---------- SCROLL: isScrolled + cierre anuncio por scroll ----------
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      setIsScrolled(y > 10);
 
-  // 3) Resetear open/active en cambios de ruta/params
+      // si el usuario scrollea hacia abajo y la barra está visible -> iniciar cierre en 1s
+      if (y > 50 && showAnnouncement && !scrollCloseTimeoutRef.current) {
+        scrollCloseTimeoutRef.current = setTimeout(() => {
+          closeAnnouncement(true); // guarda timestamp
+          scrollCloseTimeoutRef.current = null;
+        }, SCROLL_CLOSE_DELAY_MS);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollCloseTimeoutRef.current) {
+        clearTimeout(scrollCloseTimeoutRef.current);
+        scrollCloseTimeoutRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAnnouncement]); // solo necesitamos re-subscribe si cambia la visibilidad deseada
+
+  // ---------- RESET MENU cuando cambian ruta/params ----------
   useEffect(() => {
     setIsMenuOpen(false);
     setActiveDropdown("");
   }, [pathname, searchParams]);
 
-  // Manejo click en item / subitem
+  // ---------- LÓGICA: comprobar localStorage al montar para decidir mostrar ----------
+  useEffect(() => {
+    try {
+      const lastClosed = localStorage.getItem("announcementClosedAt");
+      if (lastClosed) {
+        const closedAt = parseInt(lastClosed, 10);
+        if (!isNaN(closedAt)) {
+          const minutesDiff = (Date.now() - closedAt) / (1000 * 60);
+          if (minutesDiff >= ANNOUNCE_REAPPEAR_MINUTES) {
+            localStorage.removeItem("announcementClosedAt");
+            setShowAnnouncement(true);
+          } else {
+            setShowAnnouncement(false);
+          }
+        } else {
+          // dato corrupto -> mostrar y limpiar
+          localStorage.removeItem("announcementClosedAt");
+          setShowAnnouncement(true);
+        }
+      } else {
+        // nunca cerrado -> mostrar
+        setShowAnnouncement(true);
+      }
+    } catch (e) {
+      // en caso de fallo con storage, mostramos por seguridad
+      setShowAnnouncement(true);
+    }
+  }, []);
+
+  // ---------- manejar mount/animación cuando cambia showAnnouncement ----------
+  useEffect(() => {
+    if (showAnnouncement) {
+      // montar y animar entrada
+      setAnnounceMounted(true);
+      // forzar paint para que la transición CSS pueda animar del estado inicial al activo
+      requestAnimationFrame(() => {
+        setAnnounceActive(true);
+      });
+    } else {
+      // animar salida y desmontar después de la duración
+      setAnnounceActive(false);
+      if (announceUnmountTimeoutRef.current) {
+        clearTimeout(announceUnmountTimeoutRef.current);
+      }
+      announceUnmountTimeoutRef.current = setTimeout(() => {
+        setAnnounceMounted(false);
+        announceUnmountTimeoutRef.current = null;
+      }, ANNOUNCE_ANIM_MS);
+    }
+    return () => {
+      if (announceUnmountTimeoutRef.current) {
+        clearTimeout(announceUnmountTimeoutRef.current);
+        announceUnmountTimeoutRef.current = null;
+      }
+    };
+  }, [showAnnouncement]);
+
+  // ---------- cerrar anuncio (con animación). saveTimestamp=true guarda en localStorage ----------
+  const closeAnnouncement = (saveTimestamp = true) => {
+    // primero desactivar (lanza animación de salida)
+    setShowAnnouncement(false);
+    // guardar timestamp ahora mismo o en el desmontaje, guardamos aquí:
+    if (saveTimestamp) {
+      try {
+        localStorage.setItem("announcementClosedAt", Date.now().toString());
+      } catch (e) {
+        // fail silently si storage no disponible
+      }
+    }
+    // limpiar timeouts de scroll si existen
+    if (scrollCloseTimeoutRef.current) {
+      clearTimeout(scrollCloseTimeoutRef.current);
+      scrollCloseTimeoutRef.current = null;
+    }
+  };
+
+  // ---------- manejo clicks del menú ----------
   const handleMenuItemClick = async (item, subItem = null) => {
     if (subItem) {
       if (item.name === "Tienda") {
-        // ir al catálogo con query param
         const newPath = `${item.path}?categoria=${encodeURIComponent(subItem)}`;
         await router.push(newPath);
       } else if (item.name === "Tutoriales") {
-        // usar slugify o map de excepciones
         const slug = slugify(subItem);
         await router.push(`${item.path}/${slug}`);
       } else {
-        // por si hay otro menú con submenu (genérico)
         const slug = slugify(subItem);
         await router.push(`${item.path}/${slug}`);
       }
@@ -157,7 +239,6 @@ const Navbar = () => {
       setIsMenuOpen(false);
       setActiveDropdown("");
     } else {
-      // toggle del dropdown
       setActiveDropdown((prev) => (prev === item.name ? "" : item.name));
     }
   };
@@ -169,60 +250,37 @@ const Navbar = () => {
     }
   };
 
-  const handleCloseAnnouncement = () => setShowAnnouncement(false);
-
-  /**
-   * Render de submenú: lo dejamos como `absolute` dentro del wrapper relativo.
-   * - usamos top-full para que siempre quede por debajo del botón
-   * - z-index controlado desde nav para evitar montarse "por encima" del comprimido
-   */
   const renderSubmenuInline = (item) => {
-    if (!item.submenu) return null;
-
-    // Si el dropdown está abierto, mostrar el submenú
-    if (activeDropdown === item.name) {
-      return (
-        <div
-          className="absolute left-0 top-full mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-          style={{ zIndex: 60 }}
-        >
-          <div className="py-1">
-            {item.submenu.map((subItem) => (
-              <button
-                key={subItem}
-                onClick={() => handleMenuItemClick(item, subItem)}
-                className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
-                  item.color
-                )}`}
-              >
-                {subItem}
-              </button>
-            ))}
-          </div>
+    if (!item.submenu || activeDropdown !== item.name) return null;
+    return (
+      <div
+        className="absolute left-0 top-full mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+        style={{ zIndex: 60 }}
+      >
+        <div className="py-1">
+          {item.submenu.map((subItem) => (
+            <button
+              key={subItem}
+              onClick={() => handleMenuItemClick(item, subItem)}
+              className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(item.color)}`}
+            >
+              {subItem}
+            </button>
+          ))}
         </div>
-      );
-    }
-
-    return null;
+      </div>
+    );
   };
 
-  /**
-   * Versión para mobile donde el submenu queda dentro del panel colapsable
-   * (evita posicionamientos `fixed` que puedan superponerse)
-   */
   const renderSubmenuMobile = (item) => {
-    if (!item.submenu) return null;
-    if (activeDropdown !== item.name) return null;
-
+    if (!item.submenu || activeDropdown !== item.name) return null;
     return (
       <div className="bg-gray-50">
         {item.submenu.map((subItem) => (
           <button
             key={subItem}
             onClick={() => handleMenuItemClick(item, subItem)}
-            className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(
-              item.color
-            )}`}
+            className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(item.color)}`}
           >
             {subItem}
           </button>
@@ -231,6 +289,7 @@ const Navbar = () => {
     );
   };
 
+  // ---------- RENDER ----------
   return (
     <>
       <nav
@@ -247,13 +306,7 @@ const Navbar = () => {
               {/* Primera fila - Logo centrado */}
               <div className="flex justify-center">
                 <Link href="/" className="flex-shrink-0">
-                  <Image
-                    src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga"
-                    width={200}
-                    height={40}
-                    className="h-14 w-auto"
-                  />
+                  <Image src="/images/logos/mmm.png" alt="Manos del Marga Marga" width={200} height={40} className="h-14 w-auto" />
                 </Link>
               </div>
 
@@ -266,12 +319,9 @@ const Navbar = () => {
                       placeholder="Buscar en catálogo..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-l-md focus:inline-none focus:ring-1 focus:ring-gray-200"
                     />
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200"
-                    >
+                    <button type="submit" className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200">
                       <FiSearch size={20} />
                     </button>
                   </div>
@@ -279,53 +329,32 @@ const Navbar = () => {
 
                 <div className="flex items-center space-x-4 mx-4">
                   {menuItems.map((item) => (
-                    <div
-                      key={item.name}
-                      className="relative group"
-                      ref={(el) => (dropdownRefs.current[item.name] = el)}
-                    >
+                    <div key={item.name} className="relative group" ref={(el) => (dropdownRefs.current[item.name] = el)}>
                       {item.name === "Tienda" ? (
                         <div className="flex items-center">
-                          {/* Botón palabra "Tienda" */}
                           <button
                             onClick={() => router.push(item.path)}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path ? getActiveColorClass(item.color) : getHoverColorClass(item.color)
                             }`}
-                            style={{
-                              borderTopRightRadius: 0,
-                              borderBottomRightRadius: 0,
-                              zIndex: 70,
-                            }}
+                            style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, zIndex: 70 }}
                           >
                             {item.name}
                           </button>
 
-                          {/* Botón flecha que abre el submenu */}
                           <button
                             onClick={() => setActiveDropdown((prev) => (prev === item.name ? "" : item.name))}
                             className={`px-2 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               activeDropdown === item.name ? getActiveColorClass(item.color) : getHoverColorClass(item.color)
                             }`}
-                            style={{
-                              borderTopLeftRadius: 0,
-                              borderBottomLeftRadius: 0,
-                              zIndex: 70,
-                            }}
+                            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, zIndex: 70 }}
                             aria-label="Abrir submenú Tienda"
                           >
-                            <svg
-                              className={`ml-0 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`}
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
+                            <svg className={`ml-0 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </button>
 
-                          {/* Submenú */}
-                          {/* Usamos posicionamiento absoluto relativo al wrapper y top-full para que "caiga" debajo */}
                           {renderSubmenuInline(item)}
                         </div>
                       ) : (
@@ -338,18 +367,12 @@ const Navbar = () => {
                           >
                             {item.name}
                             {item.submenu && (
-                              <svg
-                                className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
+                              <svg className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                               </svg>
                             )}
                           </button>
 
-                          {/* Submenú */}
                           {renderSubmenuInline(item)}
                         </>
                       )}
@@ -366,18 +389,10 @@ const Navbar = () => {
             {/* Modo compacto (con scroll) - 1 fila */}
             <div className={`${isScrolled ? "block" : "hidden"}`}>
               <div className="flex items-center justify-between">
-                {/* Logo pequeño */}
                 <Link href="/" className="flex-shrink-0">
-                  <Image
-                    src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga"
-                    width={120}
-                    height={24}
-                    className="h-8 w-auto"
-                  />
+                  <Image src="/images/logos/mmm.png" alt="Manos del Marga Marga" width={120} height={24} className="h-8 w-auto" />
                 </Link>
 
-                {/* Contenedor central - Búsqueda y menú */}
                 <div className="flex items-center space-x-4 mx-4">
                   <form onSubmit={handleSearch} className="flex">
                     <input
@@ -385,22 +400,15 @@ const Navbar = () => {
                       placeholder="Buscar..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-48 px-3 py-1 text-sm border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      className="w-48 px-3 py-1 text-sm border border-gray-300 rounded-l-md focus:inline-none focus:ring-1 focus:ring-gray-200"
                     />
-                    <button
-                      type="submit"
-                      className="px-3 py-1 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200"
-                    >
+                    <button type="submit" className="px-3 py-1 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200">
                       <FiSearch size={16} />
                     </button>
                   </form>
 
                   {menuItems.map((item) => (
-                    <div
-                      key={item.name}
-                      className="relative group"
-                      ref={(el) => (dropdownRefs.current[item.name] = el)}
-                    >
+                    <div key={item.name} className="relative group" ref={(el) => (dropdownRefs.current[item.name] = el)}>
                       {item.name === "Tienda" ? (
                         <div className="flex items-center">
                           <button
@@ -408,11 +416,7 @@ const Navbar = () => {
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path ? getActiveColorClass(item.color) : getHoverColorClass(item.color)
                             }`}
-                            style={{
-                              borderTopRightRadius: 0,
-                              borderBottomRightRadius: 0,
-                              zIndex: 70,
-                            }}
+                            style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, zIndex: 70 }}
                           >
                             {item.name}
                           </button>
@@ -422,24 +426,14 @@ const Navbar = () => {
                             className={`px-2 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               activeDropdown === item.name ? getActiveColorClass(item.color) : getHoverColorClass(item.color)
                             }`}
-                            style={{
-                              borderTopLeftRadius: 0,
-                              borderBottomLeftRadius: 0,
-                              zIndex: 70,
-                            }}
+                            style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, zIndex: 70 }}
                             aria-label="Abrir submenú Tienda"
                           >
-                            <svg
-                              className={`ml-0 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`}
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
+                            <svg className={`ml-0 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </button>
 
-                          {/* Submenú */}
                           {renderSubmenuInline(item)}
                         </div>
                       ) : (
@@ -452,12 +446,7 @@ const Navbar = () => {
                           >
                             {item.name}
                             {item.submenu && (
-                              <svg
-                                className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
+                              <svg className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                               </svg>
                             )}
@@ -470,7 +459,6 @@ const Navbar = () => {
                   ))}
                 </div>
 
-                {/* Carrito */}
                 <div className="flex-shrink-0">
                   <CartButton />
                 </div>
@@ -481,21 +469,11 @@ const Navbar = () => {
           {/* Vista Móvil */}
           <div className="md:hidden flex items-center justify-between">
             <Link href="/" className="flex-shrink-0">
-              <Image
-                src="/images/logos/mmm.png"
-                alt="Manos del Marga Marga"
-                width={150}
-                height={30}
-                className="h-10 w-auto"
-              />
+              <Image src="/images/logos/mmm.png" alt="Manos del Marga Marga" width={150} height={30} className="h-10 w-auto" />
             </Link>
             <div className="flex items-center space-x-4">
               <CartButton />
-              <button
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-                className="p-2 text-gray-600 hover:text-gray-900"
-                aria-label="Abrir menu"
-              >
+              <button onClick={() => setIsMenuOpen((prev) => !prev)} className="p-2 text-gray-600 hover:text-gray-900" aria-label="Abrir menu">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {isMenuOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -508,25 +486,12 @@ const Navbar = () => {
           </div>
 
           {/* Menú móvil desplegable */}
-          <div
-            className={`md:hidden transition-all duration-300 ease-in-out ${
-              isMenuOpen ? "max-h-[32rem] opacity-100 visible mt-2" : "max-h-0 opacity-0 invisible"
-            }`}
-          >
+          <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? "max-h-[32rem] opacity-100 visible mt-2" : "max-h-0 opacity-0 invisible"}`}>
             <div className="bg-white border rounded-lg shadow-lg">
               <form onSubmit={handleSearch} className="p-4 border-b">
                 <div className="flex">
-                  <input
-                    type="text"
-                    placeholder="Buscar en catálogo..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200"
-                  >
+                  <input type="text" placeholder="Buscar en catálogo..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500" />
+                  <button type="submit" className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200">
                     <FiSearch size={20} />
                   </button>
                 </div>
@@ -536,25 +501,17 @@ const Navbar = () => {
                 <div key={item.name}>
                   <button
                     onClick={() => {
-                      // en móvil el toggle abre el submenu (si tiene) o va a la ruta
                       if (item.submenu) {
                         setActiveDropdown((prev) => (prev === item.name ? "" : item.name));
                       } else {
                         handleMenuItemClick(item);
                       }
                     }}
-                    className={`w-full text-left px-4 py-2 text-sm flex justify-between items-center ${
-                      pathname === item.path ? getActiveColorClass(item.color) : getHoverColorClass(item.color)
-                    }`}
+                    className={`w-full text-left px-4 py-2 text-sm flex justify-between items-center ${pathname === item.path ? getActiveColorClass(item.color) : getHoverColorClass(item.color)}`}
                   >
                     {item.name}
                     {item.submenu && (
-                      <svg
-                        className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
+                      <svg className={`ml-1 h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     )}
@@ -568,19 +525,23 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Barra de anuncio */}
-      {showAnnouncement && (
+      {/* Barra de anuncio (montada/animada) */}
+      {announceMounted && (
         <div
-          className={`fixed left-0 right-0 bg-emerald-700 text-white py-2 px-4 transition-all duration-300 z-40 ${
-            isScrolled ? "top-[56px]" : "top-[140px]"
-          }`}
+          aria-live="polite"
+          className={`fixed left-0 right-0 bg-emerald-700 text-white py-2 px-4 z-40`}
+          style={{ top: isScrolled ? "56px" : "140px" }}
         >
-          <div className="max-w-6xl text-center mx-auto px-4 flex justify-center items-center">
+          <div
+            className={`max-w-6xl mx-auto px-4 flex justify-center items-center transition-transform transition-opacity duration-300 ease-out transform ${
+              announceActive ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+            }`}
+          >
             <p className="text-sm font-medium">
               ¿Necesitas cotización para Agencia, Fondos, Institución o Empresa? Haz click en botón WhatsApp.
             </p>
             <button
-              onClick={handleCloseAnnouncement}
+              onClick={() => closeAnnouncement(true)}
               className="ml-4 p-1 hover:bg-emerald-600 rounded-full transition-colors"
               aria-label="Cerrar anuncio"
             >
@@ -593,6 +554,6 @@ const Navbar = () => {
       )}
     </>
   );
-};
+};  
 
 export default Navbar;

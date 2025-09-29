@@ -5,19 +5,19 @@ const botones = [
     icon: <FaSeedling className="text-emerald-600 text-3xl mb-2" />,
     title: "¿CÓMO PLANTAR?",
     desc: "Haz germinar tu papel semilla.",
-    href: "#como-plantar",
+    href: "/tutoriales/como-plantar",
   },
   {
     icon: <FaCompass className="text-emerald-600 text-3xl mb-2" />,
     title: "¿CÓMO TRABAJAMOS?",
     desc: "Así funcionamos ante un pedido.",
-    href: "#como-trabajamos",
+    href: "/tutoriales/como-trabajamos",
   },
   {
     icon: <FaDesktop className="text-emerald-600 text-3xl mb-2" />,
     title: "PROTOCOLO GRÁFICO",
     desc: "Léelo si enviarás tu propio diseño.",
-    href: "#protocolo-grafico",
+    href: "/tutoriales/protocolo-grafico",
   },
   {
     icon: <FaPuzzlePiece className="text-emerald-600 text-3xl mb-2" />,

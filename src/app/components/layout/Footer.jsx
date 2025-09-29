@@ -10,15 +10,9 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 justify-items-center text-center gap-8">
           {/* Logo y descripción */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Mi Marca</h3>
-            <p className="mt-4 text-gray-600 text-sm">
-              Tu espacio para productos únicos, personalizados y con
-              inspiración natural.
-            </p>
-          </div>
+         
 
           {/* Enlaces rápidos */}
           <div>
