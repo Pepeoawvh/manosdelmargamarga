@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { firestoreDB } from "./lib/firebase/config";
 import ProductCard from "./components/product/ProductCard";
+import Link from "next/link";
 import FeatureCard from "./components/FeatureCard";
 import HeroCarousel from "./components/HeroCarousel";
 import WspButton from "./components/WspButton";
@@ -98,14 +99,14 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
             </div>
           )}
           <div className="text-center mt-12">
-            <button className="bg-[#5e3623] text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
-              Ver Todos los Diseños
-            </button>
+<Link href="/catalogo">
+  <button className="bg-[#5e3623] text-white px-8 py-3 rounded-lg hover:bg-opacity-50 transition-colors">
+    Ver Todos los Diseños
+  </button>
+</Link>
           </div>
         </div>
       </section>
-
-
       {/* Testimonials Section */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">

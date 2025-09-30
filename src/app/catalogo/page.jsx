@@ -241,7 +241,7 @@ export default function Products() {
                 {PRODUCT_CATEGORIES.map(category => {
                   const count = products.filter(p => p.categories?.includes(category) && p.stock > 0).length;
                   return (
-                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-[#ab4b1e]">
+                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-[#f1f0e6] rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-[#964a27]">
                       <div className="text-2xl">{categoryIcons[category] || '📦'}</div>
                       <h3 className="text-md font-medium text-center">{category}</h3>
                       <p className="text-xs text-gray-700 mt-2 text-center">{count} {count === 1 ? 'producto' : 'productos'}</p>
