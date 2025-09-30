@@ -150,7 +150,7 @@ const CheckOut = () => {
               {/* Botón de Transbank comentado temporalmente */}
               {/* <Button
                 type="button"
-                className="w-2/5 py-3 flex items-center justify-center bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
+                className="w-2/5 py-3 flex items-center justify-center bg-[#542e1d] text-white rounded hover:bg-[#542e1d] transition-colors"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >

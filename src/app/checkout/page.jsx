@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
       <div className="mb-6">
-        <Link href="/catalogo" className="text-emerald-600 hover:text-emerald-800 flex items-center">
+        <Link href="/catalogo" className="text-[#542e1d] hover:text-[#b3633e] flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
           </svg>
@@ -47,7 +47,7 @@ export default function CheckoutPage() {
           <p className="text-gray-600 mb-6">
             No hay productos en tu carrito para completar la compra.
           </p>
-          <Link href="/catalogo" className="py-2 px-4 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors inline-block">
+          <Link href="/catalogo" className="py-2 px-4 bg-[#542e1d] text-white rounded hover:bg-[#b06441] transition-colors inline-block">
             Ir al catálogo
           </Link>
         </div>

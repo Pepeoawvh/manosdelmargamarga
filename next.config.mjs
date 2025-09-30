@@ -1,27 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.pinimg.com',
+        hostname: '**', // Puedes restringirlo si quieres más seguridad
       },
-      {
-        protocol: 'https',
-        hostname: '*.pinimg.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.pinterest.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'drive.google.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-      }
     ],
     domains: [
       'i.pinimg.com',
@@ -32,7 +17,18 @@ const nextConfig = {
       'drive.google.com',
       'lh3.googleusercontent.com',
     ],
-  }
+    formats: ['image/avif', 'image/webp'],
+  },
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = { fs: false };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

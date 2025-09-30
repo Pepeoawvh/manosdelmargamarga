@@ -208,7 +208,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="firstName"
               value={shippingInfo.firstName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               required
             />
           </div>
@@ -226,7 +226,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="lastName"
               value={shippingInfo.lastName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               required
             />
           </div>
@@ -248,7 +248,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               onChange={handleChange}
               onKeyDown={preventEmailSpace}
               autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               required
             />
           </div>
@@ -270,7 +270,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               inputMode="numeric"
               pattern="[0-9]*"
               placeholder="912345678"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               maxLength={9}
               required
             />
@@ -293,7 +293,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="city"
               value={shippingInfo.city}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               required
             />
           </div>
@@ -309,7 +309,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="region"
               value={shippingInfo.region}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
               required
             >
               {regiones.map((region, index) => (
@@ -333,7 +333,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
             name="address"
             value={shippingInfo.address}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
             required
           />
         </div>
@@ -353,7 +353,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
             value={shippingInfo.notes || ""}
             onChange={handleChange}
             rows="2"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
             placeholder="Instrucciones especiales para la entrega, referencias, etc."
           ></textarea>
         </div>
@@ -373,7 +373,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
             name="needsInvoice"
             checked={shippingInfo.needsInvoice || false}
             onChange={handleChange}
-            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+            className="h-4 w-4 text-[#533021] focus:ring-[#6b554b] border-gray-300 rounded"
           />
           <label
             htmlFor="needsInvoice"
@@ -405,7 +405,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   name="invoiceInfo.representativeName"
                   value={invoiceInfo.representativeName || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
                   required={shippingInfo.needsInvoice}
                 />
               </div>
@@ -421,7 +421,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   id="businessRut"
                   value={invoiceInfo.businessRut || ""}
                   onChange={handleRutChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
                   placeholder="12345678-9"
                   required={shippingInfo.needsInvoice}
                 />
@@ -459,7 +459,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   name="invoiceInfo.businessAddress"
                   value={invoiceInfo.businessAddress || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
                   required={shippingInfo.needsInvoice}
                 />
               </div>
@@ -479,7 +479,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                       name="invoiceInfo.useSameEmail"
                       checked={invoiceInfo.useSameEmail || false}
                       onChange={handleChange}
-                      className="h-3 w-3 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-3 w-3 text-emerald-600 focus:ring-[#6b554b] border-gray-300 rounded"
                     />
                     <label
                       htmlFor="useSameEmail"
@@ -498,7 +498,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   onChange={handleChange}
                   onKeyDown={preventEmailSpace}
                   autoComplete="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
                   required={shippingInfo.needsInvoice && !invoiceInfo.useSameEmail}
                   disabled={invoiceInfo.useSameEmail}
                 />
@@ -518,7 +518,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                 value={invoiceInfo.additionalNotes || ""}
                 onChange={handleChange}
                 rows="2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
                 placeholder="Cualquier detalle adicional para la factura"
               ></textarea>
             </div>

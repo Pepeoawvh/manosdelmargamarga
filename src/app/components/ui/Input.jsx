@@ -37,7 +37,7 @@ const Input = forwardRef(({
   const baseInputClasses = `
     block border rounded-md bg-white focus:outline-none focus:ring-2 transition-all
     disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed
-    ${error ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-emerald-300 focus:border-emerald-500'}
+    ${error ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-[#6b554b] focus:border-[#6b554b]'}
     ${fullWidth ? 'w-full' : 'w-auto'}
   `;
 

@@ -87,7 +87,7 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
     <button
       onClick={handleAddToCart}
       disabled={isButtonDisabled}
-      className={`${className} ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-emerald-700'} transition-all duration-200`}
+      className={`${className} ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#8f5f49]'} bg-[#7d3c1e] transition-all duration-200`}
     >
       {isAdding ? (
         // Estado de carga

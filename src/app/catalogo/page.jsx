@@ -151,7 +151,7 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen text-emerald-800 bg-gray-50 pt-20">
+    <div className="min-h-screen text-[#6b554b] bg-gray-50 pt-20">
       <main className="max-w-6xl mx-auto px-4 py-2">
         <p className="text-center mt-4 text-gray-600 mb-8">Explora nuestra colección de productos artesanales en papel reciclado</p>
 
@@ -163,12 +163,14 @@ export default function Products() {
 
         <div className="mb-8 p-4 bg-white rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="w-full">
+            <div className="flex w-full ">
               <Input
                 placeholder="Buscar productos..."
                 value={searchTerm}
+                
+                className="border-2 border-[#f2ddd3]"
                 onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
+                leftIcon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="#6b554b"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
               />
             </div>
 
@@ -183,7 +185,7 @@ export default function Products() {
         {(filters.category || filters.subcategories.length > 0 || filters.featured || filters.inStock || searchTerm) && (
           <div className="flex flex-wrap gap-2 mb-6">
             {filters.category && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 text-emerald-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-[#6b554b] text-white">
                 {filters.category}
                 <button onClick={() => setFilters({...filters, category: '', subcategories: []})} className="ml-2 focus:outline-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -191,7 +193,7 @@ export default function Products() {
               </span>
             )}
             {filters.subcategories.map(sub => (
-              <span key={sub} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 text-emerald-800">
+              <span key={sub} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-[#fff9f7] text-[#6b554b]">
                 {sub}
                 <button onClick={() => toggleSubcategory(sub)} className="ml-2 focus:outline-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -226,12 +228,12 @@ export default function Products() {
 
         {loading ? (
           <div className="py-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mb-2"></div>
-            <p className="text-emerald-700">Cargando productos...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6b554b] mb-2"></div>
+            <p className="text-[#362b26]">Cargando productos...</p>
           </div>
         ) : showCategories && !searchTerm ? (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-center text-emerald-800">Nuestras Categorías</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-[#604d44]">Nuestras Categorías</h2>
             {products.length === 0 ? (
               <div className="text-center py-8 text-gray-600">No hay productos disponibles en este momento.</div>
             ) : (
@@ -239,7 +241,7 @@ export default function Products() {
                 {PRODUCT_CATEGORIES.map(category => {
                   const count = products.filter(p => p.categories?.includes(category) && p.stock > 0).length;
                   return (
-                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-emerald-500">
+                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-[#ab4b1e]">
                       <div className="text-2xl">{categoryIcons[category] || '📦'}</div>
                       <h3 className="text-md font-medium text-center">{category}</h3>
                       <p className="text-xs text-gray-700 mt-2 text-center">{count} {count === 1 ? 'producto' : 'productos'}</p>
@@ -254,7 +256,7 @@ export default function Products() {
                 {featuredProducts.length > 0 && (
                   <>
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold text-emerald-700 flex items-center"><span className="mr-2">★</span> Productos Destacados</h2>
+                      <h2 className="text-2xl font-bold text-[#553323] flex items-center"><span className="mr-2">★</span> Productos Destacados</h2>
                       <Button onClick={() => setFilters({...filters, featured: true})} variant="text" size="sm">Ver todos →</Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

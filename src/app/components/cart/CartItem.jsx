@@ -44,11 +44,11 @@ const CartItem = ({ item }) => {
         <div className="flex justify-between text-sm font-medium text-gray-900">
           <Link 
             href={`/product/${item.id}`} 
-            className="hover:text-emerald-600 transition-colors"
+            className="hover:text-[#623c2a] transition-colors"
           >
             {item.title}
           </Link>
-          <p className="ml-2 text-emerald-700">${subtotal.toLocaleString()}</p>
+          <p className="ml-2 text-[#542e1d]">${subtotal.toLocaleString()}</p>
         </div>
         
         {item.subcategories && item.subcategories.length > 0 && (
@@ -64,7 +64,7 @@ const CartItem = ({ item }) => {
             >
               -
             </button>
-            <span className="text-emerald-500 px-2">{item.quantity}</span>
+            <span className="text-[#704d3d] px-2">{item.quantity}</span>
             <button 
               onClick={() => handleQuantityChange(1)}
               className="px-2 py-1 text-gray-600 hover:bg-gray-100"

@@ -22,10 +22,10 @@ const Button = ({
   
   // Estilos según la variante
   const variantStyles = {
-    primary: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 disabled:bg-emerald-300',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 disabled:bg-gray-300',
-    outline: 'border border-emerald-500 text-emerald-600 hover:bg-emerald-50 focus:ring-emerald-500 disabled:border-gray-300 disabled:text-gray-400',
-    ghost: 'text-emerald-600 hover:bg-emerald-50 focus:ring-emerald-500 disabled:text-gray-400',
+    primary: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-[#6b554b] disabled:bg-emerald-300',
+    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-[#6b554b] disabled:bg-gray-300',
+    outline: 'border border-[#6b554b] text-emerald-600 hover:bg-emerald-50 focus:ring-[#6b554b] disabled:border-gray-300 disabled:text-gray-400',
+    ghost: 'text-emerald-600 hover:bg-emerald-50 focus:ring-[#6b554b] disabled:text-gray-400',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   };
   

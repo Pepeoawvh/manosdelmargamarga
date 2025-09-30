@@ -8,7 +8,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200">
+    <footer className="bg-[#ebead6] border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 justify-items-center text-center gap-8">
           {/* Logo y descripción */}
@@ -16,12 +16,12 @@ export default function Footer() {
 
           {/* Enlaces rápidos */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-[#361b10]">
               Enlaces rápidos
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link href="/" className="text-gray-900 hover:text-gray-500">
+                <Link href="/" className="text-[#361b10] hover:text-gray-500">
                   Inicio
                 </Link>
               </li>
@@ -33,7 +33,7 @@ export default function Footer() {
                     .replace(/[\u0300-\u036f]/g, "")
                     .replace(/[¿?]/g, "")
                     .replace(/\s+/g, "-")}`}
-                  className="text-gray-900 hover:text-gray-500"
+                  className="text-[#361b10] hover:text-gray-500"
                 >
                   ¿Cómo plantar?
                 </Link>
@@ -46,7 +46,7 @@ export default function Footer() {
                     .replace(/[\u0300-\u036f]/g, "")
                     .replace(/[¿?]/g, "")
                     .replace(/\s+/g, "-")}`}
-                  className="text-gray-900 hover:text-gray-500"
+                  className="text-[#361b10] hover:text-gray-500"
                 >
                   ¿Cómo trabajamos?
                 </Link>
@@ -59,7 +59,7 @@ export default function Footer() {
                     .replace(/[\u0300-\u036f]/g, "")
                     .replace(/[¿?]/g, "")
                     .replace(/\s+/g, "-")}`}
-                  className="text-gray-900 hover:text-gray-500"
+                  className="text-[#361b10] hover:text-gray-500"
                 >
                   Protocolo gráfico
                 </Link>
@@ -72,7 +72,7 @@ export default function Footer() {
                     .replace(/[\u0300-\u036f]/g, "")
                     .replace(/[¿?]/g, "")
                     .replace(/\s+/g, "-")}`}
-                  className="text-gray-900 hover:text-gray-500"
+                  className="text-[#361b10] hover:text-gray-500"
                 >
                   Personalizados
                 </Link>
@@ -82,22 +82,22 @@ export default function Footer() {
 
           {/* Contacto */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Contacto</h3>
-            <ul className="mt-4 space-y-2 text-gray-600 text-sm">
-              <li>Email: manosdelmargamarga@gmail.com</li>
+            <h3 className="text-lg font-semibold text-[#361b10]">Contacto</h3>
+            <ul className="mt-4 space-y-2 text-[#361b10] text-xl">
+              <li>manosdelmargamarga@gmail.com</li>
 
             </ul>
           </div>
 
           {/* Síguenos */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Síguenos</h3>
+            <h3 className="text-lg font-semibold text-[#361b10]">Síguenos</h3>
             <div className="mt-4 flex space-x-4">
               <a
                 href="https://facebook.com/manosdelmargamarga"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-[#361b10] hover:text-gray-900"
               >
                 <FaFacebookF size={20} />
               </a>
@@ -105,7 +105,7 @@ export default function Footer() {
                 href="https://instagram.com/manosdelmargamarga"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-[#361b10] hover:text-gray-900"
               >
                 <FaInstagram size={20} />
               </a>
@@ -113,7 +113,7 @@ export default function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-[#361b10] hover:text-gray-900"
               >
                 <FaLinkedinIn size={20} />
               </a>
@@ -122,7 +122,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 border-t border-gray-200 pt-8 text-center text-gray-500 text-sm">
+        <div className="mt-12 border-t border-gray-200 pt-8 text-center text-[#b99c90] text-sm">
           © {new Date().getFullYear()} Manos del MargaMarga. Todos los derechos reservados.
         </div>
       </div>

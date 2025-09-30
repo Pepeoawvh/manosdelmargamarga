@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
     <html lang="es" className="scrollbar-thin scrollbar-thumb-emerald-200 scrollbar-track-gray-100 hover:scrollbar-thumb-emerald-300 scrollbar-thumb-rounded-full">
       <body className={`${lexend.className} relative min-h-screen`}>
         {/* Contenedor de fondo */}
-        <div className="fixed bg-[#f5f3ea] inset-0 w-full h-full">
+        <div className="fixed bg-[#fff9f2] inset-0 w-full h-full">
         </div>
         
         <AuthProvider>

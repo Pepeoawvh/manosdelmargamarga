@@ -529,7 +529,7 @@ const Navbar = () => {
       {announceMounted && (
         <div
           aria-live="polite"
-          className={`fixed left-0 right-0 bg-emerald-700 text-white py-2 px-4 z-40`}
+          className={`fixed left-0 right-0 bg-[#c97e5b] text-white py-2 px-4 z-40`}
           style={{ top: isScrolled ? "56px" : "140px" }}
         >
           <div

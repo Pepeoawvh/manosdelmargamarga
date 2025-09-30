@@ -10,7 +10,7 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
             value="webpay"
             checked={paymentMethod === 'webpay'}
             onChange={() => setPaymentMethod('webpay')}
-            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
+            className="h-4 w-4 text-emerald-600 focus:ring-[#6b554b]"
           />
           <span className="ml-3 flex-grow">
             <span className="block font-medium">WebPay</span>
