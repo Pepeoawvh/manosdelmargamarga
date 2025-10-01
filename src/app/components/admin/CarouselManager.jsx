@@ -1,182 +1,246 @@
-import React, { useState } from 'react';
-import useCarouselManager from '../../hooks/admin/useCarouselManager';
-import SlideForm from '../slides/SlideForm';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import useCarouselManager from "../../hooks/admin/useCarouselManager";
+import SlideForm from "../slides/SlideForm";
 
-// Componente de elemento arrastrable
-const DraggableSlideItem = ({ slide, index, moveSlide, onEdit, onDelete }) => {
-  const [{ isDragging }, drag] = useDrag({
-    type: 'SLIDE',
-    item: { id: slide.id, index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+// Iconos simples SVG inline (puedes reemplazar por Heroicons o similares)
+const IconEdit = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    viewBox="0 0 24 24"
+  >
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+  </svg>
+);
+const IconDelete = () => (
+  <svg
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    viewBox="0 0 24 24"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-2 14H7L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4h6v2" />
+  </svg>
+);
 
-  const [, drop] = useDrop({
-    accept: 'SLIDE',
-    hover: (item, monitor) => {
-      if (item.index === index) return;
-      moveSlide(item.index, index);
-      item.index = index;
-    },
-  });
+function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
 
-  const opacity = isDragging ? 0.4 : 1;
-  const typeLabels = {
-    'full': 'Completo (Imagen + Texto + Botones)',
-    'image': 'Solo Imagen',
-    'imageText': 'Imagen + Texto'
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    padding: "12px",
+    marginBottom: "8px",
+    backgroundColor: isDragging ? "#e0f2fe" : "white",
+    borderRadius: "6px",
+    boxShadow: isDragging
+      ? "0 4px 12px rgba(0,0,0,0.15)"
+      : "0 1px 3px rgba(0,0,0,0.1)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    cursor: isDragging ? "grabbing" : "grab",
   };
 
   return (
-    <div 
-      ref={(node) => drag(drop(node))}
-      className="bg-white p-4 mb-2 rounded-lg shadow flex items-center justify-between"
-      style={{ opacity }}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      aria-label={`Slide ${slide.title || "sin título"}`}
     >
+      {/* Contenedor thumbnail + texto */}
       <div className="flex items-center space-x-3">
-        <div className="cursor-move text-gray-500">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-        </div>
-        <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded overflow-hidden">
-          <img src={slide.imageUrl} alt={slide.title || "Slide image"} className="h-full w-full object-cover" />
+        <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-300">
+          {slide.imageUrl ? (
+            <img
+              src={slide.imageUrl}
+              alt={slide.title || "Slide"}
+              className="object-cover w-full h-full"
+              loading="lazy"
+            />
+          ) : (
+            <span className="text-xs text-gray-400">Sin imagen</span>
+          )}
         </div>
         <div>
-          <h3 className="font-medium">{slide.title || "Sin título"}</h3>
-          <p className="text-sm text-gray-500">Tipo: {typeLabels[slide.type]}</p>
-          <p className="text-xs text-gray-400">Orden: {slide.order}</p>
+          <strong className="block">{slide.title || "Sin título"}</strong>
+          <span className="text-sm text-gray-600">Orden: {slide.order}</span>
         </div>
       </div>
-      <div className="flex space-x-2">
-        <button 
+
+      {/* Botones */}
+      <div className="flex items-center space-x-2">
+        <button
           onClick={() => onEdit(slide)}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+          title="Editar slide"
+          className="p-1 rounded hover:bg-blue-100 text-blue-700"
+          type="button"
         >
-          Editar
+          <IconEdit />
         </button>
-        <button 
-          onClick={() => onDelete(slide.id, slide.imageUrl)}
-          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+
+        <button
+          onClick={() => onDelete(slide.id)}
+          title={isDeleting ? "Eliminando..." : "Eliminar slide"}
+          disabled={isDeleting}
+          className={`p-1 rounded hover:bg-red-100 text-red-700 ${
+            isDeleting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          type="button"
         >
-          Eliminar
+          <IconDelete />
         </button>
       </div>
     </div>
   );
-};
+}
 
-// Componente principal
 export default function CarouselManager() {
-  const { slides, loading, error, addSlide, updateSlide, deleteSlide, reorderSlides } = useCarouselManager();
+  const {
+    slides,
+    loading,
+    error,
+    addSlide,
+    updateSlide,
+    deleteSlide,
+    reorderSlides,
+  } = useCarouselManager();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSlide, setEditingSlide] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const handleAddClick = () => {
-    setEditingSlide(null);
-    setIsFormOpen(true);
-  };
+  const sensors = useSensors(useSensor(PointerSensor));
 
-  const handleEditClick = (slide) => {
+  const openForm = (slide = null) => {
     setEditingSlide(slide);
     setIsFormOpen(true);
   };
 
-  const handleCloseForm = () => {
+  const closeForm = () => {
     setIsFormOpen(false);
     setEditingSlide(null);
   };
 
-  // Simplificada para solo usar slideData sin imageFile
-  const handleSubmit = async (slideData) => {
-    if (editingSlide) {
-      await updateSlide(editingSlide.id, slideData);
-    } else {
-      await addSlide(slideData);
+  const handleSubmit = async (data) => {
+    try {
+      if (editingSlide) {
+        await updateSlide(editingSlide.id, data);
+      } else {
+        await addSlide(data);
+      }
+      closeForm();
+    } catch (e) {
+      alert("Error guardando slide");
     }
-    handleCloseForm();
   };
 
-  // Simplificada para no pasar imageUrl
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este slide?')) {
+    if (slides.length <= 1) {
+      alert("Debe haber al menos un slide");
+      return;
+    }
+    if (!window.confirm("¿Eliminar este slide?")) return;
+
+    setDeletingId(id);
+    try {
       await deleteSlide(id);
+    } catch {
+      alert("Error al eliminar");
+    } finally {
+      setDeletingId(null);
     }
   };
 
-  const moveSlide = (fromIndex, toIndex) => {
-    const updatedSlides = [...slides];
-    const [movedSlide] = updatedSlides.splice(fromIndex, 1);
-    updatedSlides.splice(toIndex, 0, movedSlide);
-    
-    // No actualizamos Firestore en cada movimiento para evitar muchas escrituras
-    // Solo cuando se confirma el orden
-    return updatedSlides;
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = slides.findIndex((s) => s.id === active.id);
+    const newIndex = slides.findIndex((s) => s.id === over.id);
+    const newOrder = arrayMove(slides, oldIndex, newIndex);
+
+    try {
+      const orderedSlides = newOrder.map((s, i) => ({ id: s.id, order: i + 1 }));
+      await reorderSlides(orderedSlides);
+    } catch {
+      alert("Error guardando nuevo orden");
+    }
   };
 
-  const handleSaveOrder = async (newOrder) => {
-    await reorderSlides(newOrder);
-  };
-
-  if (loading) return <div className="text-center py-8">Cargando slides...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+  if (loading) return <p>Cargando slides...</p>;
+  if (error) return <p className="text-red-600">Error: {error}</p>;
 
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Administrar Carrusel</h2>
-        <button 
-          onClick={handleAddClick}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-        >
-          Añadir Nuevo Slide
-        </button>
-      </div>
+    <div className="p-4 max-w-3xl mx-auto">
+      <button
+        onClick={() => openForm()}
+        className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        type="button"
+      >
+        Añadir Slide
+      </button>
 
       {isFormOpen && (
-        <SlideForm 
-          initialData={editingSlide} 
-          onSubmit={handleSubmit} 
-          onCancel={handleCloseForm} 
+        <SlideForm
+          initialData={editingSlide}
+          onSubmit={handleSubmit}
+          onCancel={closeForm}
         />
       )}
 
-      <div className="mt-6">
-        <h3 className="text-lg font-medium mb-3">Slides Existentes</h3>
-        
-        {slides.length === 0 ? (
-          <p className="text-gray-500 text-center py-6">No hay slides añadidos todavía.</p>
-        ) : (
-          <DndProvider backend={HTML5Backend}>
-            <div className="space-y-2">
-              {slides.map((slide, index) => (
-                <DraggableSlideItem 
-                  key={slide.id}
-                  slide={slide}
-                  index={index}
-                  moveSlide={(fromIndex, toIndex) => {
-                    const newOrder = moveSlide(fromIndex, toIndex);
-                    // Aplicamos el reordenamiento de manera visual inmediatamente
-                  }}
-                  onEdit={handleEditClick}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
-            <div className="mt-4 text-right">
-              <button 
-                onClick={() => handleSaveOrder(slides)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Guardar Orden
-              </button>
-            </div>
-          </DndProvider>
-        )}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={slides.map((s) => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {slides.map((slide) => (
+            <SortableItem
+              key={slide.id}
+              id={slide.id}
+              slide={slide}
+              onEdit={openForm}
+              onDelete={handleDelete}
+              isDeleting={deletingId === slide.id}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
