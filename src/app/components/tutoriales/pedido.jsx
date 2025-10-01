@@ -47,7 +47,7 @@ const steps = [
     number: "7",
     title: "Despacho",
     description:
-      "• Nacional: Arica a Punta Arenas (link de seguimiento por correo). \n• Local: Olmué, Limache, P.Blanca, Quilpué, Con-Con, Reñaca, Valparaíso, Placilla, Curauma. \n• Retiro personal: a coordinar según disponibilidad en Quilpué.",
+      "• Nacional: Arica a Punta Arenas (link de seguimiento por correo). \n• Local: Olmué, Limache, P.Blanca, Quilpué, Villa Alemana, Con-Con, Reñaca, Valparaíso, Placilla, Curauma. \n• Retiro personal: a coordinar según disponibilidad en Quilpué.",
     icon: "🚚",
   },
 ];

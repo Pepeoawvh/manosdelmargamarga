@@ -44,14 +44,14 @@ a {
   .overflow-y-scroll,
   .overflow-x-auto,
   .overflow-x-scroll {
-    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-200 scrollbar-track-gray-100 hover:scrollbar-thumb-emerald-300 scrollbar-thumb-rounded-full;
+    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-700 scrollbar-track-gray-100 hover:scrollbar-thumb-emerald-300 scrollbar-thumb-rounded-full;
   }
 }
 
 /* Clases personalizadas para scrollbars específicas */
 @layer components {
   .scrollbar-primary {
-    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-emerald-50 hover:scrollbar-thumb-emerald-500 scrollbar-thumb-rounded-full;
+    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-900 scrollbar-track-emerald-900 hover:scrollbar-thumb-emerald-800 scrollbar-thumb-rounded-full;
   }
   
   .scrollbar-secondary {
