@@ -78,7 +78,7 @@ const Input = forwardRef(({
       <div className="relative">
         {leftIcon && (
           <div 
-            className={`absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 ${iconClickable ? 'cursor-pointer hover:text-emerald-600' : ''}`}
+            className={`absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 ${iconClickable ? 'cursor-pointer hover:text-[#798f38]' : ''}`}
             onClick={iconClickable ? onIconClick : undefined}
           >
             {leftIcon}
@@ -113,7 +113,7 @@ const Input = forwardRef(({
         
         {(rightIcon || type === 'password') && (
           <div 
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 cursor-pointer hover:text-emerald-600"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 cursor-pointer hover:text-[#798f38]"
             onClick={type === 'password' ? () => setShowPassword(!showPassword) : onIconClick}
           >
             {type === 'password' ? (

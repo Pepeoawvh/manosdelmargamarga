@@ -179,13 +179,13 @@ const ProductCard = ({
               {/* Botón para ver detalles */}
               <Link 
                 href={`/producto/${id}`}
-                className="px-3 py-1.5 bg-white text-[#5e2e1b] text-xs font-medium rounded hover:bg-[#ebead6] transition-colors"
+                className="px-3 py-1.5 bg-white text-[#467302] text-xs font-medium rounded hover:bg-[#ebead6] transition-colors"
               >
                 Ver más
               </Link>
               
               {/* Botón de añadir al carrito */}
-              <AddToCartButton product={product} compact={true} className="px-3 py-1.5 text-white text-xs font-medium rounded hover:bg-emerald-700" />
+              <AddToCartButton product={product} compact={true} className="px-3 py-1.5 text-white text-xs font-medium rounded hover:bg-[#467302] " />
             </div>
           )}
         </div>

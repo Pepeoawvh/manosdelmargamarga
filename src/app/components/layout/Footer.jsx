@@ -122,7 +122,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 border-t border-gray-200 pt-8 text-center text-[#b99c90] text-sm">
+        <div className="mt-12 border-t border-gray-200 pt-8 text-center text-[#b4cf66] text-sm">
           © {new Date().getFullYear()} Manos del MargaMarga. Todos los derechos reservados.
         </div>
       </div>

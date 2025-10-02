@@ -362,7 +362,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
           <label className="block font-medium text-gray-700">
             Tipo de envío:
           </label>
-          <span className="inline-flex items-center py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <span className="inline-flex items-center py-0.5 rounded-full text-xs font-medium bg-[#b4cf66] text-[#533021]">
             {shippingInfo.shippingType}
           </span>
         </div>
@@ -479,7 +479,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                       name="invoiceInfo.useSameEmail"
                       checked={invoiceInfo.useSameEmail || false}
                       onChange={handleChange}
-                      className="h-3 w-3 text-emerald-600 focus:ring-[#6b554b] border-gray-300 rounded"
+                      className="h-3 w-3 text-[#b4cf66] focus:ring-[#6b554b] border-gray-300 rounded"
                     />
                     <label
                       htmlFor="useSameEmail"

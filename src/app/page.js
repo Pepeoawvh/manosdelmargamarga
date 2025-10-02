@@ -76,7 +76,7 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
       {/* Productos destacados */}
       <section className="py-20 bg-[#ffffff7a]">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#6d462e]">
+          <h2 className="text-4xl font-bold text-center mb-12 text-[#467302]">
             Productos Destacados
           </h2>
           {loading ? (
@@ -100,7 +100,7 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
           )}
           <div className="text-center mt-12">
 <Link href="/catalogo">
-  <button className="bg-[#5e3623] text-white px-8 py-3 rounded-lg hover:bg-opacity-50 transition-colors">
+  <button className="bg-[#467302] text-white px-8 py-3 rounded-lg hover:bg-opacity-50 transition-colors">
     Ver Todos los Diseños
   </button>
 </Link>
@@ -110,7 +110,7 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
       {/* Testimonials Section */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#653b27]">
+          <h2 className="text-4xl font-bold text-center mb-12 text-[#87a644]">
             ¡Contactanos por Whatsapp!
           </h2>
 

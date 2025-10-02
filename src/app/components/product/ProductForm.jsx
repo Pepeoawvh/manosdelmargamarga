@@ -205,7 +205,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                         type="checkbox"
                         checked={formData.categories.includes(category)}
                         onChange={() => handleCategoryChange(category)}
-                        className="rounded text-emerald-600 focus:ring-emerald-500 h-3 w-3"
+                        className="rounded text-[#798f38] focus:ring-[#9bb05b] h-3 w-3"
                       />
                       <span className="text-xs">{category}</span>
                     </label>
@@ -226,7 +226,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                           type="checkbox"
                           checked={formData.subcategories.includes(subcategory)}
                           onChange={() => handleSubcategoryChange(subcategory)}
-                          className="rounded text-emerald-600 focus:ring-emerald-500 h-3 w-3"
+                          className="rounded text-[#798f38] focus:ring-emerald-500 h-3 w-3"
                         />
                         <span className="text-xs">{subcategory}</span>
                       </label>

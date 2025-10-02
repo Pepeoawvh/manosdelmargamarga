@@ -54,7 +54,7 @@ const steps = [
 
 export default function HacerPedido() {
   return (
-    <section className="py-20 bg-white text-emerald-800">
+    <section className="py-20 bg-white text-[#798f38]">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12">
           ¿Cómo hago un pedido?
@@ -68,10 +68,10 @@ export default function HacerPedido() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="flex items-start gap-6 bg-emerald-50 rounded-xl p-6 shadow-md"
+              className="flex items-start gap-6 bg-[#d2d9be] rounded-xl p-6 shadow-md"
             >
               {/* Número e ícono */}
-              <div className="flex flex-col items-center justify-center bg-emerald-800 text-white rounded-lg w-16 h-16 font-bold text-xl shrink-0">
+              <div className="flex flex-col items-center justify-center bg-[#798f38] text-white rounded-lg w-16 h-16 font-bold text-xl shrink-0">
                 {step.number}
               </div>
               <div>

@@ -24,8 +24,8 @@ const Slide1 = ({ title, description, imageUrl, buttons }) => {
               <button
                 className={`px-8 py-3 rounded-lg transition-colors ${
                   button.variant === 'primary'
-                    ? 'bg-emerald-800 text-white hover:bg-opacity-90'
-                    : 'border-2 border-emerald-800 text-emerald-800 hover:bg-emerald-800 hover:text-white'
+                    ? 'bg-[#798f38] text-white hover:bg-opacity-90'
+                    : 'border-2 border-[#404c1b] text-[#8ca345] hover:bg-[#566528] hover:text-white'
                 }`}
               >
                 {button.text}

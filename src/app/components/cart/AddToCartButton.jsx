@@ -77,7 +77,7 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
         setIsAdding(false);
       }, 500);
     }
-  };
+  };v
 
   // Determinar si el botón debe estar deshabilitado
   const isOutOfStock = product.stock === 0;
@@ -87,12 +87,12 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
     <button
       onClick={handleAddToCart}
       disabled={isButtonDisabled}
-      className={`${className} ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#8f5f49]'} bg-[#7d3c1e] transition-all duration-200`}
+      className={`${className} ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#467302]'} bg-[#549c21] transition-all duration-200`}
     >
       {isAdding ? (
         // Estado de carga
         <>
-          <span className="inline-block animate-pulse">Añadiendo...</span>
+          <span className="inline-block animate-pulse text-[#467302]">Añadiendo...</span>
         </>
       ) : isOutOfStock ? (
         // Sin stock

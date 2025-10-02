@@ -13,7 +13,7 @@ const steps = [
     title: "2. Poner en tierra fértil",
     description:
       "Tras el remojo, coloca el papel sobre tierra y cúbrelo con no más de 2 cm de tierra fértil. También puedes esperar a ver los primeros brotes antes de plantar.",
-    icon: <FaSeedling className="text-emerald-600 text-2xl" />,
+    icon: <FaSeedling className="text-[#798f38] text-2xl" />,
   },
   {
     title: "3. Riega regularmente",

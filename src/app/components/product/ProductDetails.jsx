@@ -63,7 +63,7 @@ const ProductDetails = ({ productId }) => {
       <div className="text-center py-10">
         <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
         <p className="text-gray-600">{error || 'No se pudo cargar el producto'}</p>
-        <Link href="/catalogo" className="mt-4 inline-block px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">
+        <Link href="/catalogo" className="mt-4 inline-block px-4 py-2 bg-[#b4cf66] text-white rounded hover:bg-[#87a644]">
           Ver todos los productos
         </Link>
       </div>
@@ -100,7 +100,7 @@ const ProductDetails = ({ productId }) => {
                   key={idx}
                   onClick={() => setActiveImage(idx)}
                   className={`relative h-16 w-16 border-2 rounded overflow-hidden flex-shrink-0 ${
-                    activeImage === idx ? 'border-emerald-500' : 'border-gray-200 hover:border-emerald-200'
+                    activeImage === idx ? 'border-[#cde582]' : 'border-gray-200 hover:border-[#a3d01c]'
                   }`}
                 >
                   <Image
@@ -135,14 +135,14 @@ const ProductDetails = ({ productId }) => {
             )}
             <h1 className="text-2xl font-bold text-gray-800">{product.title}</h1>
             {product.subtitle && (
-              <p className="text-emerald-600 italic mt-1">{product.subtitle}</p>
+              <p className="text-[#798f38] italic mt-1">{product.subtitle}</p>
             )}
           </div>
           
           {/* Precio y stock */}
           <div className="mb-6 flex items-end justify-between">
             <div>
-              <span className="text-3xl font-bold text-emerald-700">${parseInt(product.price).toLocaleString()}</span>
+              <span className="text-3xl font-bold text-[#798f38]">${parseInt(product.price).toLocaleString()}</span>
               {product.oldPrice && (
                 <span className="ml-2 text-sm text-gray-500 line-through">
                   ${parseInt(product.oldPrice).toLocaleString()}
@@ -153,7 +153,7 @@ const ProductDetails = ({ productId }) => {
             <div className="text-sm">
               {product.stock > 0 ? (
                 <span className={`font-medium ${
-                  product.stock > 10 ? 'text-green-600' : 'text-amber-600'
+                  product.stock > 10 ? 'text-[#798f38]' : 'text-amber-600'
                 }`}>
                   {product.stock > 10 ? 'En stock' : `¡Solo quedan ${product.stock}!`}
                 </span>
@@ -184,8 +184,8 @@ const ProductDetails = ({ productId }) => {
           )}
           
           {/* Añadir al carrito */}
-          <div className="mt-auto">
-            <AddToCartButton product={product} className="w-full" />
+          <div className="mt-auto]">
+            <AddToCartButton product={product} className="w-full bg-[#8f5f49] text-white" />
           </div>
         </div>
       </div>
@@ -229,19 +229,19 @@ const ProductDetails = ({ productId }) => {
             <h3 className="text-sm font-medium text-gray-700 mb-2">Envío y entrega</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <svg className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#798f38] mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>Envío a todo Chile</span>
               </li>
               <li className="flex items-start">
-                <svg className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#798f38] mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>3-5 días hábiles para entrega</span>
               </li>
               <li className="flex items-start">
-                <svg className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-[#798f38] mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>Compras seguras con WebPay</span>
