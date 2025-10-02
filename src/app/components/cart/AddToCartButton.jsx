@@ -77,7 +77,7 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
         setIsAdding(false);
       }, 500);
     }
-  };v
+  };
 
   // Determinar si el botón debe estar deshabilitado
   const isOutOfStock = product.stock === 0;
