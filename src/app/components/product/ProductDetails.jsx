@@ -152,8 +152,8 @@ const ProductDetails = ({ productId }) => {
             
             <div className="text-sm">
               {product.stock > 0 ? (
-                <span className={`font-medium ${
-                  product.stock > 10 ? 'text-[#798f38]' : 'text-amber-600'
+                <span className={`font-medium bg-[#dde5c4] rounded-full p-2 ${
+                  product.stock > 10 ? 'text-[#a3ca2e]' : 'text-amber-700'
                 }`}>
                   {product.stock > 10 ? 'En stock' : `¡Solo quedan ${product.stock}!`}
                 </span>
