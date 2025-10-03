@@ -118,9 +118,9 @@ const Navbar = () => {
 
   const getHoverColorClass = (color) => {
     const colorClasses = {
-      yellow: "text-gray-700 hover:text-yellow-600 hover:bg-yellow-50",
+      yellow: "text-gray-700 hover:text-[#969e9d] hover:bg-[#eff2d5]",
       pink: "text-gray-700 hover:text-pink-600 hover:bg-pink-50",
-      green: "text-gray-700 hover:text-green-600 hover:bg-green-50",
+      green: "text-gray-700 hover:text-[#5e8c30] hover:bg-[#ecf7cd]",
       blue: "text-gray-700 hover:text-sky-600 hover:bg-sky-50",
       gray: "text-gray-700 hover:text-gray-600 hover:bg-gray-50",
     };
@@ -1028,7 +1028,7 @@ const Navbar = () => {
       {announceMounted && (
         <div
           aria-live="polite"
-          className={`fixed left-0 right-0 bg-[#c97e5b] text-white py-2 px-4 z-40`}
+          className={`fixed left-0 right-0 bg-[#5c7a0b] text-white py-2 px-4 z-40`}
           style={{ top: isScrolled ? "56px" : "140px" }}
         >
           <div

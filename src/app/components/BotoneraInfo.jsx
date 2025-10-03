@@ -2,25 +2,25 @@ import { FaSeedling, FaCompass, FaDesktop, FaPuzzlePiece } from "react-icons/fa"
 
 const botones = [
   {
-    icon: <FaSeedling className="text-[#6b554b] text-3xl mb-2" />,
+    icon: <FaSeedling className="text-[#5e8c30] text-3xl mb-2" />,
     title: "¿CÓMO PLANTAR?",
     desc: "Haz germinar tu papel semilla.",
     href: "/tutoriales/como-plantar",
   },
   {
-    icon: <FaCompass className="text-[#6b554b] text-3xl mb-2" />,
+    icon: <FaCompass className="text-[#5e8c30] text-3xl mb-2" />,
     title: "¿CÓMO TRABAJAMOS?",
     desc: "Así funcionamos ante un pedido.",
     href: "/tutoriales/como-trabajamos",
   },
   {
-    icon: <FaDesktop className="text-[#6b554b] text-3xl mb-2" />,
+    icon: <FaDesktop className="text-[#5e8c30] text-3xl mb-2" />,
     title: "PROTOCOLO GRÁFICO",
     desc: "Léelo si enviarás tu propio diseño.",
     href: "/tutoriales/protocolo-grafico",
   },
   {
-    icon: <FaPuzzlePiece className="text-[#6b554b] text-3xl mb-2" />,
+    icon: <FaPuzzlePiece className="text-[#5e8c30] text-3xl mb-2" />,
     title: "PERSONALIZADOS",
     desc: "¿Tienes una idea? Lee aquí",
     href: "#personalizados",

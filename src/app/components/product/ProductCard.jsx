@@ -107,7 +107,7 @@ const ProductCard = ({
       {/* Badges de estado */}
       <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
         {mainCategory && (
-          <span className="text-xs font-medium px-2 py-1 bg-[#ebead6] backdrop-blur-sm text-[#482315] rounded-full">
+          <span className="text-xs font-medium px-2 py-1 bg-[#96bf49] backdrop-blur-sm text-[white] rounded-full">
             {mainCategory}
           </span>
         )}
@@ -179,7 +179,7 @@ const ProductCard = ({
               {/* Botón para ver detalles */}
               <Link 
                 href={`/producto/${id}`}
-                className="px-3 py-1.5 bg-white text-[#467302] text-xs font-medium rounded hover:bg-[#ebead6] transition-colors"
+                className="px-3 py-1.5 bg-white text-[#5e8c30] text-xs font-medium rounded hover:bg-[#ebead6] transition-colors"
               >
                 Ver más
               </Link>

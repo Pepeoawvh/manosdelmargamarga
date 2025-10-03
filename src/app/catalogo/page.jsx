@@ -142,7 +142,7 @@ export default function Products() {
           <div className="h-20 bg-gray-100 rounded-lg mb-8 animate-pulse"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-100 rounded-xl animate-pulse"></div>
+              <div key={i} className="h-48  bg-gray-100 rounded-xl animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen text-[#6b554b] bg-gray-50 pt-20">
+    <div className="min-h-screen text-[#535550] bg-gray-50 pt-20">
       <main className="max-w-6xl mx-auto px-4 py-2">
         <p className="text-center mt-4 text-gray-600 mb-8">Explora nuestra colección de productos artesanales en papel reciclado</p>
 
@@ -175,7 +175,7 @@ export default function Products() {
             </div>
 
             {!showCategories && (
-              <Button onClick={handleBackToCategories} variant="outline" size="sm" className="whitespace-nowrap">
+              <Button onClick={handleBackToCategories} variant="outline" size="sm" className="whitespace-nowrap text-white bg-[#5e8c30] ">
                 Volver a Categorías
               </Button>
             )}
@@ -185,7 +185,7 @@ export default function Products() {
         {(filters.category || filters.subcategories.length > 0 || filters.featured || filters.inStock || searchTerm) && (
           <div className="flex flex-wrap gap-2 mb-6">
             {filters.category && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-[#6b554b] text-white">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-[#96bf49] text-white">
                 {filters.category}
                 <button onClick={() => setFilters({...filters, category: '', subcategories: []})} className="ml-2 focus:outline-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -219,6 +219,7 @@ export default function Products() {
                 onClick={() => toggleSubcategory(sub)}
                 variant={filters.subcategories.includes(sub) ? 'solid' : 'outline'}
                 size="sm"
+                className='text-[#5e8c30]'
               >
                 {sub}
               </Button>
@@ -233,7 +234,7 @@ export default function Products() {
           </div>
         ) : showCategories && !searchTerm ? (
           <>
-            <h2 className="text-2xl font-bold mb-6 text-center text-[#604d44]">Nuestras Categorías</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-[#668a23]">Nuestras Categorías</h2>
             {products.length === 0 ? (
               <div className="text-center py-8 text-gray-600">No hay productos disponibles en este momento.</div>
             ) : (
@@ -241,7 +242,7 @@ export default function Products() {
                 {PRODUCT_CATEGORIES.map(category => {
                   const count = products.filter(p => p.categories?.includes(category) && p.stock > 0).length;
                   return (
-                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-[#f1f0e6] rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-[#964a27]">
+                    <div key={category} onClick={() => handleCategorySelect(category)} className="bg-[#f1f0e6] rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transform transition-transform hover:scale-105 hover:shadow-lg border-2 border-transparent hover:border-[#96bf49]">
                       <div className="text-2xl">{categoryIcons[category] || '📦'}</div>
                       <h3 className="text-md font-medium text-center">{category}</h3>
                       <p className="text-xs text-gray-700 mt-2 text-center">{count} {count === 1 ? 'producto' : 'productos'}</p>
@@ -256,8 +257,8 @@ export default function Products() {
                 {featuredProducts.length > 0 && (
                   <>
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold text-[#553323] flex items-center"><span className="mr-2">★</span> Productos Destacados</h2>
-                      <Button onClick={() => setFilters({...filters, featured: true})} variant="text" size="sm">Ver todos →</Button>
+                      <h2 className="text-2xl font-bold text-[#5e8c30] flex items-center"><span className="mr-2">★</span> Productos Destacados</h2>
+                      <Button className='text-white bg-[#5e8c30]' onClick={() => setFilters({...filters, featured: true})} variant="text" size="sm">Ver todos →</Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                       {featuredProducts.map(p => <ProductCard key={p.id} product={p} showInfo />)}
@@ -269,7 +270,7 @@ export default function Products() {
                   <>
                     <div className="flex justify-between items-center mb-4 mt-8">
                       <h2 className="text-2xl font-bold text-red-600 flex items-center"><span className="mr-2">🏷️</span> Ofertas Especiales</h2>
-                      <Button onClick={() => handleCategorySelect('Ofertas')} variant="text" size="sm">Ver todas →</Button>
+                      <Button className='text-white bg-[#96bf49]' onClick={() => handleCategorySelect('Ofertas')} variant="text" size="sm">Ver todas →</Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {offerProducts.map(p => <ProductCard key={p.id} product={p} showInfo />)}

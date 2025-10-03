@@ -88,7 +88,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
       .replace(/javascript:/gi, ""); // quita javascript: URLs
     if (trimEdges) v = v.trim();     // recorta bordes solo si corresponde
     return v;
-  };
+  }; 
 
   // Maneja cambios en los campos del formulario
   const handleChange = (e) => {
