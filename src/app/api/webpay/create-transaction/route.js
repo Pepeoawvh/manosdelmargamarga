@@ -20,9 +20,6 @@ export async function POST(request) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const returnUrl = `${baseUrl}/payment-success`;
     
-    // Ya no preparamos datos para un número de orden con formato fecha
-    // La asignación del número será manual
-    
     // Crear la orden en Firestore - mantener la estructura original del cliente
     const orderData = {
       id: newOrderId,

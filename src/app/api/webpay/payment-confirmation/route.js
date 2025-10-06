@@ -132,9 +132,6 @@ export async function POST(request) {
     );
   }
 }
-
-// ELIMINADA la función generateOrderNumber que estaba aquí
-
 // Función para actualizar la orden en Firestore (simplificada, sin números automáticos)
 async function updateOrderInFirestore(orderId, status, isApproved, transactionResult, additionalData) {
   try {

@@ -101,7 +101,7 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
           <div className="text-center mt-12">
 <Link href="/catalogo">
   <button className="bg-[#467302] text-white px-8 py-3 rounded-lg hover:bg-opacity-50 transition-colors">
-    Ver Todos los Diseños
+    Ver Todos los Productos
   </button>
 </Link>
           </div>

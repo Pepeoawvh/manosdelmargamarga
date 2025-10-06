@@ -34,7 +34,7 @@ a {
 /* Personalización de scrollbar para toda la aplicación */
 @layer base {
   html {
-    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-200 scrollbar-track-gray-100 hover:scrollbar-thumb-emerald-300 scrollbar-thumb-rounded-full;
+    @apply scrollbar scrollbar-thin scrollbar-thumb-[#5e8c30] scrollbar-track-gray-100 hover:scrollbar-thumb-[#91d84b] scrollbar-thumb-rounded-full;
   }
   
   /* Para elementos con overflow-auto o overflow-scroll */
@@ -44,14 +44,14 @@ a {
   .overflow-y-scroll,
   .overflow-x-auto,
   .overflow-x-scroll {
-    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-700 scrollbar-track-gray-100 hover:scrollbar-thumb-emerald-300 scrollbar-thumb-rounded-full;
+    @apply scrollbar scrollbar-thin scrollbar-thumb-[#5e8c30] scrollbar-track-gray-100 hover:scrollbar-thumb-[#98e24e] scrollbar-thumb-rounded-full;
   }
 }
 
 /* Clases personalizadas para scrollbars específicas */
 @layer components {
   .scrollbar-primary {
-    @apply scrollbar scrollbar-thin scrollbar-thumb-emerald-900 scrollbar-track-emerald-900 hover:scrollbar-thumb-emerald-800 scrollbar-thumb-rounded-full;
+    @apply scrollbar scrollbar-thin scrollbar-thumb-[#5e8c30] scrollbar-track-[#5e8c30] hover:scrollbar-thumb-[#96e24b] scrollbar-thumb-rounded-full;
   }
   
   .scrollbar-secondary {

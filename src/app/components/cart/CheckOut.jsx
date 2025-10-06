@@ -1,44 +1,45 @@
-'use client';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { useCart } from '../../context/CartContext';
-import ShippingInfoForm from './ShippingInfoForm';
-import OrderSummary from './OrderSummary';
-import PaymentMethods from './PaymentMethods';
-import Button from '../../components/ui/Button';
-import BuyWspButton from './BuyWspButton'; // Importamos el botón de WhatsApp
+"use client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useCart } from "../../context/CartContext";
+import ShippingInfoForm from "./ShippingInfoForm";
+import OrderSummary from "./OrderSummary";
+import PaymentMethods from "./PaymentMethods";
+import Button from "../../components/ui/Button";
+import BuyWspButton from "./BuyWspButton"; // Importamos el botón de WhatsApp
 
 // Importar funciones necesarias de Firebase Firestore
-import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { firestoreDB } from "../../lib/firebase/config";
 
 const CheckOut = () => {
   const searchParams = useSearchParams();
-  const isRetry = searchParams.get('retry') === 'true';
+  const router = useRouter();
+  const isRetry = searchParams.get("retry") === "true";
 
-  const { 
-    cart, 
-    subtotal, 
-    savedShippingInfo, 
+  const {
+    cart,
+    subtotal,
+    savedShippingInfo,
     saveShippingInfo,
     startPaymentAttempt,
-    cancelPaymentAttempt
+    cancelPaymentAttempt,
   } = useCart();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('webpay');
+  const [message, setMessage] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("webpay");
   const [shippingInfo, setShippingInfo] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    region: 'Selecciona tu región',
-    notes: '',
-    shippingType: 'Por pagar todo Chile'
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    region: "Selecciona tu región",
+    notes: "",
+    shippingType: "Por pagar todo Chile",
   });
 
   const shippingCost = subtotal > 5 ? 0 : 0;
@@ -49,20 +50,28 @@ const CheckOut = () => {
     if (isRetry && savedShippingInfo) {
       setShippingInfo(savedShippingInfo);
 
-      // Si es un reintento, sugerir el otro método de pago
-      if (savedShippingInfo.lastPaymentMethod === 'webpay') {
-        setPaymentMethod('mercadopago');
-      } else if (savedShippingInfo.lastPaymentMethod === 'mercadopago') {
-        setPaymentMethod('webpay');
+      if (savedShippingInfo.lastPaymentMethod === "webpay") {
+        setPaymentMethod("mercadopago");
+      } else if (savedShippingInfo.lastPaymentMethod === "mercadopago") {
+        setPaymentMethod("webpay");
       }
 
-      // Mostrar mensaje para el usuario
-      setMessage('Tus datos se han recuperado. Puedes intentar con otro método de pago.');
+      setMessage(
+        "Tus datos se han recuperado. Puedes intentar con otro método de pago."
+      );
     }
   }, [isRetry, savedShippingInfo]);
 
   const validateForm = () => {
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'region'];
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "city",
+      "region",
+    ];
     for (const field of requiredFields) {
       if (!shippingInfo[field]) {
         setError(`El campo ${getFieldName(field)} es obligatorio`);
@@ -70,17 +79,15 @@ const CheckOut = () => {
       }
     }
 
-    // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(shippingInfo.email)) {
-      setError('El formato del email es inválido');
+      setError("El formato del email es inválido");
       return false;
     }
 
-    // Validar teléfono (solo números)
     const phoneRegex = /^\d{9,12}$/;
-    if (!phoneRegex.test(shippingInfo.phone.replace(/\s+/g, ''))) {
-      setError('El teléfono debe contener entre 9 y 12 dígitos');
+    if (!phoneRegex.test(shippingInfo.phone.replace(/\s+/g, ""))) {
+      setError("El teléfono debe contener entre 9 y 12 dígitos");
       return false;
     }
 
@@ -89,16 +96,60 @@ const CheckOut = () => {
 
   const getFieldName = (field) => {
     const fieldNames = {
-      firstName: 'nombre',
-      lastName: 'apellido',
-      email: 'correo electrónico',
-      phone: 'teléfono',
-      address: 'dirección',
-      city: 'ciudad',
-      region: 'región'
+      firstName: "nombre",
+      lastName: "apellido",
+      email: "correo electrónico",
+      phone: "teléfono",
+      address: "dirección",
+      city: "ciudad",
+      region: "región",
     };
 
     return fieldNames[field] || field;
+  };
+
+  // 🔹 Implementación de handleCheckout
+  const handleCheckout = async () => {
+    setLoading(true);
+    setError(null);
+
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Guardar info de envío en contexto para reintentos
+      saveShippingInfo({ ...shippingInfo, lastPaymentMethod: paymentMethod });
+
+      // Llamar a tu API de checkout
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cart,
+          customer: shippingInfo,
+          summary: { subtotal, shippingCost, total },
+          paymentMethod,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error al iniciar el pago");
+      }
+
+      if (data.url) {
+        // Redirigir a WebPay
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("handleCheckout error:", err);
+      setError(err.message || "Ocurrió un error durante el pago");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,18 +177,20 @@ const CheckOut = () => {
 
       <form className="p-4 md:p-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          {/* Columna 1: Información de envío */}
           <div>
-            <ShippingInfoForm shippingInfo={shippingInfo} setShippingInfo={setShippingInfo} />
-
-            {/* Métodos de pago */}
-            {/* <div className="mt-4">
-              <PaymentMethods paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
-            </div> */}
+            <ShippingInfoForm
+              shippingInfo={shippingInfo}
+              setShippingInfo={setShippingInfo}
+            />
+            <div className="mt-4">
+              <PaymentMethods
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+              />
+            </div>
           </div>
 
-          {/* Columna 2: Resumen del pedido y botones de pago */}
-          <div className='text-xs'>
+          <div className="text-xs">
             <OrderSummary
               cart={cart}
               subtotal={subtotal}
@@ -145,38 +198,21 @@ const CheckOut = () => {
               total={total}
             />
 
-            {/* Botón de pago */}
             <div className="flex justify-center space-y-4 mt-4">
-              {/* Botón de Transbank comentado temporalmente */}
-              {/* <Button
+              <Button
                 type="button"
                 className="w-2/5 py-3 flex items-center justify-center bg-[#542e1d] text-white rounded hover:bg-[#542e1d] transition-colors"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Procesando...
-                  </span>
-                ) : (
-                  `Pagar con ${paymentMethod === 'webpay' ? 'WebPay' : 'MercadoPago'}`
-                )}
-              </Button> */}
-
-              {/* Botón de WhatsApp */}
-              <BuyWspButton
-                orderData={{
-                  customer: shippingInfo,
-                  cart,
-                  summary: { subtotal, shippingCost, total },
-                }}
-                phoneNumber="56322121504" // Número de WhatsApp de la empresa
-              />
+                {loading ? "Procesando..." : `Pagar con ${paymentMethod === "webpay" ? "WebPay" : "MercadoPago"}`}
+              </Button>
             </div>
+
+            <BuyWspButton
+              orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
+              phoneNumber="56322121504"
+            />
           </div>
         </div>
 

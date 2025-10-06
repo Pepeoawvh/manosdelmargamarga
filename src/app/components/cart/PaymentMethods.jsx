@@ -1,3 +1,5 @@
+"use client";
+
 const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
   return (
     <div className="mb-6">
@@ -10,7 +12,7 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
             value="webpay"
             checked={paymentMethod === 'webpay'}
             onChange={() => setPaymentMethod('webpay')}
-            className="h-4 w-4 text--600[#b4cf66] focus:ring-[#6b554b]"
+            className="h-4 w-4 text-[#b4cf66] focus:ring-[#6b554b]"
           />
           <span className="ml-3 flex-grow">
             <span className="block font-medium">WebPay</span>
@@ -18,7 +20,24 @@ const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
           </span>
           <img src="/webpay-logo.png" alt="WebPay" className="h-8 ml-auto" />
         </label>
-        {/* MercadoPago eliminado temporalmente */}
+
+        {/*
+        <label className="flex items-center p-3 border rounded-md bg-white cursor-pointer hover:bg-gray-50">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="mercadopago"
+            checked={paymentMethod === 'mercadopago'}
+            onChange={() => setPaymentMethod('mercadopago')}
+            className="h-4 w-4 text-[#f5c521] focus:ring-[#6b554b]"
+          />
+          <span className="ml-3 flex-grow">
+            <span className="block font-medium">MercadoPago</span>
+            <span className="block text-sm text-gray-500">Paga con tu cuenta o tarjeta</span>
+          </span>
+          <img src="/mercadopago-logo.png" alt="MercadoPago" className="h-8 ml-auto" />
+        </label>
+        */}
       </div>
     </div>
   );

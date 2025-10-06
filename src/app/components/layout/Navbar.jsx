@@ -1044,7 +1044,7 @@ const Navbar = () => {
             </p>
             <button
               onClick={() => closeAnnouncement(true)}
-              className="ml-4 p-1 hover:bg-emerald-600 rounded-full transition-colors"
+              className="ml-4 p-1 hover:bg-[#7bb93e] rounded-full transition-colors"
               aria-label="Cerrar anuncio"
             >
               <svg
