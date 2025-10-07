@@ -41,7 +41,14 @@ export async function POST(request) {
         });
       }
     }
-
+if (data.TBK_TOKEN || data.TBK_ORDEN_COMPRA) {
+  console.log("Transacción cancelada por el usuario:", data);
+  return NextResponse.json({
+    success: false,
+    status: "cancelled",
+    message: "El usuario canceló el pago en Webpay.",
+  });
+}
     // Usar helper para completar la transacción
     const { transactionResult, status, isApproved } = await handleNormalFlow(token_ws, webpay);
 
