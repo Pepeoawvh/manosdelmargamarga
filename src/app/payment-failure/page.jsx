@@ -2,7 +2,6 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { XCircleIcon } from '@heroicons/react/24/outline';
 
 export default function PaymentFailure() {
   const searchParams = useSearchParams();
@@ -24,7 +23,6 @@ export default function PaymentFailure() {
       <div className="w-full max-w-md bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
         <div className="flex justify-center mb-4">
           <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center">
-            <XCircleIcon className="h-10 w-10 text-red-600" />
           </div>
         </div>
 
