@@ -131,14 +131,14 @@ export default function PaymentSuccess() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <p className="text-xl mb-4">No se pudo encontrar la información del pedido.</p>
-        <pre className="bg-gray-100 p-2 rounded text-xs mb-4">
+        <pre className="bg-stone-100 p-2 rounded text-xs mb-4">
           {JSON.stringify(debugInfo, null, 2)}
         </pre>
         <div className="flex gap-3">
-          <Link href="/catalogo" className="py-2 px-4 bg-emerald-600 text-white rounded">
+          <Link href="/catalogo" className="py-2 px-4 bg-[#5e8c30] hover:bg-[#4d7528] text-white rounded transition-colors">
             Volver al catálogo
           </Link>
-          <Link href="/payment-failure" className="py-2 px-4 bg-gray-200 rounded text-gray-800">
+          <Link href="/payment-failure" className="py-2 px-4 bg-stone-100 hover:bg-stone-200 rounded text-stone-800 transition-colors">
             Ver detalles de fallo
           </Link>
         </div>
@@ -148,46 +148,46 @@ export default function PaymentSuccess() {
 
   const isApproved = statusLabel === "approved";
   const badge = isApproved
-    ? { text: "Pago aprobado", cls: "bg-green-100 text-green-800" }
-    : { text: "Pago no aprobado", cls: "bg-red-100 text-red-800" };
+    ? { text: "Pago aprobado", cls: "bg-[#e5f2d9] text-[#46621f]" }
+    : { text: "Pago no aprobado", cls: "bg-amber-100 text-amber-800" };
 
   const shownDate =
     orderDetails.createdAt || orderDetails?.transactionDetails?.transaction_date || null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#f5f3e6] py-12">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 md:p-8">
-        {/* Encabezado alegre sin botonera */}
+        {/* Encabezado adaptado a paleta */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2">
-            <FaCheckCircle className={`text-3xl ${isApproved ? "text-emerald-600" : "text-amber-600"}`} />
-            <h1 className={`text-2xl md:text-3xl font-semibold ${isApproved ? "text-emerald-700" : "text-amber-700"}`}>
+            <FaCheckCircle className={`text-3xl ${isApproved ? "text-[#5e8c30]" : "text-amber-600"}`} />
+            <h1 className={`text-2xl md:text-3xl font-semibold ${isApproved ? "text-[#46621f]" : "text-amber-700"}`}>
               {isApproved ? "¡Felicidades! Tu pedido se ha completado con éxito" : "Pago recibido, en revisión"}
             </h1>
           </div>
-          <p className="text-gray-600 mt-2">
+          <p className="text-stone-600 mt-2">
             {isApproved ? "Gracias por confiar en nosotros." : "Si el emisor finaliza el proceso, te informaremos el resultado."}
           </p>
 
           <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
             <div className={`px-3 py-1 rounded-full font-medium ${badge.cls}`}>{badge.text}</div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full">
+            <div className="bg-stone-100 px-3 py-1 rounded-full">
               <span className="font-medium">Pedido:</span>{" "}
               #{orderDetails.id?.slice?.(-6)?.toUpperCase?.() || "N/D"}
             </div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full">
+            <div className="bg-stone-100 px-3 py-1 rounded-full">
               <span className="font-medium">Fecha:</span> {safeFormatDate(shownDate)}
             </div>
           </div>
         </div>
 
+        {/* Datos del cliente y envío */}
         {orderDetails.customer && (
           <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-gray-50 rounded p-4">
-              <h3 className="font-medium text-gray-800 mb-2">Datos del Cliente</h3>
+            <div className="bg-[#faf8ee] rounded p-4 border border-[#ece7d2]">
+              <h3 className="font-medium text-[#3f4f1c] mb-2">Datos del Cliente</h3>
               <p>
-                <span className="font-medium">Nombre:</span> {orderDetails.customer.firstName}{" "}
-                {orderDetails.customer.lastName}
+                <span className="font-medium">Nombre:</span> {orderDetails.customer.firstName} {orderDetails.customer.lastName}
               </p>
               <p>
                 <span className="font-medium">Email:</span> {orderDetails.customer.email}
@@ -201,8 +201,8 @@ export default function PaymentSuccess() {
                 </p>
               )}
             </div>
-            <div className="bg-gray-50 rounded p-4">
-              <h3 className="font-medium text-gray-800 mb-2">Dirección de Envío</h3>
+            <div className="bg-[#faf8ee] rounded p-4 border border-[#ece7d2]">
+              <h3 className="font-medium text-[#3f4f1c] mb-2">Dirección de Envío</h3>
               <p>
                 {orderDetails.customer.address}
                 <br />
@@ -214,6 +214,7 @@ export default function PaymentSuccess() {
           </div>
         )}
 
+        {/* Resumen del pedido */}
         {orderDetails.cart && orderDetails.summary ? (
           <OrderSummary
             cart={orderDetails.cart}
@@ -222,17 +223,24 @@ export default function PaymentSuccess() {
             total={orderDetails.summary.total}
           />
         ) : (
-          <div className="bg-gray-50 rounded p-4 mb-6 text-center">
+          <div className="bg-[#faf8ee] rounded p-4 mb-6 text-center border border-[#ece7d2]">
             No se pudo cargar el detalle del pedido
           </div>
         )}
 
+        {/* Acciones finales */}
         <div className="mt-6 flex flex-col md:flex-row gap-3">
-          <Link href="/catalogo" className="flex-1 py-3 px-4 bg-[#5e8c30] text-white text-center rounded">
+          <Link
+            href="/catalogo"
+            className="flex-1 py-3 px-4 bg-[#5e8c30] hover:bg-[#4d7528] text-white text-center rounded transition-colors"
+          >
             Seguir comprando
           </Link>
           {!isApproved && (
-            <Link href="/payment-failure?retry=true" className="flex-1 py-3 px-4 bg-gray-100 text-center rounded text-gray-800">
+            <Link
+              href="/payment-failure?retry=true"
+              className="flex-1 py-3 px-4 bg-stone-100 hover:bg-stone-200 text-center rounded text-stone-800 transition-colors"
+            >
               Reintentar pago
             </Link>
           )}
