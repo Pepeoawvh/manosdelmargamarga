@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { collection, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
-import { firestoreDB } from '../lib/firebase/config';
+import { firestoreDB } from '../../lib/firebase/config';
 import OrderSummary from '../components/cart/OrderSummary';
 
 export default function PaymentSuccess() {

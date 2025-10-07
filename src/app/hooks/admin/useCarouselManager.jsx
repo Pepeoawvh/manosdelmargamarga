@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot, serverTimestamp, writeBatch } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
+import { firestoreDB } from '../../../lib/firebase/config';
 
 export default function useCarouselManager() {
   const [slides, setSlides] = useState([]);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
+import { firestoreDB } from '../../../lib/firebase/config';
 
 // Estructura de categorías y subcategorías
 export const PRODUCT_CATEGORIES = [

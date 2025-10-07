@@ -8,7 +8,7 @@ import PaymentMethods from "./PaymentMethods";
 import Button from "../../components/ui/Button";
 import BuyWspButton from "./BuyWspButton";
 import PaymentNotice from "../ui/Notice";
-import { firestoreDB } from "../../lib/firebase/config";
+import { firestoreDB } from "../../../lib/firebase/config";
 
 const CheckOut = () => {
   const searchParams = useSearchParams();

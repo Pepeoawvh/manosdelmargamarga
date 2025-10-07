@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { firestoreDB } from "./lib/firebase/config";
+import { firestoreDB } from "../lib/firebase/config";
 import ProductCard from "./components/product/ProductCard";
 import Link from "next/link";
 import FeatureCard from "./components/FeatureCard";

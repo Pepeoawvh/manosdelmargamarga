@@ -15,7 +15,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { firestoreDB, auth } from "../../lib/firebase/config";
+import { firestoreDB, auth } from "../../../lib/firebase/config";
 import useProducts from "../shared/useProducts";
 
 export default function useAdminPanel() {

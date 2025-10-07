@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
-import { firestoreDB } from "../lib/firebase/config";
+import { firestoreDB } from "../../lib/firebase/config";
 
 import "swiper/css";
 import "swiper/css/pagination";

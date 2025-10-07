@@ -11,7 +11,7 @@ import {
   writeBatch,
   getDocs,
 } from "firebase/firestore";
-import { firestoreDB } from "../../lib/firebase/config";
+import { firestoreDB } from "../../../lib/firebase/config";
 
 export default function useCarouselManager() {
   const [slides, setSlides] = useState([]);

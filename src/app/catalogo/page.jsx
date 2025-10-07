@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { collection, getDocs, query } from 'firebase/firestore';
-import { firestoreDB } from '../lib/firebase/config';
+import { firestoreDB } from '../../lib/firebase/config';
 import ProductCard from '../components/product/ProductCard';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';

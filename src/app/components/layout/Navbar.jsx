@@ -9,7 +9,7 @@ import { PRODUCT_CATEGORIES } from "../../hooks/shared/useProducts";
 
 // Firestore
 import { collection, getDocs, query } from "firebase/firestore";
-import { firestoreDB } from "../../lib/firebase/config";
+import { firestoreDB } from "../../../lib/firebase/config";
 
 const ANNOUNCE_REAPPEAR_MINUTES = 10;
 const SCROLL_CLOSE_DELAY_MS = 5000;

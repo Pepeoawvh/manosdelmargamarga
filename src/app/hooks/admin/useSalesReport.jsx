@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, getDocs, addDoc, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { firestoreDB } from '../../lib/firebase/config';
+import { firestoreDB } from '../../../lib/firebase/config';
 
 export default function useSalesReport() {
   const [loading, setLoading] = useState(true);
