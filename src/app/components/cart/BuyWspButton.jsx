@@ -7,7 +7,7 @@ const BuyWspButton = ({ orderData, phoneNumber }) => {
     let message = `Hola, quiero realizar un pedido:\n\n`;
 
     // Agregar detalles del cliente
-    message += `Nombre: ${customer.name}\n`;
+    message += `Nombre: ${customer.firstName},${customer.lastName}\n`;
     message += `Teléfono: ${customer.phone}\n`;
     message += `Email: ${customer.email}\n`;
     message += `Dirección: ${customer.address}, ${customer.city}, ${customer.region}\n\n`;
@@ -38,7 +38,7 @@ const BuyWspButton = ({ orderData, phoneNumber }) => {
   return (
     <button
       onClick={handleClick}
-      className="px-4 py-2 bg-[#b4cf66] text-white rounded hover:bg-[#87a644] transition"
+      className="px-4 h-full py-5 text-lg bg-[#b4cf66] text-white rounded hover:bg-[#87a644] transition"
     >
       Realizar compra por WhatsApp
     </button>

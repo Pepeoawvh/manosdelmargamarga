@@ -100,7 +100,7 @@ const ShoppingCart = () => {
             <div className="border-t p-4 space-y-4">
               <div className="flex justify-between font-medium">
                 <span className="text-gray-700">Subtotal:</span>
-                <span className="text-[#542e1d]">${subtotal.toLocaleString()}</span>
+                <span className="text-[#84a229]">${subtotal.toLocaleString()}</span>
               </div>
               
               <div className="text-xs text-gray-500">
@@ -110,7 +110,7 @@ const ShoppingCart = () => {
               <div className="space-y-2">
                 <Link
                   href="/checkout"
-                  className="block w-full py-2 px-4 bg-[#542e1d] text-white text-center text-sm font-medium rounded hover:bg-[#bc8b74] transition-colors"
+                  className="block w-full py-2 px-4 bg-[#9bb158] text-white text-center text-sm font-medium rounded hover:bg-[#b4cf66] transition-colors"
                   onClick={closeCart}
                 >
                   Iniciar Compra

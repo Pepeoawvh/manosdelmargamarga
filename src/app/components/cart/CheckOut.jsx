@@ -7,7 +7,7 @@ import OrderSummary from "./OrderSummary";
 import PaymentMethods from "./PaymentMethods";
 import Button from "../../components/ui/Button";
 import BuyWspButton from "./BuyWspButton"; // Importamos el botón de WhatsApp
-
+import PaymentNotice from "../ui/Notice";
 // Importar funciones necesarias de Firebase Firestore
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { firestoreDB } from "../../lib/firebase/config";
@@ -154,6 +154,7 @@ const CheckOut = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
+      <PaymentNotice />
       <div className="p-4 md:p-6 border-b">
         <h1 className="text-md font-bold text-gray-800">Finalizar Compra</h1>
         {isRetry && (
@@ -198,10 +199,14 @@ const CheckOut = () => {
               total={total}
             />
 
-            <div className="flex justify-center space-y-4 mt-4">
+            <div className="grid w-full justify-center space-y-4 mt-4">
+             <BuyWspButton
+              orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
+              phoneNumber="56322121504"
+            />
               <Button
                 type="button"
-                className="w-2/5 py-3 flex items-center justify-center bg-[#542e1d] text-white rounded hover:bg-[#542e1d] transition-colors"
+                className="w-full bg-gray-100 hover:bg-gray-50 py-3 items-center justify-center text-white rounded transition-colors"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
@@ -209,10 +214,7 @@ const CheckOut = () => {
               </Button>
             </div>
 
-            <BuyWspButton
-              orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
-              phoneNumber="56322121504"
-            />
+           
           </div>
         </div>
 

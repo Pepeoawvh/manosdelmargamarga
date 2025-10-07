@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import CheckOut from '../components/cart/CheckOut';
 import Link from 'next/link';
 
+
 export default function CheckoutPage() {
   const { cart } = useCart();
   const router = useRouter();
