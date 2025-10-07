@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**', // Puedes restringirlo si quieres más seguridad
+        hostname: '**',
       },
     ],
     domains: [
@@ -19,10 +20,17 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
+
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
+    // Sugerido si usas Server Components/Route Handlers con librerías Node
+    serverComponentsExternalPackages: ['pdfmake'],
   },
+
+  // Excluir pdfmake del bundle del server y cargarlo nativamente en runtime
+  serverExternalPackages: ['pdfmake'],
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = { fs: false };
@@ -31,4 +39,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
