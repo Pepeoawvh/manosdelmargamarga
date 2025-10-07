@@ -226,16 +226,7 @@ export default function PaymentSuccess() {
             No se pudo cargar el detalle del pedido
           </div>
         )}
-<div className="mt-6 flex flex-col md:flex-row gap-3">
-  <Link
-    href={`/api/receipt/${orderDetails.id}`}
-    className="flex-1 py-3 px-4 bg-[#e6e5ba] hover:bg-[#4d7528] text-white text-center rounded"
-    target="_blank"
-    rel="noopener"
-  >
-    Descargar comprobante (PDF)
-  </Link>
-</div>
+
         <div className="mt-6 flex flex-col md:flex-row gap-3">
           <Link href="/catalogo" className="flex-1 py-3 px-4 bg-[#5e8c30] text-white text-center rounded">
             Seguir comprando
