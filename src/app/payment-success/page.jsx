@@ -27,6 +27,69 @@ export default function PaymentSuccess() {
     return res.json();
   };
 
+  // Formateador robusto de fecha para evitar RangeError: Invalid time value
+  const safeFormatDate = (ts) => {
+    try {
+      if (!ts) return 'Fecha no disponible';
+
+      // Firestore Timestamp
+      if (typeof ts?.toDate === 'function') {
+        const d = ts.toDate();
+        if (isNaN(d?.getTime?.())) return 'Fecha no disponible';
+        return new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(d);
+      }
+
+      // Date nativo
+      if (ts instanceof Date) {
+        if (isNaN(ts.getTime())) return 'Fecha no disponible';
+        return new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(ts);
+      }
+
+      // Epoch ms como number o string numérica
+      if (typeof ts === 'number' || (typeof ts === 'string' && /^\d+$/.test(ts))) {
+        const n = typeof ts === 'number' ? ts : parseInt(ts, 10);
+        const d = new Date(n);
+        if (isNaN(d.getTime())) return 'Fecha no disponible';
+        return new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(d);
+      }
+
+      // ISO string u otro string parseable
+      if (typeof ts === 'string') {
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return 'Fecha no disponible';
+        return new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(d);
+      }
+
+      return 'Fecha no disponible';
+    } catch {
+      return 'Fecha no disponible';
+    }
+  };
+
   useEffect(() => {
     const processTransaction = async () => {
       const debug = {
@@ -61,18 +124,6 @@ export default function PaymentSuccess() {
     processTransaction();
   }, [token_ws]);
 
-  const formatDate = (ts) => {
-    if (!ts) return 'Fecha no disponible';
-    const date = ts.toDate?.() || (ts instanceof Date ? ts : new Date(ts));
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -106,6 +157,12 @@ export default function PaymentSuccess() {
       ? { text: 'Pago aprobado', cls: 'bg-green-100 text-green-800' }
       : { text: 'Pago no aprobado', cls: 'bg-red-100 text-red-800' };
 
+  // Elegir fecha para mostrar: preferir createdAt de la orden; fallback a transaction_date del commit si existe en transactionDetails.
+  const shownDate =
+    orderDetails.createdAt ||
+    orderDetails?.transactionDetails?.transaction_date ||
+    null;
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 md:p-8">
@@ -120,7 +177,7 @@ export default function PaymentSuccess() {
               #{orderDetails.id?.slice?.(-6)?.toUpperCase?.() || 'N/D'}
             </div>
             <div className="bg-gray-100 px-3 py-1 rounded-full w-full">
-              <span className="font-medium">Fecha:</span> {formatDate(orderDetails.createdAt)}
+              <span className="font-medium">Fecha:</span> {safeFormatDate(shownDate)}
             </div>
           </div>
         </div>
