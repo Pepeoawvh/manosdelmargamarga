@@ -17,7 +17,7 @@ export async function POST(request) {
     const newOrderId = `O-${timestamp.toString().slice(-5)}`;
     const sessionId = `S-${timestamp.toString().slice(-5)}`;
     const amount = summary.total;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.BASE_URL
     const returnUrl = `${baseUrl}/payment-success`;
 
     // === Guardar orden inicial en Firestore ===
