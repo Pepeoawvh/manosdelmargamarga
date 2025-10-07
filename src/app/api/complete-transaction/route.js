@@ -25,6 +25,11 @@ export async function POST(req) {
     let transactionResult;
     try {
       transactionResult = await webpay.commit(token_ws);
+      console.log("✅ Commit Webpay OK:", {
+        buy_order: transactionResult.buy_order,
+        status: transactionResult.status,
+        response_code: transactionResult.response_code,
+      });
     } catch (error) {
       console.error("❌ Error al confirmar transacción en WebPay:", error);
       return NextResponse.json(
@@ -33,16 +38,22 @@ export async function POST(req) {
       );
     }
 
-    const status = transactionResult.response_code === 0 ? "approved" : "rejected";
-    const isApproved = status === "approved";
-    const updateOrderId = orderId || transactionResult.buy_order;
+    // Aprobada solo si response_code === 0 y status === "AUTHORIZED"
+    const isApproved =
+      transactionResult?.response_code === 0 && transactionResult?.status === "AUTHORIZED";
+    const status = isApproved ? "completed" : "failed";
 
-    if (!updateOrderId) {
-      return NextResponse.json({ success: false, error: "No se pudo determinar el ID de la orden" }, { status: 400 });
-    }
+    // Preferir buy_order devuelto por Webpay sobre orderId del cliente
+    const candidateOrderId = orderId || transactionResult.buy_order;
 
     // Actualizar orden en Firestore
-    const orderData = await updateOrderInFirestore(updateOrderId, status, isApproved, transactionResult, token_ws);
+    const orderData = await updateOrderInFirestore(
+      candidateOrderId,
+      status,
+      isApproved,
+      transactionResult,
+      token_ws
+    );
 
     if (!orderData) {
       return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
@@ -50,7 +61,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
-      order: orderData, // ✅ Devuelve toda la orden
+      order: orderData, // Devuelve la orden
       status,
       isApproved,
       details: {
@@ -61,65 +72,108 @@ export async function POST(req) {
         accounting_date: transactionResult.accounting_date,
         card_number: transactionResult.card_detail?.card_number,
         amount: transactionResult.amount,
+        buy_order: transactionResult.buy_order,
+        session_id: transactionResult.session_id,
       },
     });
   } catch (error) {
     console.error("❌ Error en complete-transaction:", error);
-    return NextResponse.json({ success: false, error: `Error al completar la transacción: ${error.message}` }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: `Error al completar la transacción: ${error.message}` },
+      { status: 500 }
+    );
   }
 }
 
-async function updateOrderInFirestore(orderId, status, isApproved, transactionResult, token_ws) {
+async function updateOrderInFirestore(orderIdOrBuyOrder, status, isApproved, tr, token_ws) {
   try {
-    const orderDocRef = adminDb.collection("orders").doc(orderId);
-    const orderDoc = await orderDocRef.get();
+    // 1) Intentar por docId directo (cuando el frontend pasó orderId)
+    if (orderIdOrBuyOrder && orderIdOrBuyOrder.length < 64) {
+      const byIdRef = adminDb.collection("orders").doc(orderIdOrBuyOrder);
+      const byIdDoc = await byIdRef.get();
+      if (byIdDoc.exists) {
+        await byIdRef.update({
+          paymentStatus: status,
+          isApproved,
+          webpayToken: token_ws,
+          transactionDetails: {
+            buy_order: tr.buy_order,
+            session_id: tr.session_id,
+            amount: tr.amount,
+            card_number: tr.card_detail?.card_number,
+            authorization_code: tr.authorization_code,
+            payment_type_code: tr.payment_type_code,
+            transaction_date: tr.transaction_date,
+            accounting_date: tr.accounting_date,
+            response_code: tr.response_code,
+            status: tr.status,
+          },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { id: byIdDoc.id, ...byIdDoc.data(), paymentStatus: status, isApproved };
+      }
+    }
 
-    if (!orderDoc.exists) {
-      const snapshot = await adminDb.collection("orders")
-        .where("cart.buy_order", "==", orderId)
-        .limit(1)
-        .get();
-
-      if (snapshot.empty) return null;
-
-      await snapshot.docs[0].ref.update({
+    // 2) Intentar por token_ws almacenado
+    const tokenSnap = await adminDb
+      .collection("orders")
+      .where("webpayToken", "==", token_ws)
+      .limit(1)
+      .get();
+    if (!tokenSnap.empty) {
+      const doc = tokenSnap.docs[0];
+      await doc.ref.update({
         paymentStatus: status,
         isApproved,
-        webpayToken: token_ws,
         transactionDetails: {
-          buy_order: transactionResult.buy_order,
-          session_id: transactionResult.session_id,
-          amount: transactionResult.amount,
-          card_number: transactionResult.card_detail?.card_number,
-          authorization_code: transactionResult.authorization_code,
-          payment_type_code: transactionResult.payment_type_code,
-          transaction_date: transactionResult.transaction_date,
-          accounting_date: transactionResult.accounting_date,
+          buy_order: tr.buy_order,
+          session_id: tr.session_id,
+          amount: tr.amount,
+          card_number: tr.card_detail?.card_number,
+          authorization_code: tr.authorization_code,
+          payment_type_code: tr.payment_type_code,
+          transaction_date: tr.transaction_date,
+          accounting_date: tr.accounting_date,
+          response_code: tr.response_code,
+          status: tr.status,
         },
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-
-      return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+      return { id: doc.id, ...doc.data(), paymentStatus: status, isApproved };
     }
 
-    await orderDocRef.update({
-      paymentStatus: status,
-      isApproved,
-      webpayToken: token_ws,
-      transactionDetails: {
-        buy_order: transactionResult.buy_order,
-        session_id: transactionResult.session_id,
-        amount: transactionResult.amount,
-        card_number: transactionResult.card_detail?.card_number,
-        authorization_code: transactionResult.authorization_code,
-        payment_type_code: transactionResult.payment_type_code,
-        transaction_date: transactionResult.transaction_date,
-        accounting_date: transactionResult.accounting_date,
-      },
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    // 3) Intentar por buy_order devuelto por Webpay
+    if (tr?.buy_order) {
+      const byBuyOrderSnap = await adminDb
+        .collection("orders")
+        .where("buy_order", "==", tr.buy_order)
+        .limit(1)
+        .get();
+      if (!byBuyOrderSnap.empty) {
+        const doc = byBuyOrderSnap.docs[0];
+        await doc.ref.update({
+          paymentStatus: status,
+          isApproved,
+          webpayToken: token_ws,
+          transactionDetails: {
+            buy_order: tr.buy_order,
+            session_id: tr.session_id,
+            amount: tr.amount,
+            card_number: tr.card_detail?.card_number,
+            authorization_code: tr.authorization_code,
+            payment_type_code: tr.payment_type_code,
+            transaction_date: tr.transaction_date,
+            accounting_date: tr.accounting_date,
+            response_code: tr.response_code,
+            status: tr.status,
+          },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return { id: doc.id, ...doc.data(), paymentStatus: status, isApproved };
+      }
+    }
 
-    return { id: orderDoc.id, ...orderDoc.data() };
+    return null;
   } catch (firestoreError) {
     console.error("❌ Error al actualizar la orden:", firestoreError);
     return null;
