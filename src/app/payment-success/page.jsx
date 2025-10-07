@@ -27,7 +27,7 @@ export default function PaymentSuccess() {
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   const fetchCompleteTransaction = async (token) => {
-    const res = await fetch('/api/webpay/complete-transaction', {
+    const res = await fetch('/api/complete-transaction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token_ws: token })
