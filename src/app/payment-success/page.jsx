@@ -1,18 +1,15 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import OrderSummary from "../components/cart/OrderSummary";
+import { FaCheckCircle } from "react-icons/fa";
 
 export default function PaymentSuccess() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // token_ws viene por GET desde Webpay (API v1.1+)
-  const token_ws = useMemo(
-    () => searchParams.get("token_ws") || "",
-    [searchParams]
-  );
+  const token_ws = useMemo(() => searchParams.get("token_ws") || "", [searchParams]);
 
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,12 +27,11 @@ export default function PaymentSuccess() {
     return res.json();
   };
 
-  // Formateador robusto de fecha para evitar RangeError: Invalid time value
+  // Formateador robusto de fecha
   const safeFormatDate = (ts) => {
     try {
       if (!ts) return "Fecha no disponible";
 
-      // Firestore Timestamp
       if (typeof ts?.toDate === "function") {
         const d = ts.toDate();
         if (isNaN(d?.getTime?.())) return "Fecha no disponible";
@@ -48,7 +44,6 @@ export default function PaymentSuccess() {
         }).format(d);
       }
 
-      // Date nativo
       if (ts instanceof Date) {
         if (isNaN(ts.getTime())) return "Fecha no disponible";
         return new Intl.DateTimeFormat("es-ES", {
@@ -60,11 +55,7 @@ export default function PaymentSuccess() {
         }).format(ts);
       }
 
-      // Epoch ms como number o string numérica
-      if (
-        typeof ts === "number" ||
-        (typeof ts === "string" && /^\d+$/.test(ts))
-      ) {
+      if (typeof ts === "number" || (typeof ts === "string" && /^\d+$/.test(ts))) {
         const n = typeof ts === "number" ? ts : parseInt(ts, 10);
         const d = new Date(n);
         if (isNaN(d.getTime())) return "Fecha no disponible";
@@ -77,7 +68,6 @@ export default function PaymentSuccess() {
         }).format(d);
       }
 
-      // ISO string u otro string parseable
       if (typeof ts === "string") {
         const d = new Date(ts);
         if (isNaN(d.getTime())) return "Fecha no disponible";
@@ -107,7 +97,6 @@ export default function PaymentSuccess() {
         if (!token_ws || token_ws.length !== 64) {
           throw new Error("No se recibió token_ws válido");
         }
-
         const result = await fetchCompleteTransaction(token_ws);
 
         if (result.success && result.order) {
@@ -138,27 +127,18 @@ export default function PaymentSuccess() {
     );
   }
 
-  // Si no hay orden, mostrar depuración y opción para reintentar
   if (!orderDetails) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <p className="text-xl mb-4">
-          No se pudo encontrar la información del pedido.
-        </p>
+        <p className="text-xl mb-4">No se pudo encontrar la información del pedido.</p>
         <pre className="bg-gray-100 p-2 rounded text-xs mb-4">
           {JSON.stringify(debugInfo, null, 2)}
         </pre>
         <div className="flex gap-3">
-          <Link
-            href="/catalogo"
-            className="py-2 px-4 bg-emerald-600 text-white rounded"
-          >
+          <Link href="/catalogo" className="py-2 px-4 bg-emerald-600 text-white rounded">
             Volver al catálogo
           </Link>
-          <Link
-            href="/payment-failure"
-            className="py-2 px-4 bg-gray-200 rounded text-gray-800"
-          >
+          <Link href="/payment-failure" className="py-2 px-4 bg-gray-200 rounded text-gray-800">
             Ver detalles de fallo
           </Link>
         </div>
@@ -166,35 +146,37 @@ export default function PaymentSuccess() {
     );
   }
 
-  const badge =
-    statusLabel === "approved"
-      ? { text: "Pago aprobado", cls: "bg-green-100 text-green-800" }
-      : { text: "Pago no aprobado", cls: "bg-red-100 text-red-800" };
+  const isApproved = statusLabel === "approved";
+  const badge = isApproved
+    ? { text: "Pago aprobado", cls: "bg-green-100 text-green-800" }
+    : { text: "Pago no aprobado", cls: "bg-red-100 text-red-800" };
 
-  // Elegir fecha para mostrar: preferir createdAt de la orden; fallback a transaction_date del commit si existe en transactionDetails.
   const shownDate =
-    orderDetails.createdAt ||
-    orderDetails?.transactionDetails?.transaction_date ||
-    null;
+    orderDetails.createdAt || orderDetails?.transactionDetails?.transaction_date || null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 md:p-8">
+        {/* Encabezado alegre sin botonera */}
         <div className="text-center mb-6">
-          <p className="text-gray-600 mt-2">Detalle de su pedido:</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-            <div
-              className={`px-3 w-full py-1 rounded-full font-medium ${badge.cls}`}
-            >
-              {badge.text}
+          <div className="flex items-center justify-center gap-2">
+            <FaCheckCircle className={`text-3xl ${isApproved ? "text-emerald-600" : "text-amber-600"}`} />
+            <h1 className={`text-2xl md:text-3xl font-semibold ${isApproved ? "text-emerald-700" : "text-amber-700"}`}>
+              {isApproved ? "¡Felicidades! Tu pedido se ha completado con éxito" : "Pago recibido, en revisión"}
+            </h1>
+          </div>
+          <p className="text-gray-600 mt-2">
+            {isApproved ? "Gracias por confiar en nosotros." : "Si el emisor finaliza el proceso, te informaremos el resultado."}
+          </p>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+            <div className={`px-3 py-1 rounded-full font-medium ${badge.cls}`}>{badge.text}</div>
+            <div className="bg-gray-100 px-3 py-1 rounded-full">
+              <span className="font-medium">Pedido:</span>{" "}
+              #{orderDetails.id?.slice?.(-6)?.toUpperCase?.() || "N/D"}
             </div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full w-full">
-              <span className="font-medium">Pedido:</span> #
-              {orderDetails.id?.slice?.(-6)?.toUpperCase?.() || "N/D"}
-            </div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full w-full">
-              <span className="font-medium">Fecha:</span>{" "}
-              {safeFormatDate(shownDate)}
+            <div className="bg-gray-100 px-3 py-1 rounded-full">
+              <span className="font-medium">Fecha:</span> {safeFormatDate(shownDate)}
             </div>
           </div>
         </div>
@@ -202,33 +184,25 @@ export default function PaymentSuccess() {
         {orderDetails.customer && (
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="bg-gray-50 rounded p-4">
-              <h3 className="font-medium text-gray-800 mb-2">
-                Datos del Cliente
-              </h3>
+              <h3 className="font-medium text-gray-800 mb-2">Datos del Cliente</h3>
               <p>
-                <span className="font-medium">Nombre:</span>{" "}
-                {orderDetails.customer.firstName}{" "}
+                <span className="font-medium">Nombre:</span> {orderDetails.customer.firstName}{" "}
                 {orderDetails.customer.lastName}
               </p>
               <p>
-                <span className="font-medium">Email:</span>{" "}
-                {orderDetails.customer.email}
+                <span className="font-medium">Email:</span> {orderDetails.customer.email}
               </p>
               <p>
-                <span className="font-medium">Teléfono:</span>{" "}
-                {orderDetails.customer.phone}
+                <span className="font-medium">Teléfono:</span> {orderDetails.customer.phone}
               </p>
               {orderDetails.customer.rut && (
                 <p>
-                  <span className="font-medium">RUT:</span>{" "}
-                  {orderDetails.customer.rut}
+                  <span className="font-medium">RUT:</span> {orderDetails.customer.rut}
                 </p>
               )}
             </div>
             <div className="bg-gray-50 rounded p-4">
-              <h3 className="font-medium text-gray-800 mb-2">
-                Dirección de Envío
-              </h3>
+              <h3 className="font-medium text-gray-800 mb-2">Dirección de Envío</h3>
               <p>
                 {orderDetails.customer.address}
                 <br />
@@ -252,19 +226,22 @@ export default function PaymentSuccess() {
             No se pudo cargar el detalle del pedido
           </div>
         )}
-
-        <div className="flex flex-col md:flex-row gap-3">
-          <Link
-            href="/catalogo"
-            className="flex-1 py-3 px-4 bg-emerald-600 text-white text-center rounded"
-          >
+<div className="mt-6 flex flex-col md:flex-row gap-3">
+  <Link
+    href={`/api/receipt/${orderDetails.id}`}
+    className="flex-1 py-3 px-4 bg-[#5e8c30] hover:bg-[#4d7528] text-white text-center rounded"
+    target="_blank"
+    rel="noopener"
+  >
+    Descargar comprobante (PDF)
+  </Link>
+</div>
+        <div className="mt-6 flex flex-col md:flex-row gap-3">
+          <Link href="/catalogo" className="flex-1 py-3 px-4 bg-emerald-600 text-white text-center rounded">
             Seguir comprando
           </Link>
-          {statusLabel !== "approved" && (
-            <Link
-              href="/payment-failure?retry=true"
-              className="flex-1 py-3 px-4 bg-gray-100 text-center rounded text-gray-800"
-            >
+          {!isApproved && (
+            <Link href="/payment-failure?retry=true" className="flex-1 py-3 px-4 bg-gray-100 text-center rounded text-gray-800">
               Reintentar pago
             </Link>
           )}
