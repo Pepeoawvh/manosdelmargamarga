@@ -1,5 +1,22 @@
 const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
-  if (!cart || cart.length === 0) {
+  // Formateador robusto CLP
+  const fmtMoney = (v) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(0);
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
+  };
+
+  const safeNumber = (v, fallback = 0) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  };
+
+  const safeCart = Array.isArray(cart) ? cart : [];
+  const subtotalN = safeNumber(subtotal);
+  const shippingN = safeNumber(shippingCost);
+  const totalN = safeNumber(total);
+
+  if (!safeCart.length) {
     return (
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <p className="text-gray-600 text-center">No hay productos en el pedido.</p>
@@ -11,33 +28,40 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
     <div>
       <h2 className="text-lg font-semibold mb-4">Resumen del pedido</h2>
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
-        {cart.map((item) => (
-          <div key={item.id} className="flex justify-between py-2 border-b last:border-0">
-            <div>
-              <p className="font-medium">{item.title}</p>
-              <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
+        {safeCart.map((item) => {
+          const price = safeNumber(item?.price);
+          const qty = safeNumber(item?.quantity, 1);
+          const lineTotal = price * qty;
+          return (
+            <div key={item?.id ?? `${item?.title}-${Math.random()}`} className="flex justify-between py-2 border-b last:border-0">
+              <div>
+                <p className="font-medium">{item?.title ?? 'Producto'}</p>
+                <p className="text-sm text-gray-500">Cantidad: {qty}</p>
+              </div>
+              <p className="font-medium">{fmtMoney(lineTotal)}</p>
             </div>
-            <p className="font-medium">${(item.price * item.quantity).toLocaleString()}</p>
-          </div>
-        ))}
+          );
+        })}
         <div className="mt-4 space-y-2">
           <div className="flex justify-between text-sm">
             <span>Subtotal:</span>
-            <span>${subtotal.toLocaleString()}</span>
+            <span>{fmtMoney(subtotalN)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span>Envío:</span>
             <span className="flex items-center px-4">
-              {shippingCost === 0 ? (
-                <span className="text-amber-600 font-medium">¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!</span>
+              {shippingN === 0 ? (
+                <span className="text-amber-600 font-medium">
+                  ¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!
+                </span>
               ) : (
-                `$${shippingCost.toLocaleString()}`
+                fmtMoney(shippingN)
               )}
             </span>
           </div>
           <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
             <span>Total</span>
-            <span>${total.toLocaleString()}</span>
+            <span>{fmtMoney(totalN)}</span>
           </div>
         </div>
       </div>
