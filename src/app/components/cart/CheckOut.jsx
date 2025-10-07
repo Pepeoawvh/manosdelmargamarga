@@ -6,10 +6,8 @@ import ShippingInfoForm from "./ShippingInfoForm";
 import OrderSummary from "./OrderSummary";
 import PaymentMethods from "./PaymentMethods";
 import Button from "../../components/ui/Button";
-import BuyWspButton from "./BuyWspButton"; // Importamos el botón de WhatsApp
+import BuyWspButton from "./BuyWspButton";
 import PaymentNotice from "../ui/Notice";
-// Importar funciones necesarias de Firebase Firestore
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { firestoreDB } from "../../lib/firebase/config";
 
 const CheckOut = () => {
@@ -29,7 +27,7 @@ const CheckOut = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("webpay");
+  const [paymentMethod] = useState("webpay"); // Siempre Webpay
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
     lastName: "",
@@ -49,16 +47,7 @@ const CheckOut = () => {
   useEffect(() => {
     if (isRetry && savedShippingInfo) {
       setShippingInfo(savedShippingInfo);
-
-      if (savedShippingInfo.lastPaymentMethod === "webpay") {
-        setPaymentMethod("mercadopago");
-      } else if (savedShippingInfo.lastPaymentMethod === "mercadopago") {
-        setPaymentMethod("webpay");
-      }
-
-      setMessage(
-        "Tus datos se han recuperado. Puedes intentar con otro método de pago."
-      );
+      setMessage("Tus datos se han recuperado. Puedes intentar nuevamente el pago.");
     }
   }, [isRetry, savedShippingInfo]);
 
@@ -104,68 +93,64 @@ const CheckOut = () => {
       city: "ciudad",
       region: "región",
     };
-
     return fieldNames[field] || field;
   };
 
-  // 🔹 Implementación de handleCheckout
-const handleCheckout = async () => {
-  setLoading(true);
-  setError(null);
+  const handleCheckout = async () => {
+    setLoading(true);
+    setError(null);
 
-  if (!validateForm()) {
-    setLoading(false);
-    return;
-  }
-
-  try {
-    // Guardar info de envío en contexto para reintentos
-    saveShippingInfo({ ...shippingInfo, lastPaymentMethod: paymentMethod });
-
-    // Llamar a la API
-    const res = await fetch("/api/create-transaction", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cart,
-        customer: shippingInfo,
-        summary: { subtotal, shippingCost, total },
-        paymentMethod,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Error al iniciar el pago");
+    if (!validateForm()) {
+      setLoading(false);
+      return;
     }
 
-    if (data.url && data.token) {
-      // Webpay requiere POST con token_ws
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = data.url;
+    try {
+      // Guardar info de envío en contexto para reintentos
+      saveShippingInfo({ ...shippingInfo, lastPaymentMethod: "webpay" });
 
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = "token_ws";
-      input.value = data.token;
+      // Llamar a la API
+      const res = await fetch("/api/create-transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cart,
+          customer: shippingInfo,
+          summary: { subtotal, shippingCost, total },
+          paymentMethod: "webpay",
+        }),
+      });
 
-      form.appendChild(input);
-      document.body.appendChild(form);
+      const data = await res.json();
 
-      // Enviar formulario automáticamente
-      form.submit();
-    } else {
-      throw new Error("Respuesta inválida del servidor");
+      if (!res.ok) {
+        throw new Error(data.error || "Error al iniciar el pago");
+      }
+
+      if (data.url && data.token) {
+        // Redirigir a Webpay
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = data.url;
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "token_ws";
+        input.value = data.token;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        throw new Error("Respuesta inválida del servidor");
+      }
+    } catch (err) {
+      console.error("handleCheckout error:", err);
+      setError(err.message || "Ocurrió un error durante el pago");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("handleCheckout error:", err);
-    setError(err.message || "Ocurrió un error durante el pago");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
@@ -201,7 +186,8 @@ const handleCheckout = async () => {
             <div className="mt-4">
               <PaymentMethods
                 paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
+                setPaymentMethod={() => {}}
+                onlyWebpay={false} // opcional, para deshabilitar selector
               />
             </div>
           </div>
@@ -215,21 +201,19 @@ const handleCheckout = async () => {
             />
 
             <div className="grid w-full justify-center space-y-4 mt-4">
-             <BuyWspButton
-              orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
-              phoneNumber="56322121504"
-            />
+              <BuyWspButton
+                orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
+                phoneNumber="56322121504"
+              />
               <Button
                 type="button"
                 className="w-full bg-gray-100 hover:bg-gray-50 py-3 items-center justify-center text-white rounded transition-colors"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
-                {loading ? "Procesando..." : `Pagar con ${paymentMethod === "webpay" ? "WebPay" : "MercadoPago"}`}
+                {loading ? "Procesando..." : "Pagar con WebPay"}
               </Button>
             </div>
-
-           
           </div>
         </div>
 

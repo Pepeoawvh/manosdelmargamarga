@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import admin, { adminDb } from "../../../../lib/firebase/admin";
+import admin, { adminDb } from "../../../lib/firebase/admin";
 import { Environment, Options, WebpayPlus } from "transbank-sdk";
 
 // Configuración explícita para PRODUCCIÓN

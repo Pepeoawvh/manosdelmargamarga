@@ -1,6 +1,6 @@
 import { WebpayPlus, Options, Environment } from "transbank-sdk";
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
-import { firestoreDB } from "../../../lib/firebase/config";
+import { firestoreDB } from "../../lib/firebase/config";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {

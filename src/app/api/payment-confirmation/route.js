@@ -1,7 +1,7 @@
 import { WebpayPlus, Environment, Options } from "transbank-sdk";
 import { NextResponse } from "next/server";
-import admin, { adminDb } from "../../../../lib/firebase/admin";
-import { handleNormalFlow } from "../payment-confirmation/transactionHelpers";
+import admin, { adminDb } from "../../../lib/firebase/admin";
+import { handleNormalFlow } from "./transactionHelpers";
 
 // Instancia de WebpayPlus en producción
 const webpayOptions = new Options(

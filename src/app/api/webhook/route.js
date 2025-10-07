@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { firestoreDB } from '../../../lib/firebase/config';
+import { firestoreDB } from '../../lib/firebase/config';
 
 export async function POST(request) {
   console.log('Firebase Project ID:', process.env.FIREBASE_PROJECT_ID);
