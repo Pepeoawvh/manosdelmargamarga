@@ -6,10 +6,14 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { cart, customer, summary, paymentMethod } = data;
+    const { cart, customer, summary } = data;
 
     if (!cart || cart.length === 0) {
-      return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "El carrito está vacío" }, { status: 400 });
+    }
+
+    if (!summary?.total || typeof summary.total !== "number") {
+      return NextResponse.json({ success: false, error: "Monto total inválido" }, { status: 400 });
     }
 
     // === Datos base ===
@@ -17,7 +21,7 @@ export async function POST(request) {
     const newOrderId = `O-${timestamp.toString().slice(-5)}`;
     const sessionId = `S-${timestamp.toString().slice(-5)}`;
     const amount = summary.total;
-    const baseUrl = process.env.BASE_URL
+    const baseUrl = process.env.BASE_URL; // debe ser tu URL de producción
     const returnUrl = `${baseUrl}/payment-success`;
 
     // === Guardar orden inicial en Firestore ===
@@ -36,18 +40,13 @@ export async function POST(request) {
 
     const ordersRef = collection(firestoreDB, "orders");
     const docRef = await addDoc(ordersRef, orderData);
-
     console.log("✅ Orden creada:", newOrderId, "->", docRef.id);
 
-    // === Configurar entorno automáticamente ===
-    const isIntegration =
-      process.env.WEBPAY_COMMERCE_CODE === "597055555532" ||
-      process.env.NODE_ENV === "development";
-
+    // === Configuración explícita para PRODUCCIÓN ===
     const options = new Options(
       process.env.WEBPAY_COMMERCE_CODE,
       process.env.WEBPAY_API_KEY_SECRET,
-      isIntegration ? Environment.Integration : Environment.Production
+      Environment.Production
     );
 
     const transaction = new WebpayPlus.Transaction(options);
@@ -66,7 +65,7 @@ export async function POST(request) {
       throw new Error("Respuesta inválida de Webpay");
     }
 
-    // === Actualizar la orden con token Webpay ===
+    // === Actualizar orden con token de Webpay ===
     await updateDoc(doc(firestoreDB, "orders", docRef.id), {
       webpayToken: createResponse.token,
       firestoreDocId: docRef.id,
@@ -84,11 +83,11 @@ export async function POST(request) {
       documentId: docRef.id,
       url: createResponse.url,
       token: createResponse.token,
-      environment: isIntegration ? "integration" : "production",
+      environment: "production",
       message: "Redirigiendo a Webpay...",
     });
   } catch (error) {
-    console.error("❌ Error general al crear transacción:", error);
+    console.error("❌ Error al crear transacción en producción:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Error desconocido al crear transacción" },
       { status: 500 }
