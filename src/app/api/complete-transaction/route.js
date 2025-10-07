@@ -15,7 +15,6 @@ export async function POST(req) {
     const data = await req.json();
     const { token_ws, orderId } = data;
 
-    // Validación mínima del token
     if (!token_ws || typeof token_ws !== "string" || token_ws.length !== 64) {
       return NextResponse.json({ success: false, error: "Token inválido" }, { status: 400 });
     }
@@ -34,36 +33,28 @@ export async function POST(req) {
       );
     }
 
-    // Estado de la transacción
     const status = transactionResult.response_code === 0 ? "approved" : "rejected";
     const isApproved = status === "approved";
-
-    console.log("✅ Resultado de transacción:", {
-      buy_order: transactionResult.buy_order,
-      status,
-      isApproved,
-      response_code: transactionResult.response_code,
-    });
-
     const updateOrderId = orderId || transactionResult.buy_order;
+
     if (!updateOrderId) {
       return NextResponse.json({ success: false, error: "No se pudo determinar el ID de la orden" }, { status: 400 });
     }
 
     // Actualizar orden en Firestore
-    const updateResult = await updateOrderInFirestore(updateOrderId, status, isApproved, transactionResult, token_ws);
-    if (updateResult.error) {
-      return NextResponse.json({ success: false, error: updateResult.error }, { status: 500 });
+    const orderData = await updateOrderInFirestore(updateOrderId, status, isApproved, transactionResult, token_ws);
+
+    if (!orderData) {
+      return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      orderId: updateOrderId,
+      order: orderData, // ✅ Devuelve toda la orden
       status,
       isApproved,
       details: {
         response_code: transactionResult.response_code,
-        status: transactionResult.status,
         authorization_code: transactionResult.authorization_code,
         payment_type_code: transactionResult.payment_type_code,
         transaction_date: transactionResult.transaction_date,
@@ -80,19 +71,16 @@ export async function POST(req) {
 
 async function updateOrderInFirestore(orderId, status, isApproved, transactionResult, token_ws) {
   try {
-    console.log("📌 Actualizando orden en Firestore:", { orderId, status, isApproved });
-
     const orderDocRef = adminDb.collection("orders").doc(orderId);
     const orderDoc = await orderDocRef.get();
 
     if (!orderDoc.exists) {
-      // Buscar por buy_order si no existe el docId directo
       const snapshot = await adminDb.collection("orders")
         .where("cart.buy_order", "==", orderId)
         .limit(1)
         .get();
 
-      if (snapshot.empty) return { error: `Orden no encontrada: ${orderId}` };
+      if (snapshot.empty) return null;
 
       await snapshot.docs[0].ref.update({
         paymentStatus: status,
@@ -111,8 +99,7 @@ async function updateOrderInFirestore(orderId, status, isApproved, transactionRe
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      console.log("✅ Orden actualizada por búsqueda alternativa:", snapshot.docs[0].id);
-      return { success: true };
+      return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
     }
 
     await orderDocRef.update({
@@ -132,10 +119,9 @@ async function updateOrderInFirestore(orderId, status, isApproved, transactionRe
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log("✅ Orden actualizada correctamente:", orderId);
-    return { success: true };
+    return { id: orderDoc.id, ...orderDoc.data() };
   } catch (firestoreError) {
     console.error("❌ Error al actualizar la orden:", firestoreError);
-    return { error: firestoreError.message };
+    return null;
   }
 }
