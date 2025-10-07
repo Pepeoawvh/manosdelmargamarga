@@ -109,48 +109,63 @@ const CheckOut = () => {
   };
 
   // 🔹 Implementación de handleCheckout
-  const handleCheckout = async () => {
-    setLoading(true);
-    setError(null);
+const handleCheckout = async () => {
+  setLoading(true);
+  setError(null);
 
-    if (!validateForm()) {
-      setLoading(false);
-      return;
+  if (!validateForm()) {
+    setLoading(false);
+    return;
+  }
+
+  try {
+    // Guardar info de envío en contexto para reintentos
+    saveShippingInfo({ ...shippingInfo, lastPaymentMethod: paymentMethod });
+
+    // Llamar a la API
+    const res = await fetch("/api/create-transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cart,
+        customer: shippingInfo,
+        summary: { subtotal, shippingCost, total },
+        paymentMethod,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error al iniciar el pago");
     }
 
-    try {
-      // Guardar info de envío en contexto para reintentos
-      saveShippingInfo({ ...shippingInfo, lastPaymentMethod: paymentMethod });
+    if (data.url && data.token) {
+      // Webpay requiere POST con token_ws
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.url;
 
-      // Llamar a tu API de checkout
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cart,
-          customer: shippingInfo,
-          summary: { subtotal, shippingCost, total },
-          paymentMethod,
-        }),
-      });
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "token_ws";
+      input.value = data.token;
 
-      const data = await res.json();
+      form.appendChild(input);
+      document.body.appendChild(form);
 
-      if (!res.ok) {
-        throw new Error(data.error || "Error al iniciar el pago");
-      }
-
-      if (data.url) {
-        // Redirigir a WebPay
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error("handleCheckout error:", err);
-      setError(err.message || "Ocurrió un error durante el pago");
-    } finally {
-      setLoading(false);
+      // Enviar formulario automáticamente
+      form.submit();
+    } else {
+      throw new Error("Respuesta inválida del servidor");
     }
-  };
+  } catch (err) {
+    console.error("handleCheckout error:", err);
+    setError(err.message || "Ocurrió un error durante el pago");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
