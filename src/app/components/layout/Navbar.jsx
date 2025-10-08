@@ -380,7 +380,7 @@ const Navbar = () => {
     <>
       <nav
         ref={navRef}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60"> ${
           isScrolled
             ? "bg-white shadow-md py-2"
             : "bg-white/90 backdrop-blur-sm py-3"

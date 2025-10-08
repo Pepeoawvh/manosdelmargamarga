@@ -35,7 +35,7 @@ export default function ClientProviders({ children }) {
     <CartProvider>
       <div className="relative z-10">
         <Navbar />
-        <main className="text-emerald-800 md:max-w-6xl md:mx-auto md:px-4 pt-16">
+        <main className="text-emerald-800 md:max-w-6xl md:mx-auto md:px-4">
           {children}
         </main>
         <Footer />

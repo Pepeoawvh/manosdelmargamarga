@@ -4,14 +4,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { firestoreDB } from "../../lib/firebase/config";
-
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 // Componentes para cada tipo de slide
 const FullSlide = ({ slide }) => (
-  <div className="relative mt-20 h-auto md:h-[600px] lg:h-[500px] w-full overflow-hidden">
+  <div className="relative h-auto md:h-[600px] lg:h-[500px] w-full overflow-hidden">
     <div
       className="absolute inset-0 bg-cover bg-center md:h-full h-auto"
       style={{
@@ -53,7 +52,7 @@ const FullSlide = ({ slide }) => (
 );
 
 const ImageSlide = ({ slide }) => (
-  <div className="relative mt-20 h-auto md:h-[600px] lg:h-[500px] w-full overflow-hidden">
+  <div className="relative  h-auto md:h-[600px] lg:h-[500px] w-full overflow-hidden">
     <img
       src={slide.imageUrl}
       alt={slide.title || "Slide"}
@@ -108,10 +107,16 @@ export default function HeroCarousel() {
               id: doc.id,
               ...data,
               type: data.type || "image",
-              primaryButton:
-                data.primaryButton || { show: false, text: "", url: "" },
-              secondaryButton:
-                data.secondaryButton || { show: false, text: "", url: "" },
+              primaryButton: data.primaryButton || {
+                show: false,
+                text: "",
+                url: "",
+              },
+              secondaryButton: data.secondaryButton || {
+                show: false,
+                text: "",
+                url: "",
+              },
               visible: data.visible ?? true,
             };
           })

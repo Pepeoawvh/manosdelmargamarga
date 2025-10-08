@@ -4,60 +4,53 @@ import { motion } from "framer-motion";
 const steps = [
   {
     number: "1",
-    title: "Haces tu consulta",
-    description: "Completando el formulario aquí",
+    title: "Nos Consultas",
+    description: "por whatsapp comprando a través del sitio",
     icon: "🙋‍♂️",
   },
   {
     number: "2",
     title: "Cotizamos",
     description:
-      "Enviaremos información detallada que incluirá valores, formas de envío y condiciones de compra.",
+      "Contamos con sistema de cotización rápida, completa y con imagenes referenciales, para que puedas presentar propuestas",
     icon: "💬",
   },
   {
     number: "3",
-    title: "Abonas y envías info",
+    title: "Pago > Ingreso de pedido",
     description:
-      "Necesaria para diseño o Prueba de Impresión. Te integramos a calendario de trabajo.",
+      "Transfieres o envias OC. Ingresamos pedido en calendario de trabajo y fijamos fechas.",
     icon: "💵",
   },
   {
     number: "4",
-    title: "Abonas y envías info",
+    title: "Prueba Impresa",
     description:
-      "Si requieres diseño o enviaste tus archivos, te contactará directamente la diseñadora con los pasos a seguir; según tu caso particular.",
+      "Independiente a si tomas nuestro servicio de diseño o se usan tus archivos, SIEMPRE hacemos y te enviamos Imágenes de PRUEBA impresa, para APROBACIÓN.",
     icon: "🎨",
   },
   {
     number: "5",
     title: "Producción",
     description:
-      "Aquí solo debes esperar… Pero nos mantenemos en contacto para avisar que ya está listo tu pedido.",
+      "Nos ponemos manos a la obra. Al  iniciar esta etapa indicaremos fecha de envio.",
     icon: "⚙️",
   },
   {
     number: "6",
-    title: "Saldo",
+    title: "Despachamos",
     description:
-      "Aquí finiquitamos pago de Saldo, facturación, detalles de despachos especiales, etc.",
-    icon: "📑",
-  },
-  {
-    number: "7",
-    title: "Despacho",
-    description:
-      "• Nacional: Arica a Punta Arenas (link de seguimiento por correo). \n• Local: Olmué, Limache, P.Blanca, Quilpué, Villa Alemana, Con-Con, Reñaca, Valparaíso, Placilla, Curauma. \n• Retiro personal: a coordinar según disponibilidad en Quilpué.",
-    icon: "🚚",
+      "El medio de entrega queda establecido al momento de cotizar.Normalmente, lo hacemos por Blue Express a domicilio.Para plazos acotados usamos Chilexpress* (costo adicional de acercamiento)Y también puedes venir a retirar a nuestro taller sin costo.",
+      icon: "🚚",
   },
 ];
 
 export default function HacerPedido() {
   return (
-    <section className="py-20 bg-white text-[#798f38]">
+    <section className="py-20 bg-white text-[#5e8c30]">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12">
-          ¿Cómo hago un pedido?
+          ¿Cómo funciona un pedido?
         </h2>
 
         <div className="flex flex-col gap-8 px-20">
@@ -68,10 +61,10 @@ export default function HacerPedido() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="flex items-start gap-6 bg-[#d2d9be] rounded-xl p-6 shadow-md"
+              className="flex items-start gap-6 bg-[#ecf7cd] rounded-xl p-6 shadow-md"
             >
               {/* Número e ícono */}
-              <div className="flex flex-col items-center justify-center bg-[#798f38] text-white rounded-lg w-16 h-16 font-bold text-xl shrink-0">
+              <div className="flex flex-col items-center justify-center bg-[#5e8c30] text-white rounded-lg w-16 h-16 font-bold text-xl shrink-0">
                 {step.number}
               </div>
               <div>

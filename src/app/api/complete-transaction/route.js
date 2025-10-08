@@ -59,6 +59,19 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
     }
 
+    // BLOQUE NUEVO: Disparar notificaciones por correo (no bloquea la respuesta)
+    try {
+      fetch(`${process.env.BASE_URL}/api/notify-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.id }),
+        cache: "no-store",
+      }).catch(() => {});
+    } catch (e) {
+      console.warn("No se pudo disparar notify-order:", e?.message);
+    }
+    // FIN BLOQUE NUEVO
+
     return NextResponse.json({
       success: true,
       order: orderData, // Devuelve la orden
