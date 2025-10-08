@@ -3,8 +3,8 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import admin, { adminDb } from "../../../lib/firebase/admin";
-import { CustomerReceipt } from "../../../components/emails/CustomerReceipt";
-import { AdminNotice } from "../../../components/emails/AdminNotice";
+import { CustomerReceipt } from "../../components/emails/customerReceipt";
+import { AdminNotice } from "../../components/emails/AdminNotice";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
