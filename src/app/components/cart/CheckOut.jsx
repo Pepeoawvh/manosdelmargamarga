@@ -164,7 +164,7 @@ const CheckOut = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
-      <PaymentNotice />
+      {/* <PaymentNotice /> */}
       <div className="p-4 md:p-6 border-b border-[#c4de86]">
         <h1 className="text-md font-bold text-gray-800">Finalizar Compra</h1>
         {isRetry && (
