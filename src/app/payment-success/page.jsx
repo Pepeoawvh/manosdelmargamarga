@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import OrderSummary from "../components/cart/OrderSummary";
 import { FaCheckCircle } from "react-icons/fa";
 
 export default function PaymentSuccess() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   // token_ws viene por GET desde Webpay (API v1.1+)
@@ -26,6 +27,15 @@ export default function PaymentSuccess() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   };
+
+  // Guard: si no hay token válido, salir de inmediato a payment-failure
+  useEffect(() => {
+    const t = token_ws?.trim();
+    if (!t || t.length !== 64) {
+      router.replace("/payment-failure?reason=missing_token");
+      return;
+    }
+  }, [token_ws, router]);
 
   // Formateador robusto de fecha
   const safeFormatDate = (ts) => {
@@ -95,6 +105,8 @@ export default function PaymentSuccess() {
       };
       try {
         if (!token_ws || token_ws.length !== 64) {
+          // Este return nunca debería ejecutarse por el guard anterior,
+          // pero queda como defensa extra si router aún no cambió la ruta.
           throw new Error("No se recibió token_ws válido");
         }
         const result = await fetchCompleteTransaction(token_ws);
@@ -116,7 +128,10 @@ export default function PaymentSuccess() {
       }
     };
 
-    processTransaction();
+    // Solo procesar si el token es de 64 chars
+    if (token_ws && token_ws.length === 64) {
+      processTransaction();
+    }
   }, [token_ws]);
 
   if (loading) {
@@ -135,10 +150,16 @@ export default function PaymentSuccess() {
           {JSON.stringify(debugInfo, null, 2)}
         </pre>
         <div className="flex gap-3">
-          <Link href="/catalogo" className="py-2 px-4 bg-[#5e8c30] hover:bg-[#4d7528] text-white rounded transition-colors">
+          <Link
+            href="/catalogo"
+            className="py-2 px-4 bg-[#5e8c30] hover:bg-[#4d7528] text-white rounded transition-colors"
+          >
             Volver al catálogo
           </Link>
-          <Link href="/payment-failure" className="py-2 px-4 bg-stone-100 hover:bg-stone-200 rounded text-stone-800 transition-colors">
+          <Link
+            href="/payment-failure"
+            className="py-2 px-4 bg-stone-100 hover:bg-stone-200 rounded text-stone-800 transition-colors"
+          >
             Ver detalles de fallo
           </Link>
         </div>
@@ -157,16 +178,25 @@ export default function PaymentSuccess() {
   return (
     <div className="min-h-screen bg-[#f5f3e6] py-12">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 md:p-8">
-        {/* Encabezado adaptado a paleta */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2">
-            <FaCheckCircle className={`text-3xl ${isApproved ? "text-[#5e8c30]" : "text-amber-600"}`} />
-            <h1 className={`text-2xl md:text-3xl font-semibold ${isApproved ? "text-[#46621f]" : "text-amber-700"}`}>
-              {isApproved ? "¡Felicidades! Tu pedido se ha completado con éxito" : "Pago recibido, en revisión"}
+            <FaCheckCircle
+              className={`text-3xl ${isApproved ? "text-[#5e8c30]" : "text-amber-600"}`}
+            />
+            <h1
+              className={`text-2xl md:text-3xl font-semibold ${
+                isApproved ? "text-[#46621f]" : "text-amber-700"
+              }`}
+            >
+              {isApproved
+                ? "¡Felicidades! Tu pedido se ha completado con éxito"
+                : "Pago recibido, en revisión"}
             </h1>
           </div>
           <p className="text-stone-600 mt-2">
-            {isApproved ? "Gracias por confiar en nosotros." : "Si el emisor finaliza el proceso, te informaremos el resultado."}
+            {isApproved
+              ? "Gracias por confiar en nosotros."
+              : "Si el emisor finaliza el proceso, se informará el resultado."}
           </p>
 
           <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
@@ -181,13 +211,13 @@ export default function PaymentSuccess() {
           </div>
         </div>
 
-        {/* Datos del cliente y envío */}
         {orderDetails.customer && (
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="bg-[#faf8ee] rounded p-4 border border-[#ece7d2]">
               <h3 className="font-medium text-[#3f4f1c] mb-2">Datos del Cliente</h3>
               <p>
-                <span className="font-medium">Nombre:</span> {orderDetails.customer.firstName} {orderDetails.customer.lastName}
+                <span className="font-medium">Nombre:</span>{" "}
+                {orderDetails.customer.firstName} {orderDetails.customer.lastName}
               </p>
               <p>
                 <span className="font-medium">Email:</span> {orderDetails.customer.email}
@@ -214,7 +244,6 @@ export default function PaymentSuccess() {
           </div>
         )}
 
-        {/* Resumen del pedido */}
         {orderDetails.cart && orderDetails.summary ? (
           <OrderSummary
             cart={orderDetails.cart}
@@ -228,7 +257,6 @@ export default function PaymentSuccess() {
           </div>
         )}
 
-        {/* Acciones finales */}
         <div className="mt-6 flex flex-col md:flex-row gap-3">
           <Link
             href="/catalogo"

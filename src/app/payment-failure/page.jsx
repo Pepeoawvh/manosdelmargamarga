@@ -1,60 +1,77 @@
 'use client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { FiAlertTriangle } from 'react-icons/fi';
 
 export default function PaymentFailure() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const tbkToken = searchParams.get('TBK_TOKEN');
-  const tbkOrdenCompra = searchParams.get('TBK_ORDEN_COMPRA');
-  const retry = searchParams.get('retry');
+
+  // webpay-return puede enviar motivo=cancelled | missing_or_invalid_token | exception
+  const motivo = useMemo(() => searchParams.get('motivo') || '', [searchParams]);
+  const buyOrder = useMemo(() => searchParams.get('buy_order') || '', [searchParams]);
+  const retry = useMemo(() => searchParams.get('retry') || '', [searchParams]);
 
   useEffect(() => {
-    console.log('Pago cancelado o fallido:', { tbkToken, tbkOrdenCompra, retry });
-  }, [tbkToken, tbkOrdenCompra, retry]);
+    console.log('Pago cancelado o fallido:', { motivo, buyOrder, retry });
+  }, [motivo, buyOrder, retry]);
 
   const handleRetryPayment = () => {
     router.push('/checkout?retry=true');
   };
 
+  const title = motivo === 'cancelled'
+    ? 'Pago cancelado'
+    : motivo === 'exception'
+    ? 'Error inesperado'
+    : 'Pago no completado';
+
+  const subtitle =
+    motivo === 'cancelled'
+      ? 'El proceso fue cancelado desde la pasarela. Puedes intentarlo nuevamente.'
+      : motivo === 'missing_or_invalid_token'
+      ? 'No se recibió el comprobante de pago. Intenta nuevamente.'
+      : 'No pudimos completar el pago. Reintenta en unos segundos.';
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+    <div className="min-h-screen bg-[#f5f3e6] flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-xl bg-white rounded-lg shadow border border-[#ece7d2] p-8 text-center">
         <div className="flex justify-center mb-4">
-          <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center">
+          <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+            <FiAlertTriangle className="text-2xl text-amber-700" aria-hidden="true" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Pago no completado
+        <h1 className="text-2xl font-semibold text-[#3f4f1c] mb-2">
+          {title}
         </h1>
-        <p className="text-gray-600 text-sm mb-6">
-          El proceso de pago fue cancelado o no autorizado. Puedes intentarlo nuevamente.
+        <p className="text-stone-700 text-sm mb-6">
+          {subtitle}
         </p>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col md:flex-row gap-3">
           <button
             onClick={handleRetryPayment}
-            className="w-full py-3 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors"
+            className="w-full py-3 rounded bg-[#5e8c30] hover:bg-[#4d7528] text-white font-medium transition-colors"
           >
             Volver a intentar el pago
           </button>
 
           <Link
             href="/catalogo"
-            className="w-full py-3 rounded border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+            className="w-full py-3 rounded border border-[#ece7d2] bg-[#faf8ee] hover:bg-[#f3efdf] text-[#3f4f1c] font-medium transition-colors text-center"
           >
             Volver al catálogo
           </Link>
         </div>
 
-        {(tbkToken || tbkOrdenCompra) && (
-          <div className="mt-6 text-xs text-gray-500 border-t pt-3">
-            {tbkToken && <p>ID de transacción: {tbkToken}</p>}
-            {tbkOrdenCompra && <p>Orden: {tbkOrdenCompra}</p>}
+        {(buyOrder || motivo) ? (
+          <div className="mt-6 text-xs text-stone-600 border-t border-[#ece7d2] pt-3 text-left">
+            {buyOrder && <p><span className="font-medium">Orden:</span> {buyOrder}</p>}
+            {motivo && <p><span className="font-medium">Motivo:</span> {motivo}</p>}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
