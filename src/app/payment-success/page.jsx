@@ -9,7 +9,7 @@ export default function PaymentSuccess() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // token_ws viene por GET desde Webpay (API v1.1+)
+  // token_ws viene por GET desde Webpay (redirigido por /api/webpay-return)
   const token_ws = useMemo(() => searchParams.get("token_ws") || "", [searchParams]);
 
   const [orderDetails, setOrderDetails] = useState(null);
@@ -105,8 +105,7 @@ export default function PaymentSuccess() {
       };
       try {
         if (!token_ws || token_ws.length !== 64) {
-          // Este return nunca debería ejecutarse por el guard anterior,
-          // pero queda como defensa extra si router aún no cambió la ruta.
+          // Defensa extra si aún no se ejecutó el replace del guard
           throw new Error("No se recibió token_ws válido");
         }
         const result = await fetchCompleteTransaction(token_ws);
@@ -128,7 +127,6 @@ export default function PaymentSuccess() {
       }
     };
 
-    // Solo procesar si el token es de 64 chars
     if (token_ws && token_ws.length === 64) {
       processTransaction();
     }
@@ -172,8 +170,12 @@ export default function PaymentSuccess() {
     ? { text: "Pago aprobado", cls: "bg-[#e5f2d9] text-[#46621f]" }
     : { text: "Pago no aprobado", cls: "bg-amber-100 text-amber-800" };
 
+  // Preferir finalizedAt; luego transaction_date; luego createdAt
   const shownDate =
-    orderDetails.createdAt || orderDetails?.transactionDetails?.transaction_date || null;
+    orderDetails.finalizedAt ||
+    orderDetails?.transactionDetails?.transaction_date ||
+    orderDetails.createdAt ||
+    null;
 
   return (
     <div className="min-h-screen bg-[#f5f3e6] py-12">

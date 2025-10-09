@@ -8,7 +8,6 @@ import PaymentMethods from "./PaymentMethods";
 import Button from "../../components/ui/Button";
 import BuyWspButton from "./BuyWspButton";
 import PaymentNotice from "../ui/Notice";
-import { firestoreDB } from "../../../lib/firebase/config";
 
 const CheckOut = () => {
   const searchParams = useSearchParams();
@@ -47,9 +46,7 @@ const CheckOut = () => {
   useEffect(() => {
     if (isRetry && savedShippingInfo) {
       setShippingInfo(savedShippingInfo);
-      setMessage(
-        "Tus datos se han recuperado. Puedes intentar nuevamente el pago."
-      );
+      setMessage("Tus datos se han recuperado. Puedes intentar nuevamente el pago.");
     }
   }, [isRetry, savedShippingInfo]);
 
@@ -111,6 +108,12 @@ const CheckOut = () => {
       // Guardar info de envío en contexto para reintentos
       saveShippingInfo({ ...shippingInfo, lastPaymentMethod: "webpay" });
 
+      // Marcar intento de pago (UX y diagnóstico)
+      try {
+        startPaymentAttempt?.();
+        localStorage.setItem("lastPaymentAttempt", Date.now().toString());
+      } catch {}
+
       // Llamar a la API
       const res = await fetch("/api/create-transaction", {
         method: "POST",
@@ -130,7 +133,9 @@ const CheckOut = () => {
       }
 
       if (data.url && data.token) {
-        // Redirigir a Webpay
+        // UX: muestra feedback mientras se redirige
+        setMessage("Redirigiendo a Webpay...");
+        // Redirigir a Webpay con form POST
         const form = document.createElement("form");
         form.method = "POST";
         form.action = data.url;
@@ -149,6 +154,9 @@ const CheckOut = () => {
     } catch (err) {
       console.error("handleCheckout error:", err);
       setError(err.message || "Ocurrió un error durante el pago");
+      try {
+        cancelPaymentAttempt?.();
+      } catch {}
     } finally {
       setLoading(false);
     }
@@ -161,8 +169,7 @@ const CheckOut = () => {
         <h1 className="text-md font-bold text-gray-800">Finalizar Compra</h1>
         {isRetry && (
           <p className="text-sm text-amber-600 mt-1">
-            Estás realizando un nuevo intento de pago. Tus datos se han
-            mantenido.
+            Estás realizando un nuevo intento de pago. Tus datos se han mantenido.
           </p>
         )}
       </div>
@@ -190,7 +197,7 @@ const CheckOut = () => {
               <PaymentMethods
                 paymentMethod={paymentMethod}
                 setPaymentMethod={() => {}}
-                onlyWebpay={false} // opcional, para deshabilitar selector
+                onlyWebpay={false}
               />
             </div>
           </div>
@@ -206,12 +213,13 @@ const CheckOut = () => {
             <div className="grid w-full justify-center space-y-4 mt-4">
               <Button
                 type="button"
-                className="w-full bg-[#6e2779] hover:bg-[#a83cb9] py-3 items-center justify-center text-white rounded"
+                className="w-full bg-[#5e8c30] hover:bg-[#4d7528] py-3 items-center justify-center text-white rounded"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
-                {loading ? "Procesando..." : "Pagar con WebPay"}
+                {loading ? "Redirigiendo..." : "Pagar con Webpay"}
               </Button>
+
               <BuyWspButton
                 orderData={{
                   customer: shippingInfo,
@@ -225,8 +233,8 @@ const CheckOut = () => {
         </div>
 
         <p className="text-xs text-gray-500 mt-4 text-center">
-          Al completar la compra, aceptas nuestros términos y condiciones y
-          política de privacidad.
+          Al completar la compra, aceptas nuestros términos y condiciones y política de
+          privacidad.
         </p>
       </form>
     </div>

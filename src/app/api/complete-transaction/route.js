@@ -91,7 +91,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
-      order: orderData, // Devuelve la orden
+      order: orderData,
       status,
       isApproved,
       details: {
@@ -117,28 +117,33 @@ export async function POST(req) {
 
 async function updateOrderInFirestore(orderIdOrBuyOrder, status, isApproved, tr, token_ws) {
   try {
+    const baseUpdate = {
+      paymentStatus: status,
+      isApproved,
+      transactionDetails: {
+        buy_order: tr.buy_order,
+        session_id: tr.session_id,
+        amount: tr.amount,
+        card_number: tr.card_detail?.card_number,
+        authorization_code: tr.authorization_code,
+        payment_type_code: tr.payment_type_code,
+        transaction_date: tr.transaction_date,
+        accounting_date: tr.accounting_date,
+        response_code: tr.response_code,
+        status: tr.status,
+      },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      finalizedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
     // 1) Intentar por docId directo (cuando el frontend pasó orderId)
     if (orderIdOrBuyOrder && orderIdOrBuyOrder.length < 64) {
       const byIdRef = adminDb.collection("orders").doc(orderIdOrBuyOrder);
       const byIdDoc = await byIdRef.get();
       if (byIdDoc.exists) {
         await byIdRef.update({
-          paymentStatus: status,
-          isApproved,
+          ...baseUpdate,
           webpayToken: token_ws,
-          transactionDetails: {
-            buy_order: tr.buy_order,
-            session_id: tr.session_id,
-            amount: tr.amount,
-            card_number: tr.card_detail?.card_number,
-            authorization_code: tr.authorization_code,
-            payment_type_code: tr.payment_type_code,
-            transaction_date: tr.transaction_date,
-            accounting_date: tr.accounting_date,
-            response_code: tr.response_code,
-            status: tr.status,
-          },
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return { id: byIdDoc.id, ...byIdDoc.data(), paymentStatus: status, isApproved };
       }
@@ -152,23 +157,7 @@ async function updateOrderInFirestore(orderIdOrBuyOrder, status, isApproved, tr,
       .get();
     if (!tokenSnap.empty) {
       const doc = tokenSnap.docs[0];
-      await doc.ref.update({
-        paymentStatus: status,
-        isApproved,
-        transactionDetails: {
-          buy_order: tr.buy_order,
-          session_id: tr.session_id,
-          amount: tr.amount,
-          card_number: tr.card_detail?.card_number,
-          authorization_code: tr.authorization_code,
-          payment_type_code: tr.payment_type_code,
-          transaction_date: tr.transaction_date,
-          accounting_date: tr.accounting_date,
-          response_code: tr.response_code,
-          status: tr.status,
-        },
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      await doc.ref.update(baseUpdate);
       return { id: doc.id, ...doc.data(), paymentStatus: status, isApproved };
     }
 
@@ -182,22 +171,8 @@ async function updateOrderInFirestore(orderIdOrBuyOrder, status, isApproved, tr,
       if (!byBuyOrderSnap.empty) {
         const doc = byBuyOrderSnap.docs[0];
         await doc.ref.update({
-          paymentStatus: status,
-          isApproved,
+          ...baseUpdate,
           webpayToken: token_ws,
-          transactionDetails: {
-            buy_order: tr.buy_order,
-            session_id: tr.session_id,
-            amount: tr.amount,
-            card_number: tr.card_detail?.card_number,
-            authorization_code: tr.authorization_code,
-            payment_type_code: tr.payment_type_code,
-            transaction_date: tr.transaction_date,
-            accounting_date: tr.accounting_date,
-            response_code: tr.response_code,
-            status: tr.status,
-          },
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return { id: doc.id, ...doc.data(), paymentStatus: status, isApproved };
       }
