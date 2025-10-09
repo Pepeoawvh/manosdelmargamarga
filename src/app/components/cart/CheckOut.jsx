@@ -47,7 +47,9 @@ const CheckOut = () => {
   useEffect(() => {
     if (isRetry && savedShippingInfo) {
       setShippingInfo(savedShippingInfo);
-      setMessage("Tus datos se han recuperado. Puedes intentar nuevamente el pago.");
+      setMessage(
+        "Tus datos se han recuperado. Puedes intentar nuevamente el pago."
+      );
     }
   }, [isRetry, savedShippingInfo]);
 
@@ -159,7 +161,8 @@ const CheckOut = () => {
         <h1 className="text-md font-bold text-gray-800">Finalizar Compra</h1>
         {isRetry && (
           <p className="text-sm text-amber-600 mt-1">
-            Estás realizando un nuevo intento de pago. Tus datos se han mantenido.
+            Estás realizando un nuevo intento de pago. Tus datos se han
+            mantenido.
           </p>
         )}
       </div>
@@ -200,26 +203,30 @@ const CheckOut = () => {
               total={total}
             />
 
-            <div className="grid w-full justify-center space-y-4 mt-4 mb-4">
-                          <Button
+            <div className="grid w-full justify-center space-y-4 mt-4">
+              <Button
                 type="button"
-                className="w-full text-lg  bg-[#6e2779] hover:bg-[#a83cb9] py-3 items-center justify-center text-white rounded transition-colors"
+                className="w-full bg-[#6e2779] hover:bg-[#a83cb9] py-3 items-center justify-center text-white rounded"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
                 {loading ? "Procesando..." : "Pagar con WebPay"}
               </Button>
               <BuyWspButton
-                orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
+                orderData={{
+                  customer: shippingInfo,
+                  cart,
+                  summary: { subtotal, shippingCost, total },
+                }}
                 phoneNumber="56322121504"
               />
-
             </div>
           </div>
         </div>
 
         <p className="text-xs text-gray-500 mt-4 text-center">
-          Al completar la compra, aceptas nuestros términos y condiciones y política de privacidad.
+          Al completar la compra, aceptas nuestros términos y condiciones y
+          política de privacidad.
         </p>
       </form>
     </div>
