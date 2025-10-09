@@ -38,10 +38,10 @@ const BuyWspButton = ({ orderData, phoneNumber }) => {
   return (
     <button
       onClick={handleClick}
-      className="px-4 h-full py-5 text-lg bg-[#b4cf66] text-white rounded hover:bg-[#87a644] transition"
+      className="w-full text-sm text-shadow-md bg-[#9acb05] hover:bg-[#b4cf66] py-3 px-16 items-center justify-center text-white rounded transition-colors"
     >
-      Realizar compra por WhatsApp
-    </button>
+      Pagar con Transferencia 
+      </button>
   );
 };
 

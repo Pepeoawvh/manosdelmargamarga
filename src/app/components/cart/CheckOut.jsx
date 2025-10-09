@@ -200,19 +200,20 @@ const CheckOut = () => {
               total={total}
             />
 
-            <div className="grid w-full justify-center space-y-4 mt-4">
-              <BuyWspButton
-                orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
-                phoneNumber="56322121504"
-              />
-              <Button
+            <div className="grid w-full justify-center space-y-4 mt-4 mb-4">
+                          <Button
                 type="button"
-                className="w-full bg-gray-100 hover:bg-gray-50 py-3 items-center justify-center text-white rounded transition-colors"
+                className="w-full text-lg  bg-[#6e2779] hover:bg-[#a83cb9] py-3 items-center justify-center text-white rounded transition-colors"
                 disabled={loading || cart.length === 0}
                 onClick={handleCheckout}
               >
                 {loading ? "Procesando..." : "Pagar con WebPay"}
               </Button>
+              <BuyWspButton
+                orderData={{ customer: shippingInfo, cart, summary: { subtotal, shippingCost, total } }}
+                phoneNumber="56322121504"
+              />
+
             </div>
           </div>
         </div>

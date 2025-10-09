@@ -40,7 +40,7 @@ export default function PaymentNotice({ cart, shippingInfo, summary }) {
           Actualmente estamos realizando ajustes en la pasarela de pago Transbank. Por el momento no está operativa.
         </p>
         <p className="text-sm font-bold mb-6">
-          Para realizar tu compra, rellena los datos del formulario y presiona el botón "Realizar compra por Whatsapp". 
+          Para realizar tu compra, rellena los datos del formulario y presiona el botón "Pagar con transferencia". 
         </p>
         <p className="text-center">¡Te atenderemos a la brevedad!</p>
 

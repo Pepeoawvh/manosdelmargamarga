@@ -7,7 +7,7 @@ const steps = [
     title: "1. Remojar el papel germinable",
     description:
       "Pica el papel y remójalo durante 12 horas (mínimo 4). Mantén la temperatura templada y evita exceso de agua. No necesitan mucha luz en esta etapa.",
-    icon: <FaTint className="text-[#5ea8e4] text-2xl" />,
+    icon: <FaTint className="text-[#5ea8e4] bg-[] text-2xl" />,
   },
   {
     title: "2. Poner en tierra fértil",
@@ -31,7 +31,7 @@ const steps = [
 
 export default function TutorialPlanting() {
   return (
-    <section className="py-8 bg-white text-[#512a1d]">
+    <section className="py-8 bg-[#eff2d5] text-[#467302]">
       <div className="max-w-5xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
           ¿Cómo plantar papel germinable <br /> Manos del Marga-Marga?
@@ -41,7 +41,7 @@ export default function TutorialPlanting() {
             <motion.div
               key={index}
               whileHover={{ scale: 1.02 }}
-              className="flex items-start gap-4 border rounded-xl p-6 hover:bg-[#f0f0e5] transition"
+              className="flex items-start gap-4 border rounded-xl p-6 bg-white  transition"
             >
               <div className="flex-shrink-0">{step.icon}</div>
               <div>

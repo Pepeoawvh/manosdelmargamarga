@@ -2,7 +2,7 @@
 
 const PaymentMethods = ({ paymentMethod, setPaymentMethod }) => {
   return (
-    <div className="mb-6">
+    <div className="mb-6 hidden">
       <h3 className="text-base font-medium mb-3">Método de pago</h3>
       <div className="space-y-2">
         <label className="flex items-center p-3 border rounded-md bg-white cursor-pointer hover:bg-gray-50">

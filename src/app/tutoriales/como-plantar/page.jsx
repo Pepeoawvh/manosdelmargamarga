@@ -28,7 +28,7 @@ export default function ComoPlantarPage() {
       {/* Call to action final */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-[#7a4838] mb-6">
+          <h2 className="text-3xl font-bold text-[#73a224] mb-6">
             ¿Buscas un hermoso recuerdo?
           </h2>
           <p className="text-gray-700 mb-8">
@@ -36,7 +36,7 @@ export default function ComoPlantarPage() {
           </p>
           <a
             href="/catalogo"
-            className="bg-[#5f3527] text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
+            className="bg-[#f5f3e9]  text-gray-800 px-8 py-3 rounded-lg hover:bg-[#e3e1d8] transition-colors"
           >
             Ir al catálogo
           </a>
