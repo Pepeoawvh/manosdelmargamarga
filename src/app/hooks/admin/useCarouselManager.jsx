@@ -1,109 +1,93 @@
-import { useState, useEffect } from 'react';
-import { collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot, serverTimestamp, writeBatch } from 'firebase/firestore';
-import { firestoreDB } from '../../../lib/firebase/config';
+import { useState, useEffect } from "react";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  writeBatch,
+  getDocs,
+} from "firebase/firestore";
+import { firestoreDB } from "../../../lib/firebase/config";
 
 export default function useCarouselManager() {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Cargar slides
   useEffect(() => {
-    const q = query(collection(firestoreDB, 'carousel-slides'), orderBy('order', 'asc'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const slidesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setSlides(slidesData);
-      setLoading(false);
-    }, (err) => {
-      setError(err.message);
-      setLoading(false);
-    });
-    
-    return () => unsubscribe();
+    const q = query(collection(firestoreDB, "carousel-slides"), orderBy("order", "asc"));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const slidesData = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setSlides(slidesData);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+    return unsubscribe;
   }, []);
 
-  // Añadir slide (solo con URL)
   const addSlide = async (slideData) => {
     try {
-      // Verificar que hay una URL de imagen
-      if (!slideData.imageUrl) {
-        return { success: false, error: 'Se requiere una URL de imagen' };
-      }
-      
-      // Determinar el orden (último + 1)
-      const order = slides.length > 0 ? Math.max(...slides.map(s => s.order)) + 1 : 1;
-      
-      await addDoc(collection(firestoreDB, 'carousel-slides'), {
+      const maxOrder = slides.length ? Math.max(...slides.map((s) => s.order || 0)) : 0;
+      await addDoc(collection(firestoreDB, "carousel-slides"), {
         ...slideData,
-        order,
-        active: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        order: maxOrder + 1,
+        visible: slideData.visible ?? true,
       });
-      
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+    } catch (err) {
+      throw new Error("Error agregando slide: " + err.message);
     }
   };
 
-  // Actualizar slide
   const updateSlide = async (id, slideData) => {
     try {
-      // Verificar que hay una URL de imagen
-      if (!slideData.imageUrl) {
-        return { success: false, error: 'Se requiere una URL de imagen' };
-      }
-      
-      await updateDoc(doc(firestoreDB, 'carousel-slides', id), {
-        ...slideData,
-        updatedAt: serverTimestamp()
-      });
-      
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+      const docRef = doc(firestoreDB, "carousel-slides", id);
+      await updateDoc(docRef, slideData);
+    } catch (err) {
+      throw new Error("Error actualizando slide: " + err.message);
     }
   };
 
-  // Eliminar slide
   const deleteSlide = async (id) => {
     try {
-      await deleteDoc(doc(firestoreDB, 'carousel-slides', id));
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+      const docRef = doc(firestoreDB, "carousel-slides", id);
+      await deleteDoc(docRef);
+
+      // Obtener slides actuales para reindexar (consulta fresca)
+      const q = query(collection(firestoreDB, "carousel-slides"), orderBy("order", "asc"));
+      const snapshot = await getDocs(q);
+      const remaining = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      const batch = writeBatch(firestoreDB);
+      remaining.forEach((s, i) => {
+        batch.update(doc(firestoreDB, "carousel-slides", s.id), { order: i + 1 });
+      });
+      await batch.commit();
+    } catch (err) {
+      throw new Error("Error eliminando slide: " + err.message);
     }
   };
 
-  // Reordenar slides
-  const reorderSlides = async (newOrder) => {
+  const reorderSlides = async (orderedSlides) => {
     try {
       const batch = writeBatch(firestoreDB);
-      
-      newOrder.forEach((slide, index) => {
-        const slideRef = doc(firestoreDB, 'carousel-slides', slide.id);
-        batch.update(slideRef, { order: index + 1 });
+      orderedSlides.forEach((s, i) => {
+        batch.update(doc(firestoreDB, "carousel-slides", s.id), { order: i + 1 });
       });
-      
       await batch.commit();
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+    } catch (err) {
+      throw new Error("Error reordenando slides: " + err.message);
     }
   };
 
-  return {
-    slides,
-    loading,
-    error,
-    addSlide,
-    updateSlide,
-    deleteSlide,
-    reorderSlides
-  };
+  return { slides, loading, error, addSlide, updateSlide, deleteSlide, reorderSlides };
 }

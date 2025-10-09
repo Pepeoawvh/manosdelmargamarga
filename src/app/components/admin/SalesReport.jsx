@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import useSalesReport from "../../hooks/admin/useSalesReport";
 import { Tab } from "@headlessui/react";
 import ExternalSaleForm from "./ExternalSalesForm";
@@ -48,6 +48,10 @@ export default function SalesReport() {
       alert(`Error: ${result.error}`);
     }
   };
+
+  // Utilidad: short code (igual que en success)
+  const shortCode = (id) =>
+    id?.slice?.(-6)?.toUpperCase?.() || "N/D";
 
   // Formatear fecha
   const formatDate = (date) => {
@@ -212,9 +216,7 @@ export default function SalesReport() {
                     Ventas Online
                   </h4>
                   <p className="text-2xl font-bold text-blue-700">
-                    {monthlyData
-                      ? formatCurrency(monthlyData.onlineSales)
-                      : "-"}
+                    {monthlyData ? formatCurrency(monthlyData.onlineSales) : "-"}
                   </p>
                   <p className="text-xs text-blue-600 mt-1">
                     {monthlyData?.onlineCount || 0} ventas a través de la tienda
@@ -231,8 +233,7 @@ export default function SalesReport() {
                       : "-"}
                   </p>
                   <p className="text-xs text-yellow-600 mt-1">
-                    {monthlyData?.externalCount || 0} ventas registradas
-                    manualmente
+                    {monthlyData?.externalCount || 0} ventas registradas manualmente
                   </p>
                 </div>
               </div>
@@ -269,17 +270,13 @@ export default function SalesReport() {
                         </p>
                         <div className="flex gap-4">
                           <div>
-                            <p className="text-xs text-gray-500">
-                              Cantidad vendida
-                            </p>
+                            <p className="text-xs text-gray-500">Cantidad vendida</p>
                             <p className="text-lg font-semibold text-emerald-600">
                               {monthlyData.topProduct.quantity} unidades
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500">
-                              Ingresos generados
-                            </p>
+                            <p className="text-xs text-gray-500">Ingresos generados</p>
                             <p className="text-lg font-semibold text-emerald-600">
                               {formatCurrency(monthlyData.topProduct.revenue)}
                             </p>
@@ -320,26 +317,19 @@ export default function SalesReport() {
                           {monthlyData.topRevenueProduct.name}
                         </h5>
                         <p className="text-sm text-gray-600 mb-2">
-                          Precio:{" "}
-                          {formatCurrency(monthlyData.topRevenueProduct.price)}
+                          Precio: {formatCurrency(monthlyData.topRevenueProduct.price)}
                         </p>
                         <div className="flex gap-4">
                           <div>
-                            <p className="text-xs text-gray-500">
-                              Cantidad vendida
-                            </p>
+                            <p className="text-xs text-gray-500">Cantidad vendida</p>
                             <p className="text-lg font-semibold text-emerald-600">
                               {monthlyData.topRevenueProduct.quantity} unidades
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500">
-                              Ingresos generados
-                            </p>
+                            <p className="text-xs text-gray-500">Ingresos generados</p>
                             <p className="text-lg font-semibold text-emerald-600">
-                              {formatCurrency(
-                                monthlyData.topRevenueProduct.revenue
-                              )}
+                              {formatCurrency(monthlyData.topRevenueProduct.revenue)}
                             </p>
                           </div>
                         </div>
@@ -359,8 +349,7 @@ export default function SalesReport() {
                   Top Productos por Ventas
                 </h4>
 
-                {monthlyData?.topProducts &&
-                monthlyData.topProducts.length > 0 ? (
+                {monthlyData?.topProducts && monthlyData.topProducts.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
@@ -498,7 +487,7 @@ export default function SalesReport() {
                                   {formatDate(order.date)}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                  {order.orderNumber}
+                                  {order.orderNumber || `#${shortCode(order.id)}`}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                   {order.customer}
@@ -521,19 +510,13 @@ export default function SalesReport() {
                                   {formatCurrency(order.total)}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-gray-500">
-                                  {Array.isArray(order.items) &&
-                                  order.items.length > 0 ? (
+                                  {Array.isArray(order.items) && order.items.length > 0 ? (
                                     <ul className="list-disc pl-4">
-                                      {order.items
-                                        .slice(0, 3)
-                                        .map((item, index) => (
-                                          <li
-                                            key={index}
-                                            className="truncate max-w-xs"
-                                          >
-                                            {item.quantity}x {item.title}
-                                          </li>
-                                        ))}
+                                      {order.items.slice(0, 3).map((item, index) => (
+                                        <li key={index} className="truncate max-w-xs">
+                                          {item.quantity}x {item.title || item.name}
+                                        </li>
+                                      ))}
                                       {order.items.length > 3 && (
                                         <li className="text-gray-400 italic">
                                           +{order.items.length - 3} más...
@@ -541,9 +524,7 @@ export default function SalesReport() {
                                       )}
                                     </ul>
                                   ) : (
-                                    <span className="text-gray-400">
-                                      Sin productos
-                                    </span>
+                                    <span className="text-gray-400">Sin productos</span>
                                   )}
                                 </td>
                               </tr>
@@ -628,9 +609,7 @@ export default function SalesReport() {
 
             {/* PANEL 3: HISTÓRICO GENERAL */}
             <Tab.Panel className="p-4">
-              <h3 className="text-lg font-semibold mb-4">
-                Histórico de Ventas
-              </h3>
+              <h3 className="text-lg font-semibold mb-4">Histórico de Ventas</h3>
 
               {/* Tarjetas de estadísticas generales */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -699,15 +678,10 @@ export default function SalesReport() {
                           }
                         />
                         <Tooltip
-                          formatter={(value) => [
-                            formatCurrency(value),
-                            "Ventas",
-                          ]}
+                          formatter={(value) => [formatCurrency(value), "Ventas"]}
                           labelFormatter={(value) =>
                             `${value} ${
-                              allTimeData.chartData.find(
-                                (d) => d.monthName === value
-                              )?.year
+                              allTimeData.chartData.find((d) => d.monthName === value)?.year
                             }`
                           }
                         />
@@ -736,8 +710,7 @@ export default function SalesReport() {
                   Top 10 Productos por Ventas
                 </h4>
 
-                {allTimeData?.topProducts &&
-                allTimeData.topProducts.length > 0 ? (
+                {allTimeData?.topProducts && allTimeData.topProducts.length > 0 ? (
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
@@ -753,18 +726,12 @@ export default function SalesReport() {
                           width={150}
                           tick={{ fontSize: 12 }}
                           tickFormatter={(value) =>
-                            value.length > 20
-                              ? `${value.substring(0, 20)}...`
-                              : value
+                            value.length > 20 ? `${value.substring(0, 20)}...` : value
                           }
                         />
                         <Tooltip />
                         <Legend />
-                        <Bar
-                          dataKey="quantity"
-                          name="Cantidad Vendida"
-                          fill="#3b82f6"
-                        />
+                        <Bar dataKey="quantity" name="Cantidad Vendida" fill="#3b82f6" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -814,24 +781,22 @@ export default function SalesReport() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {allTimeData.topRevenueProducts
-                          .slice(0, 10)
-                          .map((product) => (
-                            <tr key={product.id} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 text-sm text-gray-900">
-                                {product.name}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
-                                {formatCurrency(product.price)}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
-                                {product.quantity}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-right text-gray-900">
-                                {formatCurrency(product.revenue)}
-                              </td>
-                            </tr>
-                          ))}
+                        {allTimeData.topRevenueProducts.slice(0, 10).map((product) => (
+                          <tr key={product.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {product.name}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
+                              {formatCurrency(product.price)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
+                              {product.quantity}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-right text-gray-900">
+                              {formatCurrency(product.revenue)}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
