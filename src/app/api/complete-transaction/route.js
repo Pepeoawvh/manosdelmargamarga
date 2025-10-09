@@ -59,33 +59,35 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
     }
 
-    // BLOQUE NUEVO: Disparar notificaciones por correo (no bloquea la respuesta)
-    // BLOQUE NUEVO: Disparar notificaciones por correo con trazas (no bloquea la respuesta)
-try {
-  const url = `${process.env.BASE_URL}/api/notify-order`;
-  console.log("notify-order →", { url, orderId: orderData.id });
+    // Disparar notificaciones por correo con trazas (no bloquea la respuesta)
+    try {
+      const url = `${process.env.BASE_URL}/api/notify-order`;
+      console.log("notify-order →", { url, orderId: orderData.id });
 
-  // Hacemos el fetch y leemos respuesta sin bloquear el retorno al cliente
-  // Si prefieres NO esperar nada, elimina el await y deja el .catch
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderId: orderData.id }),
-    cache: "no-store",
-  });
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.id }),
+        cache: "no-store",
+      });
 
-  let msg = null;
-  try {
-    msg = await res.json();
-  } catch {
-    msg = { note: "sin cuerpo JSON" };
-  }
+      let msg = null;
+      try {
+        msg = await res.json();
+      } catch {
+        msg = { note: "sin cuerpo JSON" };
+      }
 
-  console.log("notify-order ←", { status: res.status, body: msg });
-} catch (e) {
-  console.error("notify-order fetch error:", e);
-}
-    // FIN BLOQUE NUEVO
+      console.log("notify-order ←", { status: res.status, body: msg });
+    } catch (e) {
+      console.error("notify-order fetch error:", e);
+    }
+
+    console.log("🧾 Resultado transacción:", {
+      firestoreOrderId: orderData.id,
+      isApproved,
+      status,
+    });
 
     return NextResponse.json({
       success: true,

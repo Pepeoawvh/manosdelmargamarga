@@ -22,12 +22,14 @@ export async function POST(req) {
     const buyOrder = `${timestamp}${randomSuffix}`; // sin guiones, solo números
     const sessionId = `S${timestamp}${randomSuffix}`;
     const amount = Math.round(summary.total);
+    const trace = `${timestamp}-${randomSuffix}`;
 
-    // === URLs ===
+    // === URLs de retorno controladas ===
     const baseUrl = process.env.BASE_URL;
     if (!baseUrl) throw new Error("BASE_URL no está definido en el entorno");
 
-    const returnUrl = `${baseUrl}/payment-success`;
+    // Handler de retorno único: SIEMPRE vuelve aquí desde Webpay
+    const returnUrl = `${baseUrl}/api/webpay-return`;
 
     // === Guardar orden inicial ===
     const orderData = {
@@ -41,6 +43,7 @@ export async function POST(req) {
       isApproved: false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       timestamp,
+      trace,
     };
 
     const orderRef = await adminDb.collection("orders").add(orderData);
@@ -55,7 +58,7 @@ export async function POST(req) {
     const transaction = new WebpayPlus.Transaction(options);
 
     // === Crear transacción en Webpay ===
-    console.log("⚙️ Creando transacción:", { buyOrder, sessionId, amount, returnUrl });
+    console.log("⚙️ Creando transacción:", { buyOrder, sessionId, amount, returnUrl, trace });
     const createResponse = await transaction.create(buyOrder, sessionId, amount, returnUrl);
 
     if (!createResponse?.url || !createResponse?.token) {
@@ -84,7 +87,6 @@ export async function POST(req) {
       environment: "production",
       message: "Redirigiendo a Webpay...",
     });
-
   } catch (error) {
     console.error("❌ Error al crear transacción:", error);
     return NextResponse.json(
