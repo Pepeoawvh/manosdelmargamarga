@@ -27,7 +27,8 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Resumen del pedido</h2>
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
+      <div className="bg-gray-50 rounded-lg p-4 mb-2">
+      <h3 className="text:sm font-semibold mb-4">Productos:</h3>
         {safeCart.map((item) => {
           const price = safeNumber(item?.price);
           const qty = safeNumber(item?.quantity, 1);
@@ -43,7 +44,7 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
           );
         })}
         <div className="mt-4 space-y-2">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between mb-4 text-sm">
             <span>Subtotal:</span>
             <span>{fmtMoney(subtotalN)}</span>
           </div>
@@ -51,7 +52,7 @@ const OrderSummary = ({ cart, subtotal, shippingCost, total }) => {
             <span>Envío:</span>
             <span className="flex items-center px-4">
               {shippingN === 0 ? (
-                <span className="text-amber-600 font-medium">
+                <span className="text-[#467302] mx-24 border rounded p-4 mb-8 font-medium">
                   ¡Tu pedido será enviado en servicio regular Bluexpress Por pagar al domicilio ingresado. Si necesitas que tu pedido incluya costo de envio contactanos con el boton de whatsapp y te atenderemos inmediatamente!
                 </span>
               ) : (

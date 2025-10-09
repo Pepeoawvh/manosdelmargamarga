@@ -13,7 +13,13 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
 
   const handlePhoneKeyDown = (e) => {
     const allowedControlKeys = new Set([
-      "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End",
+      "Backspace",
+      "Delete",
+      "Tab",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
     ]);
     const isCtrlCombo = e.ctrlKey || e.metaKey; // copiar/pegar/cortar/select all
     const isNumberKey = /^[0-9]$/.test(e.key);
@@ -57,7 +63,11 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
         },
       }));
     }
-  }, [shippingInfo.email, shippingInfo.invoiceInfo?.useSameEmail, setShippingInfo]);
+  }, [
+    shippingInfo.email,
+    shippingInfo.invoiceInfo?.useSameEmail,
+    setShippingInfo,
+  ]);
 
   // Regiones de Chile para el selector
   const regiones = [
@@ -84,11 +94,11 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
   const sanitizeInput = (value, { trimEdges = true } = {}) => {
     if (typeof value !== "string") return value;
     let v = value
-      .replace(/<[^>]*>/g, "")     // quita etiquetas HTML
+      .replace(/<[^>]*>/g, "") // quita etiquetas HTML
       .replace(/javascript:/gi, ""); // quita javascript: URLs
-    if (trimEdges) v = v.trim();     // recorta bordes solo si corresponde
+    if (trimEdges) v = v.trim(); // recorta bordes solo si corresponde
     return v;
-  }; 
+  };
 
   // Maneja cambios en los campos del formulario
   const handleChange = (e) => {
@@ -103,9 +113,10 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
     ]);
 
     const shouldTrim = !looseFields.has(name);
-    let sanitizedValue = type === "checkbox"
-      ? checked
-      : sanitizeInput(value, { trimEdges: shouldTrim });
+    let sanitizedValue =
+      type === "checkbox"
+        ? checked
+        : sanitizeInput(value, { trimEdges: shouldTrim });
 
     // Sólo letras para nombres/comuna
     if (
@@ -114,9 +125,10 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
       name === "city" ||
       name === "invoiceInfo.representativeName"
     ) {
-      sanitizedValue = typeof sanitizedValue === "string"
-        ? sanitizedValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "")
-        : sanitizedValue;
+      sanitizedValue =
+        typeof sanitizedValue === "string"
+          ? sanitizedValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "")
+          : sanitizedValue;
     }
 
     // Evitar espacios en emails (principal y facturación) y normalizar en minúsculas
@@ -188,7 +200,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
   const invoiceInfo = shippingInfo.invoiceInfo || {};
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 text-[#2d4902]">
       <h2 className="text-sm font-semibold text-gray-800">
         Información de Envío
       </h2>
@@ -208,7 +220,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="firstName"
               value={shippingInfo.firstName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               required
             />
           </div>
@@ -226,7 +238,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="lastName"
               value={shippingInfo.lastName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               required
             />
           </div>
@@ -248,7 +260,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               onChange={handleChange}
               onKeyDown={preventEmailSpace}
               autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               required
             />
           </div>
@@ -270,7 +282,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               inputMode="numeric"
               pattern="[0-9]*"
               placeholder="912345678"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               maxLength={9}
               required
             />
@@ -293,7 +305,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="city"
               value={shippingInfo.city}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               required
             />
           </div>
@@ -309,7 +321,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
               name="region"
               value={shippingInfo.region}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
               required
             >
               {regiones.map((region, index) => (
@@ -333,7 +345,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
             name="address"
             value={shippingInfo.address}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
             required
           />
         </div>
@@ -353,7 +365,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
             value={shippingInfo.notes || ""}
             onChange={handleChange}
             rows="2"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
             placeholder="Instrucciones especiales para la entrega, referencias, etc."
           ></textarea>
         </div>
@@ -362,7 +374,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
           <label className="block font-medium text-gray-700">
             Tipo de envío:
           </label>
-          <span className="inline-flex items-center py-0.5 rounded-full text-xs font-medium bg-[#b4cf66] text-[#533021]">
+          <span className="inline-flex items-center py-0.5 px-2 rounded-full text-xs font-medium bg-[#b4cf66] text-[#533021]">
             {shippingInfo.shippingType}
           </span>
         </div>
@@ -384,7 +396,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
         </div>
       </div>
 
-      <div className="mt-6 text-xs border-t border-gray-200">
+      <div className="mt-6 text-xs border-t border-[#c4de86]">
         {shippingInfo.needsInvoice && (
           <div className="mt-4 p-4 bg-gray-200 rounded-lg border border-gray-200 space-y-4 text-xs">
             <h3 className="font-medium text-sm text-gray-700 mb-3">
@@ -405,7 +417,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   name="invoiceInfo.representativeName"
                   value={invoiceInfo.representativeName || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
                   required={shippingInfo.needsInvoice}
                 />
               </div>
@@ -421,7 +433,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   id="businessRut"
                   value={invoiceInfo.businessRut || ""}
                   onChange={handleRutChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
                   placeholder="12345678-9"
                   required={shippingInfo.needsInvoice}
                 />
@@ -459,7 +471,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   name="invoiceInfo.businessAddress"
                   value={invoiceInfo.businessAddress || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
                   required={shippingInfo.needsInvoice}
                 />
               </div>
@@ -479,7 +491,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                       name="invoiceInfo.useSameEmail"
                       checked={invoiceInfo.useSameEmail || false}
                       onChange={handleChange}
-                      className="h-3 w-3 text-[#b4cf66] focus:ring-[#6b554b] border-gray-300 rounded"
+                      className="h-3 w-3 text-[#b4cf66] focus:ring-[#467302] border-gray-300 rounded"
                     />
                     <label
                       htmlFor="useSameEmail"
@@ -499,7 +511,9 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                   onKeyDown={preventEmailSpace}
                   autoComplete="email"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
-                  required={shippingInfo.needsInvoice && !invoiceInfo.useSameEmail}
+                  required={
+                    shippingInfo.needsInvoice && !invoiceInfo.useSameEmail
+                  }
                   disabled={invoiceInfo.useSameEmail}
                 />
               </div>
@@ -518,7 +532,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                 value={invoiceInfo.additionalNotes || ""}
                 onChange={handleChange}
                 rows="2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#6b554b]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#467302]"
                 placeholder="Cualquier detalle adicional para la factura"
               ></textarea>
             </div>
