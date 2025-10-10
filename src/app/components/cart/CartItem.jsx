@@ -1,90 +1,141 @@
-'use client'
-import { useCart } from '../../context/CartContext';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+import React, { useMemo, useState } from "react";
+import { useCart } from "../../context/CartContext";
 
-const CartItem = ({ item }) => {
-  const { updateQuantity, removeFromCart } = useCart();
-  
-  const handleQuantityChange = (change) => {
-    // No permitir cantidades menores a 1
-    if (item.quantity + change < 1) return;
-    
-    // No permitir exceder el stock disponible
-    if (item.stock !== undefined && item.quantity + change > item.stock) return;
-    
-    updateQuantity(item.id, item.quantity + change);
+const fmtMoney = (v) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(Number(v)) ? Number(v) : 0);
+
+export default function CartItem({ item }) {
+  const { removeFromCart, updateQuantity } = useCart();
+  const [hint, setHint] = useState("");
+
+  const price = Number(item.price) || 0;
+  const qty = Math.max(1, Number(item.quantity) || 1);
+  const stock = Number(item.stock ?? 0); // viene desde CartContext al añadir
+  const canInc = Number.isFinite(stock) ? qty < stock : true;
+  const lineTotal = useMemo(() => price * qty, [price, qty]);
+
+  const handleDec = () => {
+    const next = Math.max(1, qty - 1);
+    updateQuantity(item.id, next);
+    setHint("");
   };
-  
-  const subtotal = item.price * item.quantity;
-  
+
+  const handleInc = () => {
+    if (!canInc) {
+      setHint("Stock máximo alcanzado");
+      return;
+    }
+    const next = qty + 1;
+    updateQuantity(item.id, next);
+    if (next >= stock) setHint("Stock máximo alcanzado");
+    else setHint("");
+  };
+
+  const handleInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw === "") {
+      // no aplicar 0, espera blur o siguiente input
+      return;
+    }
+    let next = Number(raw);
+    if (!Number.isFinite(next)) return;
+    if (Number.isFinite(stock) && stock > 0) {
+      next = Math.min(Math.max(1, next), stock);
+    } else {
+      next = Math.max(1, next);
+    }
+    updateQuantity(item.id, next);
+    if (Number.isFinite(stock) && next >= stock) setHint("Stock máximo alcanzado");
+    else setHint("");
+  };
+
+  const handleBlur = (e) => {
+    // Si quedó vacío, normalizar a 1 (o a stock si stock=0)
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw === "") {
+      const fallback = Number.isFinite(stock) && stock > 0 ? 1 : 1;
+      updateQuantity(item.id, fallback);
+    }
+  };
+
   return (
-    <div className="flex border rounded-md p-2 hover:bg-gray-50">
-      {/* Imagen del producto */}
-      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-        {item.image ? (
-          <Image
-            src={item.image}
-            alt={item.title}
-            width={64}
-            height={64}
-            className="h-full w-full object-cover object-center"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
+    <div className="flex items-center gap-3 border rounded p-2">
+      <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={item.image || "/placeholder.png"}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder.png";
+          }}
+        />
       </div>
-      
-      {/* Información y controles */}
-      <div className="ml-4 flex flex-1 flex-col">
-        <div className="flex justify-between text-sm font-medium text-gray-900">
-          <Link 
-            href={`/product/${item.id}`} 
-            className="hover:text-[#b4cf66] text-[#667f18] transition-colors"
-          >
-            {item.title}
-          </Link>
-          <p className="ml-2 text-[#616260]">${subtotal.toLocaleString()}</p>
-        </div>
-        
-        {item.subcategories && item.subcategories.length > 0 && (
-          <p className="text-xs text-gray-500 mt-1">{item.subcategories.join(', ')}</p>
-        )}
-        
-        <div className="flex items-center justify-between flex-1 text-xs mt-2">
-          {/* Control de cantidad */}
-          <div className="flex items-center border rounded">
-            <button 
-              onClick={() => handleQuantityChange(-1)}
-              className="px-2 py-1 text-gray-600 hover:bg-gray-100"
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+        <p className="text-xs text-gray-500">{fmtMoney(price)}</p>
+
+        <div className="mt-2 flex items-center gap-2">
+          <div className="inline-flex items-center rounded border border-gray-300">
+            <button
+              type="button"
+              className="px-2 py-1 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={handleDec}
+              aria-label="Disminuir cantidad"
             >
-              -
+              −
             </button>
-            <span className="text-[#789d0b] px-2">{item.quantity}</span>
-            <button 
-              onClick={() => handleQuantityChange(1)}
-              className="px-2 py-1 text-gray-600 hover:bg-gray-100"
-              disabled={item.stock !== undefined && item.quantity >= item.stock}
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className="w-12 text-center text-sm py-1 outline-none"
+              defaultValue={qty}
+              onInput={handleInput}
+              onBlur={handleBlur}
+            />
+            <button
+              type="button"
+              className={`px-2 py-1 text-sm ${
+                canInc ? "text-gray-700 hover:bg-gray-100" : "text-gray-400 cursor-not-allowed"
+              }`}
+              onClick={handleInc}
+              disabled={!canInc}
+              aria-label="Aumentar cantidad"
+              title={canInc ? "Aumentar" : "Stock máximo alcanzado"}
             >
               +
             </button>
           </div>
-          
-          {/* Botón eliminar */}
-          <button
-            onClick={() => removeFromCart(item.id)}
-            className="text-xs text-red-600 hover:text-red-800"
-          >
-            Eliminar
-          </button>
+
+          {Number.isFinite(stock) && (
+            <span className="text-[11px] text-gray-500">
+              Stock: {stock}
+            </span>
+          )}
         </div>
+
+        {hint && (
+          <p className="mt-1 text-[11px] text-amber-700">{hint}</p>
+        )}
+      </div>
+
+      <div className="text-right">
+        <p className="text-sm font-medium text-gray-900">{fmtMoney(lineTotal)}</p>
+        <button
+          type="button"
+          onClick={() => removeFromCart(item.id)}
+          className="mt-1 text-xs text-red-600 hover:underline"
+        >
+          Quitar
+        </button>
       </div>
     </div>
   );
-};
-
-export default CartItem;
+}

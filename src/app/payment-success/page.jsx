@@ -5,6 +5,42 @@ import Link from "next/link";
 import OrderSummary from "../components/cart/OrderSummary";
 import { FaCheckCircle } from "react-icons/fa";
 
+// === NUEVO: helpers de fecha robustos ===
+const toDateSafe = (val) => {
+  try {
+    if (!val) return null;
+    if (typeof val?.toDate === "function") return val.toDate(); // Firestore Timestamp
+    if (val instanceof Date) return val;
+    if (typeof val === "number") return new Date(val);          // epoch ms
+    if (typeof val === "string") return new Date(val);          // ISO
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const resolveOrderDate = (order) => {
+  return (
+    toDateSafe(order?.finalizedAt) ||
+    toDateSafe(order?.transactionDetails?.transaction_date) ||
+    toDateSafe(order?.createdAt) ||
+    toDateSafe(order?.date) ||
+    null
+  );
+};
+
+const formatDateCL = (date) => {
+  if (!date) return "Fecha no disponible";
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
+// === FIN helpers ===
+
 export default function PaymentSuccess() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,7 +73,7 @@ export default function PaymentSuccess() {
     }
   }, [token_ws, router]);
 
-  // Formateador robusto de fecha
+  // Formateador robusto de fecha (mantener por compatibilidad con tu UI)
   const safeFormatDate = (ts) => {
     try {
       if (!ts) return "Fecha no disponible";
@@ -170,12 +206,10 @@ export default function PaymentSuccess() {
     ? { text: "Pago aprobado", cls: "bg-[#e5f2d9] text-[#46621f]" }
     : { text: "Pago no aprobado", cls: "bg-amber-100 text-amber-800" };
 
-  // Preferir finalizedAt; luego transaction_date; luego createdAt
-  const shownDate =
-    orderDetails.finalizedAt ||
-    orderDetails?.transactionDetails?.transaction_date ||
-    orderDetails.createdAt ||
-    null;
+  // === CAMBIO: usar resolver robusto y formatear ===
+  const resolvedDate = resolveOrderDate(orderDetails);
+  const shownDate = formatDateCL(resolvedDate);
+  // === FIN CAMBIO ===
 
   return (
     <div className="min-h-screen bg-[#f5f3e6] py-12">
@@ -208,7 +242,7 @@ export default function PaymentSuccess() {
               #{orderDetails.id?.slice?.(-6)?.toUpperCase?.() || "N/D"}
             </div>
             <div className="bg-stone-100 px-3 py-1 rounded-full">
-              <span className="font-medium">Fecha:</span> {safeFormatDate(shownDate)}
+              <span className="font-medium">Fecha:</span> {shownDate}
             </div>
           </div>
         </div>

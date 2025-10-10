@@ -20,7 +20,7 @@ export default function ClientProviders({ children }) {
     return (
       <div className="relative z-10 min-h-screen">
         <div className="h-16 bg-white shadow-sm"></div>
-        <main className="text-emerald-800 md:max-w-6xl md:mx-auto md:px-4 py-8">
+        <main className="text-[#768651] md:max-w-6xl md:mx-auto md:px-4 py-8">
           {/* Esqueleto de carga */}
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 max-w-md mx-auto mb-8 rounded"></div>
@@ -35,7 +35,7 @@ export default function ClientProviders({ children }) {
     <CartProvider>
       <div className="relative z-10">
         <Navbar />
-        <main className="text-emerald-800 md:max-w-6xl md:mx-auto md:px-4">
+        <main className="text-[#768651] md:max-w-6xl md:mx-auto md:px-4">
           {children}
         </main>
         <Footer />

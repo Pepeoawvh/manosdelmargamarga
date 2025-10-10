@@ -11,93 +11,68 @@ export default function Dashboard({
 }) {
   const { allTimeData, monthlyData, formatCurrency } = useSalesReport();
 
-  const pendingOrders = useMemo(() => {
+  // Pedidos operativos: status definido y distinto de FINALIZADO/CANCELADO (no mira pago)
+  const operationalOrders = useMemo(() => {
     if (!Array.isArray(orders)) return [];
 
-    const OP_STATES = new Set([
-      "PENDIENTE",
-      "RESERVADO",
-      "ESPERANDO RETIRO",
-      "EMPACADO S/ETIQ.",
-      "EMP. CON ETIQUETA",
-    ]);
-
-    // Dedup
+    // Deduplicar por id/orderId
     const seen = new Set();
     const unique = [];
     for (const o of orders) {
-      const key =
-        o?.id ||
-        o?.orderId ||
-        `${o?.transactionDetails?.buy_order || ""}-${o?.customerEmail || ""}`;
+      const key = o?.id || o?.orderId;
+      if (!key) continue;
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(o);
       } else {
-        console.log("DUPLICADO IGNORADO:", {
-          id: o?.id,
-          orderId: o?.orderId,
-          buy_order: o?.transactionDetails?.buy_order,
-          email: o?.customerEmail,
-        });
+        console.log("DUPLICADO IGNORADO:", { id: o?.id, orderId: o?.orderId });
       }
     }
 
-    const result = [];
-    for (const o of unique) {
-      const status = String(o?.status || "").toUpperCase();
-      const payStatus = String(o?.paymentStatus || "").toLowerCase(); // completed|pending|failed|aborted
-      const infoStatus = String(o?.paymentInfo?.status || "").toLowerCase(); // completed|pending|failed|unknown
-      const resp = o?.transactionDetails?.response_code; // 0 aprobado
-      const trStatus = o?.transactionDetails?.status; // AUTHORIZED|FAILED|...
-      const isApproved = o?.isApproved === true;
-      const canceledFlag =
-        o?.cancelled === true || o?.isCancelled === true || o?.canceled === true;
+const result = unique.filter((o) => {
+  const raw = o?.status;
+  const s = String(raw ?? "").trim();         // puede ser "pendiente" del fallback
+  const S = s.toUpperCase();
 
-      const opOk = OP_STATES.has(status);
+  const hasExplicitStatus = s.length > 0;
 
-      // Rechazos y cancelaciones
-      let rejected =
-        status === "CANCELADO" ||
-        canceledFlag ||
-        payStatus === "failed" ||
-        payStatus === "aborted" ||
-        infoStatus === "failed" ||
-        (typeof resp === "number" && resp !== 0) ||
-        trStatus === "FAILED" ||
-        trStatus === "REVERSED" ||
-        trStatus === "NULLIFIED";
+  // Señales de intento no autorizado (ruido)
+  const pay = String(o?.paymentStatus || "").toLowerCase();
+  const resp = o?.transactionDetails?.response_code;
+  const trStatus = o?.transactionDetails?.status;
 
-      // Exclusión clave: pending sin autorización ni isApproved
-      const hasAuth =
-        (typeof resp === "number" && resp === 0) ||
-        trStatus === "AUTHORIZED" ||
-        isApproved;
-      if (payStatus === "pending" && !hasAuth) {
-        rejected = true;
-      }
+  const isUnauthorizedPending =
+    pay === "pending" &&
+    !(typeof resp === "number" && resp === 0) &&
+    trStatus !== "AUTHORIZED";
 
-      const passes = opOk && !rejected;
+  // Regla final: status definido, no FINALIZADO ni CANCELADO,
+  // y excluir el fallback "pendiente" del hook o intentos no autorizados.
+  const keep =
+    hasExplicitStatus &&
+    S !== "FINALIZADO" &&
+    S !== "CANCELADO" &&
+    s !== "pendiente" &&
+    !isUnauthorizedPending;
 
-      console.log("PENDING_EVAL", {
-        id: o?.id,
-        orderNumber: o?.orderNumber,
-        status,
-        payStatus,
-        infoStatus,
-        resp,
-        trStatus,
-        isApproved,
-        canceledFlag,
-        opOk,
-        rejected,
-        passes,
-      });
+  console.log("OPER_EVAL", {
+    id: o?.id,
+    orderNumber: o?.orderNumber,
+    rawStatus: raw,
+    normalized: S,
+    hasExplicitStatus,
+    pay,
+    resp,
+    trStatus,
+    isUnauthorizedPending,
+    keep,
+  });
 
-      if (passes) result.push(o);
-    }
+  return keep;
+});
 
-    console.log("PENDING_RESULT_COUNT", result.length);
+
+    console.log("OPER_RESULT_COUNT", result.length);
     return result;
   }, [orders]);
 
@@ -115,7 +90,7 @@ export default function Dashboard({
     }).format(date instanceof Date ? date : new Date(date));
   };
 
-  const pendingOrdersColumns = [
+  const operationalColumns = [
     { key: "orderNumber", label: "Nº Orden" },
     {
       key: "customer",
@@ -146,6 +121,7 @@ export default function Dashboard({
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
+      {/* Tarjetas principales (compactas) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3">
         <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3">
           <div className="flex items-center">
@@ -171,8 +147,8 @@ export default function Dashboard({
             </div>
             <div className="ml-2">
               <h3 className="text-xs font-medium text-blue-800">Pedidos</h3>
-              <p className="text-lg font-semibold text-blue-700">{pendingOrders.length}</p>
-              <p className="text-[11px] text-blue-600">Pendientes operativos</p>
+              <p className="text-lg font-semibold text-blue-700">{operationalOrders.length}</p>
+              <p className="text-[11px] text-blue-600">Pedidos en proceso</p>
             </div>
           </div>
         </div>
@@ -196,7 +172,7 @@ export default function Dashboard({
           <div className="flex items-center">
             <div className="p-1.5 bg-purple-100 rounded">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div className="ml-2">
@@ -210,57 +186,35 @@ export default function Dashboard({
 
       {/* Secciones principales del dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 p-3">
-        {/* Pedidos pendientes */}
+        {/* Pedidos en proceso */}
         <div className="lg:col-span-2 border border-gray-200 rounded-md overflow-hidden">
           <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700">Pedidos Pendientes</h3>
+            <h3 className="text-sm font-medium text-gray-700">Pedidos en Proceso</h3>
           </div>
-          {pendingOrders.length > 0 ? (
+          {operationalOrders.length > 0 ? (
             <div className="p-2">
               <Table
                 dense
-                columns={[
-                  { key: "orderNumber", label: "Nº Orden" },
-                  {
-                    key: "customer",
-                    label: "Cliente",
-                    render: (row) => {
-                      if (row.customerName) return row.customerName;
-                      if (row.customer && typeof row.customer === "object") {
-                        const firstName = row.customer.firstName || "";
-                        const lastName = row.customer.lastName || "";
-                        return `${firstName} ${lastName}`.trim() || "Cliente sin nombre";
-                      }
-                      return "Cliente";
-                    },
-                  },
-                  { key: "date", label: "Fecha", render: (row) => formatDate(row.date) },
-                  {
-                    key: "total",
-                    label: "Total",
-                    render: (row) => (formatCurrency ? formatCurrency(row.total) : row.total),
-                    className: "text-right font-medium",
-                  },
-                ]}
-                data={pendingOrders.slice(0, 5)}
+                columns={operationalColumns}
+                data={operationalOrders.slice(0, 5)}
                 onRowClick={() => onChangeTab && onChangeTab("Pedidos")}
-                emptyMessage="No hay pedidos pendientes"
+                emptyMessage="No hay pedidos en proceso"
                 pagination={false}
               />
-              {pendingOrders.length > 5 && (
+              {operationalOrders.length > 5 && (
                 <div className="mt-2 text-right p-2">
                   <button
                     onClick={() => onChangeTab && onChangeTab("Pedidos")}
                     className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
                   >
-                    Ver todos los pedidos pendientes ({pendingOrders.length})
+                    Ver todos los pedidos en proceso ({operationalOrders.length})
                   </button>
                 </div>
               )}
             </div>
           ) : (
             <div className="py-5 text-center text-gray-500 text-sm">
-              No hay pedidos pendientes
+              No hay pedidos en proceso
             </div>
           )}
         </div>

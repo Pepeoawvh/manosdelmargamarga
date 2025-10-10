@@ -60,34 +60,70 @@ export function CartProvider({ children }) {
   const closeCart = () => setIsCartOpen(false);
   const toggleCart = () => setIsCartOpen(prev => !prev);
 
-  const addToCart = (productToAdd) => {
-    const { product, quantity = 1 } = productToAdd.product ? productToAdd : { product: productToAdd, quantity: 1 };
-    if (!product || !product.id) return;
+const addToCart = (productToAdd) => {
+  const { product, quantity = 1 } =
+    productToAdd.product ? productToAdd : { product: productToAdd, quantity: 1 };
+  if (!product || !product.id) return;
 
-    setCart(prev => {
-      const index = prev.findIndex(item => item.id === product.id);
-      if (index !== -1) {
-        const updated = [...prev];
-        updated[index].quantity += quantity;
-        return updated;
+  const maxStock = Number(product.stock ?? 0);
+  if (!Number.isFinite(maxStock) || maxStock <= 0) {
+    // Sin stock disponible: no agregar
+    console.warn("Producto sin stock:", product.id, product.title);
+    return;
+  }
+
+  const addQty = Math.max(1, Number(quantity) || 1);
+
+  setCart((prev) => {
+    const idx = prev.findIndex((it) => it.id === product.id);
+    if (idx !== -1) {
+      const current = prev[idx];
+      const desired = current.quantity + addQty;
+      const capped = Math.min(desired, maxStock);
+      if (capped === current.quantity) {
+        // Ya está al máximo
+        return prev;
       }
-      return [...prev, {
+      const updated = [...prev];
+      updated[idx] = { ...current, quantity: capped };
+      return updated;
+    }
+    // Item nuevo
+    const initialQty = Math.min(addQty, maxStock);
+    return [
+      ...prev,
+      {
         id: product.id,
-        title: product.title || product.name || 'Producto',
+        title: product.title || product.name || "Producto",
         price: parseFloat(product.price) || 0,
-        image: product.image || product.images?.[0] || '/placeholder.png',
-        quantity,
-        sku: product.sku || ''
-      }];
-    });
-    openCart();
-  };
+        image: product.image || product.images?.[0] || "/placeholder.png",
+        quantity: initialQty,
+        sku: product.sku || "",
+        stock: maxStock, // guardar referencia de stock para UI/validaciones
+      },
+    ];
+  });
+  openCart();
+};
 
   const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id));
-  const updateQuantity = (id, qty) => {
-    if (qty < 1) return;
-    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item));
-  };
+const updateQuantity = (id, qty) => {
+  const wanted = Number(qty);
+  if (!Number.isFinite(wanted) || wanted < 1) return;
+
+  setCart((prev) =>
+    prev.map((item) => {
+      if (item.id !== id) return item;
+      const maxStock = Number(item.stock ?? 0);
+      if (!Number.isFinite(maxStock) || maxStock <= 0) {
+        // Si no hay stock registrado en el item, se puede optar por dejarlo en 1 o bloquear
+        return { ...item, quantity: 1 };
+      }
+      const capped = Math.min(wanted, maxStock);
+      return { ...item, quantity: capped };
+    })
+  );
+};
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem('shoppingCart');

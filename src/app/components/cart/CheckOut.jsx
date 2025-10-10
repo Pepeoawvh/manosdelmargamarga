@@ -95,11 +95,39 @@ const CheckOut = () => {
     return fieldNames[field] || field;
   };
 
+  // Validación de stock previa al pago
+  const validateStock = () => {
+    if (!Array.isArray(cart) || cart.length === 0) return { ok: false, msg: "El carrito está vacío." };
+
+    for (const it of cart) {
+      const qty = Math.max(1, Number(it.quantity) || 1);
+      const stock = Number(it.stock ?? 0);
+      if (!Number.isFinite(stock) || stock < 0) {
+        return { ok: false, msg: `El producto "${it.title}" no tiene stock disponible.` };
+      }
+      if (qty > stock) {
+        return {
+          ok: false,
+          msg: `La cantidad de "${it.title}" (${qty}) excede el stock disponible (${stock}).`,
+        };
+      }
+    }
+    return { ok: true };
+  };
+
   const handleCheckout = async () => {
     setLoading(true);
     setError(null);
 
     if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
+    // Chequeo de stock antes de iniciar la transacción
+    const stockCheck = validateStock();
+    if (!stockCheck.ok) {
+      setError(stockCheck.msg);
       setLoading(false);
       return;
     }
@@ -110,7 +138,7 @@ const CheckOut = () => {
 
       // Marcar intento de pago (UX y diagnóstico)
       try {
-        startPaymentAttempt?.();
+        startPaymentAttempt?.(shippingInfo); // se pasa la info si el contexto la usa
         localStorage.setItem("lastPaymentAttempt", Date.now().toString());
       } catch {}
 
