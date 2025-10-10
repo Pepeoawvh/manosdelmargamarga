@@ -237,17 +237,13 @@ export default function FormularioContacto() {
           {status.loading
             ? "Enviando..."
             : cooldownLeft > 0
-              ? "Temporalmente bloqueado"
+              ? "Gracias por escribirnos"
               : "Enviar mensaje"}
         </button>
-        {cooldownLeft > 0 && (
-          <span className="text-amber-400 text-sm">
-            Podrás enviar nuevamente en {Math.ceil(cooldownLeft / 60000)} min.
-          </span>
-        )}
+        
         {status.ok === true && (
-          <span className="text-[white] text-sm">
-            Mensaje enviado correctamente.
+          <span className="text-[#556b27] text-sm">
+            Su mensaje se ha enviado. Le contactaremos a la brevedad
           </span>
         )}
         {status.ok === false && (
