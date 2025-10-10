@@ -193,7 +193,7 @@ export default function Products() {
               <Input
                 placeholder="Buscar productos..."
                 value={searchTerm}
-                className="border-2 border-[#f2ddd3]"
+                className="border-2 hover:border-[#4d7528] border-[#f2ddd3]"
                 onChange={(e) => setSearchTerm(e.target.value)}
                 leftIcon={
                   <svg
@@ -201,7 +201,7 @@ export default function Products() {
                     className="h-5 w-5"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="#6b554b"
+                    stroke="#4d7528"
                   >
                     <path
                       strokeLinecap="round"
@@ -333,7 +333,7 @@ export default function Products() {
 
         {loading ? (
           <div className="py-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6b554b] mb-2"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4d7528] mb-2"></div>
             <p className="text-[#362b26]">Cargando productos...</p>
           </div>
         ) : showCategories && !searchTerm ? (
