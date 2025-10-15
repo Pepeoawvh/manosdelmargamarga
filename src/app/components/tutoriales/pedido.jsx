@@ -5,14 +5,14 @@ const steps = [
   {
     number: "1",
     title: "Nos Consultas",
-    description: "por whatsapp comprando a través del sitio",
+    description: "Por whatsapp ocomprando a través del sitio",
     icon: "🙋‍♂️",
   },
   {
     number: "2",
     title: "Cotizamos",
     description:
-      "Contamos con sistema de cotización rápida, completa y con imagenes referenciales, para que puedas presentar propuestas",
+      "Si nos contactas por whatsapp, contamos con sistema de cotización rápida, completa y con imagenes referenciales, para que puedas presentar propuestas",
     icon: "💬",
   },
   {
@@ -26,22 +26,22 @@ const steps = [
     number: "4",
     title: "Prueba Impresa",
     description:
-      "Independiente a si tomas nuestro servicio de diseño o se usan tus archivos, SIEMPRE hacemos y te enviamos Imágenes de PRUEBA impresa, para APROBACIÓN.",
+      "Independiente a si tomas nuestro servicio de diseño o se usan tus archivos, SIEMPRE hacemos y te enviamos Imágenes de PRUEBA IMPRESA, para APROBACIÓN.",
     icon: "🎨",
   },
   {
     number: "5",
     title: "Producción",
     description:
-      "Nos ponemos manos a la obra. Al  iniciar esta etapa indicaremos fecha de envio.",
+      "Nos ponemos manos a la obra. Al  iniciar esta etapa indicaremos fecha de envío.",
     icon: "⚙️",
   },
   {
     number: "6",
     title: "Despachamos",
     description:
-      "El medio de entrega queda establecido al momento de cotizar.Normalmente, lo hacemos por Blue Express a domicilio.Para plazos acotados usamos Chilexpress* (costo adicional de acercamiento)Y también puedes venir a retirar a nuestro taller sin costo.",
-      icon: "🚚",
+      "El medio de entrega queda establecido al momento de cotizar. Normalmente, lo hacemos por Blue Express a domicilio. Para plazos acotados usamos Chilexpress* (costo adicional de acercamiento) Y también puedes venir a retirar a nuestro taller sin costo.",
+    icon: "🚚",
   },
 ];
 
