@@ -1,6 +1,3 @@
-
-// app/sitemap.js
-// Activa esta versión cuando exista /api/sitemap-products
 export const revalidate = 86400; // refresca 1 vez al día
 
 async function getProductSlugs() {
@@ -8,14 +5,13 @@ async function getProductSlugs() {
     next: { revalidate: 86400 },
   });
   if (!res.ok) return [];
-  // Debe devolver: [{ slug: "m8s69ZyGYn8x1xszdir3", updatedAt: "2025-10-20T00:00:00Z" }]
-  return res.json();
+  return res.json(); // [{ slug, updatedAt }]
 }
 
 export default async function sitemap() {
   const base = "https://www.manosdelmargamarga.cl";
 
-  // Rutas estáticas principales (mismas que la versión A)
+  // Rutas estáticas principales
   const staticPaths = [
     "", // Home
     "/catalogo",
@@ -35,20 +31,19 @@ export default async function sitemap() {
     priority: path === "" ? 1.0 : 0.7,
   }));
 
-  // Productos (se habilita cuando tengas el endpoint)
+  // Productos dinámicos
   let productUrls = [];
   try {
     const products = await getProductSlugs();
     productUrls = products.map((p) => ({
-      url: `${base}/producto/${p.slug}`, // tu ruta real de detalle
+      url: `${base}/producto/${p.slug}`,
       lastModified: p.updatedAt ?? now,
       changeFrequency: "weekly",
       priority: 0.6,
     }));
   } catch {
-    productUrls = []; // sigue funcionando con las rutas estáticas
+    productUrls = [];
   }
 
   return [...staticUrls, ...productUrls];
 }
-
