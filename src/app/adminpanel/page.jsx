@@ -250,7 +250,7 @@ export default function AdminPanel() {
      ];
 
   return (
-    <div className="p-4 md:p-6 select-none">
+    <div className="p-4 md:p-6">
       <div className="w-full bg-white p-4 border-2 border-emerald-800  shadow-lg rounded-md mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-lg font-bold">Panel de Administración</h1>
