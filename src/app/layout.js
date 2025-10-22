@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/authProvider";
 import { lexend } from "./ui/fonts";
 import ClientProviders from "./providers/ClientProviders";
 import Script from "next/script";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata = {
   metadataBase: new URL("https://www.manosdelmargamarga.cl"),
