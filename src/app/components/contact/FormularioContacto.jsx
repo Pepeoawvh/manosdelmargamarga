@@ -53,7 +53,6 @@ export default function FormularioContacto() {
       });
       return false;
     }
-    // Honeypot: si el usuario visible lo completa, lo consideramos no válido
     if (form.website && form.website.trim().length > 0) {
       setStatus({ loading: false, ok: false, msg: "Validación fallida." });
       return false;
@@ -118,7 +117,6 @@ export default function FormularioContacto() {
       if (!res.ok)
         throw new Error(data.error || "No se pudo enviar el mensaje");
 
-      // Éxito: fijar cooldown local
       localStorage.setItem("contactLastSent", Date.now().toString());
       setCooldownLeft(WINDOW_MS);
 
@@ -147,7 +145,13 @@ export default function FormularioContacto() {
   const disabled = status.loading || cooldownLeft > 0;
 
   return (
-    <form onSubmit={onSubmit} className="text-white grid gap-4">
+    <form
+      onSubmit={onSubmit}
+      className="text-white grid gap-4"
+      role="form"
+      aria-label="Formulario de contacto"
+      noValidate
+    >
       {/* Honeypot: campo oculto para bots */}
       <input
         type="text"
@@ -157,6 +161,7 @@ export default function FormularioContacto() {
         className="hidden"
         tabIndex={-1}
         autoComplete="off"
+        aria-hidden="true"
       />
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -171,6 +176,11 @@ export default function FormularioContacto() {
             onChange={onChange}
             className={inputCls}
             placeholder="Nombre"
+            type="text"
+            autoComplete="name"
+            inputMode="text"
+            required
+            aria-required="true"
           />
         </div>
         <div className="grid gap-1">
@@ -184,7 +194,21 @@ export default function FormularioContacto() {
             onChange={onChange}
             className={inputCls}
             placeholder="correo@dominio.cl"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            aria-required="true"
+            aria-invalid={
+              status.ok === false && status.msg.toLowerCase().includes("correo")
+                ? "true"
+                : "false"
+            }
+            aria-describedby="email-help"
           />
+          <span id="email-help" className="sr-only">
+            Ingresa un correo válido con formato usuario@dominio.cl
+          </span>
         </div>
       </div>
 
@@ -200,6 +224,9 @@ export default function FormularioContacto() {
             onChange={onChange}
             className={inputCls}
             placeholder="+56 9 1234 5678"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
           />
         </div>
         <div className="grid gap-1">
@@ -213,6 +240,8 @@ export default function FormularioContacto() {
             onChange={onChange}
             className={inputCls}
             placeholder="Asunto"
+            type="text"
+            autoComplete="off"
           />
         </div>
       </div>
@@ -229,25 +258,39 @@ export default function FormularioContacto() {
           rows={6}
           className={`${inputCls} resize-y`}
           placeholder="Escribe tu mensaje..."
+          required
+          aria-required="true"
+          aria-describedby="message-help"
         />
+        <span id="message-help" className="sr-only">
+          No incluyas más de 3 enlaces. Máximo 4000 caracteres.
+        </span>
       </div>
 
       <div className="flex items-center gap-3 pt-1">
-        <button type="submit" disabled={disabled} className={btnCls}>
+        <button
+          type="submit"
+          disabled={disabled}
+          className={btnCls}
+          aria-disabled={disabled}
+          aria-busy={status.loading ? "true" : "false"}
+        >
           {status.loading
             ? "Enviando..."
             : cooldownLeft > 0
               ? "Gracias por escribirnos"
               : "Enviar mensaje"}
         </button>
-        
+
         {status.ok === true && (
-          <span className="text-[#556b27] text-sm">
+          <span className="text-[#556b27] text-sm" role="status" aria-live="polite">
             Su mensaje se ha enviado. Le contactaremos a la brevedad
           </span>
         )}
         {status.ok === false && (
-          <span className="text-amber-700 text-sm">{status.msg}</span>
+          <span className="text-amber-700 text-sm" role="alert" aria-live="assertive">
+            {status.msg}
+          </span>
         )}
       </div>
     </form>

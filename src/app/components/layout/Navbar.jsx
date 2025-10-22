@@ -171,7 +171,7 @@ const Navbar = () => {
     }
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, []); // [attached_file:27][attached_file:28]
+  }, []);
 
   // SCROLL + cierre de anuncio por scroll
   useEffect(() => {
@@ -193,13 +193,13 @@ const Navbar = () => {
         scrollCloseTimeoutRef.current = null;
       }
     };
-  }, [showAnnouncement]); // [attached_file:27]
+  }, [showAnnouncement]);
 
   // Reset menú cuando cambian ruta/params
   useEffect(() => {
     setIsMenuOpen(false);
     setActiveDropdown("");
-  }, [pathname, searchParams]); // [attached_file:27]
+  }, [pathname, searchParams]);
 
   // Anuncio: mostrar según localStorage
   useEffect(() => {
@@ -225,7 +225,7 @@ const Navbar = () => {
     } catch {
       setShowAnnouncement(true);
     }
-  }, []); // [attached_file:27]
+  }, []);
 
   // Animación de anuncio
   useEffect(() => {
@@ -247,7 +247,7 @@ const Navbar = () => {
         announceUnmountTimeoutRef.current = null;
       }
     };
-  }, [showAnnouncement]); // [attached_file:27]
+  }, [showAnnouncement]);
 
   const closeAnnouncement = (saveTimestamp = true) => {
     setShowAnnouncement(false);
@@ -289,7 +289,7 @@ const Navbar = () => {
   // BÚSQUEDA
   useEffect(() => {
     setOpenSearchPanel(Boolean(searchQuery.trim()));
-  }, [searchQuery]); // [attached_file:27]
+  }, [searchQuery]);
 
   useEffect(() => {
     let mounted = true;
@@ -314,7 +314,7 @@ const Navbar = () => {
     return () => {
       mounted = false;
     };
-  }, []); // [attached_file:27]
+  }, []);
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -322,7 +322,7 @@ const Navbar = () => {
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []); // [attached_file:27]
+  }, []);
 
   const filteredResults = filterCatalog(catalogProducts, { term: searchQuery });
   const MAX_ROWS = 6;
@@ -339,6 +339,8 @@ const Navbar = () => {
       <div
         className="absolute left-0 top-full mt-2 w-52 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
         style={{ zIndex: 60 }}
+        role="menu"
+        aria-label={`Submenú de ${item.name}`}
       >
         <div className="py-1">
           {item.submenu.map((subItem) => (
@@ -348,6 +350,8 @@ const Navbar = () => {
               className={`block w-full text-left px-4 py-2 text-sm ${getHoverColorClass(
                 item.color
               )}`}
+              role="menuitem"
+              title={`Ver ${subItem} - Manos del Marga Marga`}
             >
               {subItem}
             </button>
@@ -360,7 +364,7 @@ const Navbar = () => {
   const renderSubmenuMobile = (item) => {
     if (!item.submenu || activeDropdown !== item.name) return null;
     return (
-      <div className="bg-gray-50">
+      <div className="bg-gray-50" role="menu" aria-label={`Submenú de ${item.name}`}>
         {item.submenu.map((subItem) => (
           <button
             key={subItem}
@@ -368,6 +372,8 @@ const Navbar = () => {
             className={`block w-full text-left px-8 py-2 text-sm ${getHoverColorClass(
               item.color
             )}`}
+            role="menuitem"
+            title={`Ver ${subItem} - Manos del Marga Marga`}
           >
             {subItem}
           </button>
@@ -378,13 +384,39 @@ const Navbar = () => {
 
   return (
     <>
+      {/* Schema Structured Data para SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Manos del Marga Marga",
+            "url": typeof window !== 'undefined' ? window.location.origin : '',
+            "logo": typeof window !== 'undefined' ? `${window.location.origin}/images/logos/mmm.png` : '',
+            "description": "Tienda especializada en plantas, productos sostenibles y jardinería. Calidad y servicio en todo Chile.",
+            "sameAs": [],
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": typeof window !== 'undefined' ? `${window.location.origin}/catalogo?query={search_term_string}` : ''
+              },
+              "query-input": "required name=search_term_string"
+            }
+          })
+        }}
+      />
+
       <nav
         ref={navRef}
-        className={`sticky top-0 z-50 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60"> ${
+        className={`sticky top-0 z-50 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 ${
           isScrolled
             ? "bg-white shadow-md py-2"
             : "bg-white/90 backdrop-blur-sm py-3"
         }`}
+        role="navigation"
+        aria-label="Navegación principal"
       >
         <div className="max-w-6xl mx-auto px-4">
           {/* Desktop */}
@@ -392,13 +424,20 @@ const Navbar = () => {
             {/* Sin scroll */}
             <div className={`${!isScrolled ? "block" : "hidden"} space-y-4`}>
               <div className="flex justify-center">
-                <Link href="/" className="flex-shrink-0">
+                <Link 
+                  href="/" 
+                  className="flex-shrink-0"
+                  aria-label="Inicio - Manos del Marga Marga"
+                  title="Ir al inicio - Manos del Marga Marga"
+                >
                   <Image
                     src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga"
+                    alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
                     width={200}
                     height={40}
                     className="h-14 w-auto"
+                    priority
+                    loading="eager"
                   />
                 </Link>
               </div>
@@ -406,28 +445,34 @@ const Navbar = () => {
               <div className="flex items-center justify-between">
                 {/* Buscador con panel */}
                 <div className="relative flex-1 max-w-xs">
-                  <form onSubmit={(e) => e.preventDefault()}>
+                  <form onSubmit={(e) => e.preventDefault()} role="search">
                     <div className="flex">
                       <input
                         ref={inputRef}
-                        type="text"
-                        placeholder="Buscar en catálogo..."
+                        type="search"
+                        name="q"
+                        placeholder="Buscar plantas, productos sostenibles..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => searchQuery && setOpenSearchPanel(true)}
                         className="w-full px-4 py-2 border border-gray-200 text-[#6b554b] rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-200"
-                        aria-label="Buscar"
+                        aria-label="Buscar productos en Manos del Marga Marga"
+                        aria-describedby="search-help"
                       />
                       <button
                         type="button"
                         onClick={handleFocusSearch}
                         className="px-4 py-2 bg-[#eff2d5] text-gray-600 rounded-r-md hover:bg-[#ebf8ca]"
-                        aria-label="Abrir búsqueda"
+                        aria-label="Ejecutar búsqueda"
+                        title="Buscar en catálogo"
                       >
                         <FiSearch size={20} />
                       </button>
                     </div>
                   </form>
+                  <span id="search-help" className="sr-only">
+                    Busca entre nuestro catálogo de plantas y productos sostenibles
+                  </span>
 
                   {openSearchPanel && (
                     <div
@@ -435,10 +480,11 @@ const Navbar = () => {
                       className="absolute left-0 right-0 mt-2 rounded-lg border bg-white shadow-xl overflow-hidden z-[80] pointer-events-auto"
                       role="dialog"
                       aria-label="Resultados de búsqueda"
+                      aria-live="polite"
                     >
                       {catalogLoading ? (
                         <div className="p-3 text-sm text-gray-500">
-                          Cargando…
+                          Cargando productos...
                         </div>
                       ) : catalogError ? (
                         <div className="p-3 text-sm text-red-600">
@@ -446,7 +492,7 @@ const Navbar = () => {
                         </div>
                       ) : topResults.length === 0 ? (
                         <div className="p-3 text-sm text-gray-500">
-                          Sin resultados
+                          No encontramos productos que coincidan con tu búsqueda
                         </div>
                       ) : (
                         <ul className="max-h-96 overflow-auto divide-y">
@@ -468,6 +514,7 @@ const Navbar = () => {
                                     }
                                   }, 0);
                                 }}
+                                title={`Ver ${p.title} - Manos del Marga Marga`}
                               >
                                 <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
                                   <Image
@@ -476,10 +523,11 @@ const Navbar = () => {
                                       p.image ||
                                       "/images/placeholder.png"
                                     }
-                                    alt={p.title || "Producto"}
+                                    alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
                                     fill
                                     sizes="40px"
                                     className="object-cover"
+                                    loading="lazy"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -503,6 +551,7 @@ const Navbar = () => {
                             )}`}
                             className="block text-center text-sm text-[#6a554c] hover:underline"
                             onClick={() => setOpenSearchPanel(false)}
+                            title="Ver todos los resultados de búsqueda"
                           >
                             Ver todos los resultados ({filteredResults.length})
                           </Link>
@@ -521,8 +570,8 @@ const Navbar = () => {
                     >
                       {item.name === "Tienda" ? (
                         <div className="flex items-center">
-                          <button
-                            onClick={() => router.push(item.path)}
+                          <Link
+                            href={item.path}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path
                                 ? getActiveColorClass(item.color)
@@ -533,9 +582,11 @@ const Navbar = () => {
                               borderBottomRightRadius: 0,
                               zIndex: 70,
                             }}
+                            aria-current={pathname === item.path ? "page" : undefined}
+                            title={`Ir a ${item.name} - Manos del Marga Marga`}
                           >
                             {item.name}
-                          </button>
+                          </Link>
 
                           <button
                             onClick={() =>
@@ -553,7 +604,8 @@ const Navbar = () => {
                               borderBottomLeftRadius: 0,
                               zIndex: 70,
                             }}
-                            aria-label="Abrir submenú Tienda"
+                            aria-label={`Abrir categorías de ${item.name}`}
+                            aria-expanded={activeDropdown === item.name}
                           >
                             <svg
                               className={`ml-0 h-4 w-4 transition-transform ${
@@ -576,13 +628,16 @@ const Navbar = () => {
                         </div>
                       ) : (
                         <>
-                          <button
+                          <Link
+                            href={item.path}
                             onClick={() => handleMenuItemClick(item)}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path
                                 ? getActiveColorClass(item.color)
                                 : getHoverColorClass(item.color)
                             }`}
+                            aria-current={pathname === item.path ? "page" : undefined}
+                            title={`Ir a ${item.name} - Manos del Marga Marga`}
                           >
                             {item.name}
                             {item.submenu && (
@@ -604,7 +659,7 @@ const Navbar = () => {
                                 />
                               </svg>
                             )}
-                          </button>
+                          </Link>
 
                           {renderSubmenuInline(item)}
                         </>
@@ -622,36 +677,48 @@ const Navbar = () => {
             {/* Con scroll */}
             <div className={`${isScrolled ? "block" : "hidden"}`}>
               <div className="flex items-center justify-between">
-                <Link href="/" className="flex-shrink-0">
+                <Link 
+                  href="/" 
+                  className="flex-shrink-0"
+                  aria-label="Inicio - Manos del Marga Marga"
+                  title="Ir al inicio - Manos del Marga Marga"
+                >
                   <Image
                     src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga"
+                    alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
                     width={120}
                     height={24}
                     className="h-8 w-auto"
+                    priority
+                    loading="eager"
                   />
                 </Link>
 
                 <div className="flex items-center space-x-4 mx-4">
                   <div className="relative">
-                    <form onSubmit={(e) => e.preventDefault()} className="flex">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Buscar..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onFocus={() => searchQuery && setOpenSearchPanel(true)}
-                        className="w-48 px-3 py-1 text-sm border text-[#6a554c] border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleFocusSearch}
-                        className="px-3 py-1 bg-[#eff2d5] text-gray-600 rounded-r-md hover:bg-[#ebf8ca]"
-                        aria-label="Abrir búsqueda"
-                      >
-                        <FiSearch size={16} />
-                      </button>
+                    <form onSubmit={(e) => e.preventDefault()} role="search">
+                      <div className="flex">
+                        <input
+                          ref={inputRef}
+                          type="search"
+                          name="q"
+                          placeholder="Buscar plantas..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onFocus={() => searchQuery && setOpenSearchPanel(true)}
+                          className="w-48 px-3 py-1 text-sm border text-[#6a554c] border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-200"
+                          aria-label="Buscar productos en Manos del Marga Marga"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleFocusSearch}
+                          className="px-3 py-1 bg-[#eff2d5] text-gray-600 rounded-r-md hover:bg-[#ebf8ca]"
+                          aria-label="Ejecutar búsqueda"
+                          title="Buscar en catálogo"
+                        >
+                          <FiSearch size={16} />
+                        </button>
+                      </div>
                     </form>
 
                     {openSearchPanel && (
@@ -660,10 +727,11 @@ const Navbar = () => {
                         className="absolute left-0 right-0 mt-2 rounded-lg border bg-white shadow-xl overflow-hidden z-[80] pointer-events-auto"
                         role="dialog"
                         aria-label="Resultados de búsqueda"
+                        aria-live="polite"
                       >
                         {catalogLoading ? (
                           <div className="p-3 text-sm text-gray-500">
-                            Cargando…
+                            Cargando productos...
                           </div>
                         ) : catalogError ? (
                           <div className="p-3 text-sm text-red-600">
@@ -671,7 +739,7 @@ const Navbar = () => {
                           </div>
                         ) : topResults.length === 0 ? (
                           <div className="p-3 text-sm text-gray-500">
-                            Sin resultados
+                            No encontramos productos que coincidan con tu búsqueda
                           </div>
                         ) : (
                           <ul className="max-h-96 overflow-auto divide-y">
@@ -681,6 +749,7 @@ const Navbar = () => {
                                   href={`/producto/${p.id}`}
                                   className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer"
                                   onClick={() => setOpenSearchPanel(false)}
+                                  title={`Ver ${p.title} - Manos del Marga Marga`}
                                 >
                                   <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
                                     <Image
@@ -689,10 +758,11 @@ const Navbar = () => {
                                         p.image ||
                                         "/images/placeholder.png"
                                       }
-                                      alt={p.title || "Producto"}
+                                      alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
                                       fill
                                       sizes="40px"
                                       className="object-cover"
+                                      loading="lazy"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -716,9 +786,9 @@ const Navbar = () => {
                               )}`}
                               className="block text-center text-sm text-[#6a554c] hover:underline"
                               onClick={() => setOpenSearchPanel(false)}
+                              title="Ver todos los resultados de búsqueda"
                             >
-                              Ver todos los resultados ({filteredResults.length}
-                              )
+                              Ver todos los resultados ({filteredResults.length})
                             </Link>
                           </div>
                         )}
@@ -734,8 +804,8 @@ const Navbar = () => {
                     >
                       {item.name === "Tienda" ? (
                         <div className="flex items-center">
-                          <button
-                            onClick={() => router.push(item.path)}
+                          <Link
+                            href={item.path}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path
                                 ? getActiveColorClass(item.color)
@@ -746,9 +816,11 @@ const Navbar = () => {
                               borderBottomRightRadius: 0,
                               zIndex: 70,
                             }}
+                            aria-current={pathname === item.path ? "page" : undefined}
+                            title={`Ir a ${item.name} - Manos del Marga Marga`}
                           >
                             {item.name}
-                          </button>
+                          </Link>
 
                           <button
                             onClick={() =>
@@ -766,7 +838,8 @@ const Navbar = () => {
                               borderBottomLeftRadius: 0,
                               zIndex: 70,
                             }}
-                            aria-label="Abrir submenú Tienda"
+                            aria-label={`Abrir categorías de ${item.name}`}
+                            aria-expanded={activeDropdown === item.name}
                           >
                             <svg
                               className={`ml-0 h-4 w-4 transition-transform ${
@@ -789,13 +862,16 @@ const Navbar = () => {
                         </div>
                       ) : (
                         <>
-                          <button
+                          <Link
+                            href={item.path}
                             onClick={() => handleMenuItemClick(item)}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center ${
                               pathname === item.path
                                 ? getActiveColorClass(item.color)
                                 : getHoverColorClass(item.color)
                             }`}
+                            aria-current={pathname === item.path ? "page" : undefined}
+                            title={`Ir a ${item.name} - Manos del Marga Marga`}
                           >
                             {item.name}
                             {item.submenu && (
@@ -817,7 +893,7 @@ const Navbar = () => {
                                 />
                               </svg>
                             )}
-                          </button>
+                          </Link>
 
                           {renderSubmenuInline(item)}
                         </>
@@ -835,13 +911,20 @@ const Navbar = () => {
 
           {/* Móvil */}
           <div className="md:hidden flex items-center justify-between">
-            <Link href="/" className="flex-shrink-0">
+            <Link 
+              href="/" 
+              className="flex-shrink-0"
+              aria-label="Inicio - Manos del Marga Marga"
+              title="Ir al inicio - Manos del Marga Marga"
+            >
               <Image
                 src="/images/logos/mmm.png"
-                alt="Manos del Marga Marga"
+                alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
                 width={150}
                 height={30}
                 className="h-10 w-auto"
+                priority
+                loading="eager"
               />
             </Link>
             <div className="flex items-center space-x-4">
@@ -849,7 +932,8 @@ const Navbar = () => {
               <button
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 className="p-2 text-gray-600 hover:text-gray-900"
-                aria-label="Abrir menu"
+                aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+                aria-expanded={isMenuOpen}
               >
                 <svg
                   className="h-6 w-6"
@@ -884,25 +968,30 @@ const Navbar = () => {
                 ? "max-h-[32rem] opacity-100 visible mt-2"
                 : "max-h-0 opacity-0 invisible"
             }`}
+            role="menu"
+            aria-hidden={!isMenuOpen}
           >
             <div className="bg-white border rounded-lg shadow-lg">
               <div className="relative p-4 border-b">
-                <form onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={(e) => e.preventDefault()} role="search">
                   <div className="flex">
                     <input
                       ref={inputRef}
-                      type="text"
-                      placeholder="Buscar en catálogo..."
+                      type="search"
+                      name="q"
+                      placeholder="Buscar plantas, productos..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onFocus={() => searchQuery && setOpenSearchPanel(true)}
                       className="w-full px-4 py-2 border border-gray-300 text-[#6a554c]  rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      aria-label="Buscar productos en Manos del Marga Marga"
                     />
                     <button
                       type="button"
                       onClick={handleFocusSearch}
                       className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200"
-                      aria-label="Abrir búsqueda"
+                      aria-label="Ejecutar búsqueda"
+                      title="Buscar en catálogo"
                     >
                       <FiSearch size={20} />
                     </button>
@@ -915,16 +1004,17 @@ const Navbar = () => {
                     className="absolute left-4 right-4 mt-2 rounded-lg border bg-white shadow-xl overflow-hidden z-[80] pointer-events-auto"
                     role="dialog"
                     aria-label="Resultados de búsqueda"
+                    aria-live="polite"
                   >
                     {catalogLoading ? (
-                      <div className="p-3 text-sm text-gray-500">Cargando…</div>
+                      <div className="p-3 text-sm text-gray-500">Cargando productos...</div>
                     ) : catalogError ? (
                       <div className="p-3 text-sm text-red-900">
                         {String(catalogError)}
                       </div>
                     ) : topResults.length === 0 ? (
                       <div className="p-3 text-sm text-gray-500">
-                        Sin resultados
+                        No encontramos productos que coincidan con tu búsqueda
                       </div>
                     ) : (
                       <ul className="max-h-96 overflow-auto divide-y">
@@ -934,6 +1024,7 @@ const Navbar = () => {
                               href={`/producto/${p.id}`}
                               className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer"
                               onClick={() => setOpenSearchPanel(false)}
+                              title={`Ver ${p.title} - Manos del Marga Marga`}
                             >
                               <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
                                 <Image
@@ -942,10 +1033,11 @@ const Navbar = () => {
                                     p.image ||
                                     "/images/placeholder.png"
                                   }
-                                  alt={p.title || "Producto"}
+                                  alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
                                   fill
                                   sizes="40px"
                                   className="object-cover"
+                                  loading="lazy"
                                 />
                               </div>
                               <div className="flex-1 min-w-0">
@@ -969,6 +1061,7 @@ const Navbar = () => {
                           )}`}
                           className="block text-center text-sm text-sky-700 hover:underline"
                           onClick={() => setOpenSearchPanel(false)}
+                          title="Ver todos los resultados de búsqueda"
                         >
                           Ver todos los resultados ({filteredResults.length})
                         </Link>
@@ -995,6 +1088,8 @@ const Navbar = () => {
                         ? getActiveColorClass(item.color)
                         : getHoverColorClass(item.color)
                     }`}
+                    aria-expanded={activeDropdown === item.name}
+                    title={`Ir a ${item.name} - Manos del Marga Marga`}
                   >
                     {item.name}
                     {item.submenu && (
@@ -1027,7 +1122,8 @@ const Navbar = () => {
       {/* Anuncio */}
       {announceMounted && (
         <div
-          aria-live="polite"
+          role="complementary"
+          aria-label="Anuncio especial para empresas"
           className={`fixed left-0 right-0 bg-[#5c7a0b] text-white py-2 px-4 z-40`}
           style={{ top: isScrolled ? "56px" : "140px" }}
         >
@@ -1046,6 +1142,7 @@ const Navbar = () => {
               onClick={() => closeAnnouncement(true)}
               className="ml-4 p-1 hover:bg-[#7bb93e] rounded-full transition-colors"
               aria-label="Cerrar anuncio"
+              title="Cerrar este anuncio"
             >
               <svg
                 className="w-5 h-5"

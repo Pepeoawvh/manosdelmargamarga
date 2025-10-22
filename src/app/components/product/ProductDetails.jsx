@@ -1,12 +1,14 @@
-'use client'
-import { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { firestoreDB } from '../../../lib/firebase/config';
-import AddToCartButton from '../cart/AddToCartButton';
-import Image from 'next/image';
-import Link from 'next/link';
+// components/product/ProductDetails.jsx
+"use client";
+import { useState, useEffect } from "react";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { firestoreDB } from "../../../lib/firebase/config";
+import AddToCartButton from "../cart/AddToCartButton";
+import Image from "next/image";
+import Link from "next/link";
+import Script from "next/script";
 
-const ProductDetails = ({ productId }) => {
+const ProductDetails = ({ productId, productSlug }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,45 +16,61 @@ const ProductDetails = ({ productId }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
+    const fetchById = async (id) => {
+      const snap = await getDoc(doc(firestoreDB, "productosmmm", id));
+      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    };
+
+    const fetchBySlug = async (slug) => {
+      const q = query(collection(firestoreDB, "productosmmm"), where("slug", "==", slug));
+      const qs = await getDocs(q);
+      if (qs.empty) return null;
+      const d = qs.docs[0];
+      return { id: d.id, ...d.data() };
+    };
+
     const fetchProduct = async () => {
-      if (!productId) return;
-      
+      // No prop válida, no consultes
+      if (!productId && !productSlug) return;
+
       setLoading(true);
+      setError(null);
       try {
-        const docRef = doc(firestoreDB, 'productosmmm', productId);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const productData = {
-            id: docSnap.id,
-            ...docSnap.data()
-          };
-          setProduct(productData);
-          
-          // Después podríamos cargar productos relacionados
-          // por categoría o subcategoría
+        let payload = null;
+        if (productId) {
+          payload = await fetchById(productId);
+          // fallback: si llegó id pero el doc tiene slug, ok; si no existe, intenta por slug igual si enviaron ambos
+          if (!payload && productSlug) {
+            payload = await fetchBySlug(productSlug);
+          }
+        } else if (productSlug) {
+          payload = await fetchBySlug(productSlug);
+        }
+
+        if (!payload) {
+          setError("Producto no encontrado");
         } else {
-          setError('Producto no encontrado');
+          setProduct(payload);
         }
       } catch (err) {
-        console.error('Error al cargar el producto:', err);
-        setError('No se pudo cargar el producto');
+        console.error("Error al cargar el producto:", err);
+        setError("No se pudo cargar el producto");
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProduct();
-  }, [productId]);
+  }, [productId, productSlug]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-pulse flex flex-col space-y-4 w-full max-w-3xl">
-          <div className="h-64 bg-gray-200 rounded"></div>
-          <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div className="h-24 bg-gray-200 rounded"></div>
+        <div className="animate-pulse flex flex-col space-y-4 w-full max-w-3xl" aria-busy="true" aria-live="polite">
+          <div className="h-64 bg-gray-200 rounded" />
+          <div className="h-8 bg-gray-200 rounded w-3/4" />
+          <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="h-24 bg-gray-200 rounded" />
         </div>
       </div>
     );
@@ -62,7 +80,7 @@ const ProductDetails = ({ productId }) => {
     return (
       <div className="text-center py-10">
         <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
-        <p className="text-gray-600">{error || 'No se pudo cargar el producto'}</p>
+        <p className="text-gray-600">{error || "No se pudo cargar el producto"}</p>
         <Link href="/catalogo" className="mt-4 inline-block px-4 py-2 bg-[#b4cf66] text-white rounded hover:bg-[#87a644]">
           Ver todos los productos
         </Link>
@@ -70,52 +88,81 @@ const ProductDetails = ({ productId }) => {
     );
   }
 
-  // Preparar imágenes (imagen principal + adicionales si existen)
-  const images = [product.image];
+  // Imágenes
+  const images = [product.image].filter(Boolean);
   if (product.additionalImages && Array.isArray(product.additionalImages)) {
-    images.push(...product.additionalImages);
+    images.push(...product.additionalImages.filter(Boolean));
   }
+
+  const priceInt = Number.parseInt(product.price || 0);
+  const stockInt = Number(product.stock || 0);
+
+  // URL preferente con slug si existe
+  const canonicalPath = `/producto/${product.slug || product.id}`;
+  const canonicalUrl = `https://www.manosdelmargamarga.cl${canonicalPath}`;
 
   return (
     <div className="bg-white mt-12 rounded-lg shadow-sm overflow-hidden">
+      {/* JSON-LD Product (SEO) */}
+      <Script id="ld-product" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          name: product.title,
+          image: images,
+          description: (product.description || "").slice(0, 500),
+          sku: product.id,
+          brand: { "@type": "Brand", name: "Manos del Marga Marga" },
+          category: (product.categories || []).join(", "),
+          offers: {
+            "@type": "Offer",
+            url: canonicalUrl,
+            priceCurrency: "CLP",
+            price: priceInt,
+            availability: stockInt > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          },
+        })}
+      </Script>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-6">
         {/* Columna de imágenes */}
         <div>
           <div className="relative h-[400px] mb-4 border rounded overflow-hidden bg-gray-50">
-            <Image
-              src={images[activeImage]}
-              alt={product.title}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
+            {images[activeImage] ? (
+              <Image
+                src={images[activeImage]}
+                alt={product.title || "Producto de papel artesanal"}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100" />
+            )}
           </div>
-          
-          {/* Miniaturas de imágenes adicionales */}
+
+          {/* Miniaturas */}
           {images.length > 1 && (
-            <div className="flex space-x-2 overflow-x-auto pb-2">
+            <div className="flex space-x-2 overflow-x-auto pb-2" role="tablist" aria-label="Vistas del producto">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImage(idx)}
                   className={`relative h-16 w-16 border-2 rounded overflow-hidden flex-shrink-0 ${
-                    activeImage === idx ? 'border-[#cde582]' : 'border-gray-200 hover:border-[#a3d01c]'
+                    activeImage === idx ? "border-[#cde582]" : "border-gray-200 hover:border-[#a3d01c]"
                   }`}
+                  role="tab"
+                  aria-selected={activeImage === idx}
+                  aria-label={`Vista ${idx + 1}`}
                 >
-                  <Image
-                    src={img}
-                    alt={`Vista ${idx + 1} - ${product.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                  />
+                  <Image src={img} alt={`Vista ${idx + 1} - ${product.title}`} fill className="object-cover" sizes="64px" />
                 </button>
               ))}
             </div>
           )}
         </div>
-        
+
         {/* Columna de información */}
         <div className="flex flex-col">
           {/* Encabezado */}
@@ -123,9 +170,9 @@ const ProductDetails = ({ productId }) => {
             {product.categories && product.categories.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {product.categories.map((category) => (
-                  <Link 
+                  <Link
                     key={category}
-                    href={`/catalogo?categoria=${category}`}
+                    href={`/catalogo?categoria=${encodeURIComponent(category)}`}
                     className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
                   >
                     {category}
@@ -134,44 +181,44 @@ const ProductDetails = ({ productId }) => {
               </div>
             )}
             <h1 className="text-2xl font-bold text-gray-800">{product.title}</h1>
-            {product.subtitle && (
-              <p className="text-[#798f38] italic mt-1">{product.subtitle}</p>
-            )}
+            {product.subtitle && <p className="text-[#798f38] italic mt-1">{product.subtitle}</p>}
           </div>
-          
+
           {/* Precio y stock */}
           <div className="mb-6 flex items-end justify-between">
             <div>
-              <span className="text-3xl font-bold text-[#798f38]">${parseInt(product.price).toLocaleString()}</span>
+              <span className="text-3xl font-bold text-[#798f38]">
+                {priceInt > 0 ? `$${priceInt.toLocaleString()}` : "Consultar precio"}
+              </span>
               {product.oldPrice && (
                 <span className="ml-2 text-sm text-gray-500 line-through">
-                  ${parseInt(product.oldPrice).toLocaleString()}
+                  ${Number.parseInt(product.oldPrice).toLocaleString()}
                 </span>
               )}
             </div>
-            
+
             <div className="text-sm">
-              {product.stock > 0 ? (
-                <span className={`font-medium bg-[#dde5c4] rounded-full p-2 ${
-                  product.stock > 10 ? 'text-[#a3ca2e]' : 'text-amber-700'
-                }`}>
-                  {product.stock > 10 ? 'En stock' : `¡Solo quedan ${product.stock}!`}
+              {stockInt > 0 ? (
+                <span
+                  className={`font-medium bg-[#dde5c4] rounded-full px-3 py-1 ${
+                    stockInt > 10 ? "text-[#2f7d32]" : "text-amber-700"
+                  }`}
+                >
+                  {stockInt > 10 ? "En stock" : `¡Solo quedan ${stockInt}!`}
                 </span>
               ) : (
                 <span className="text-red-600 font-medium">Agotado</span>
               )}
             </div>
           </div>
-          
+
           {/* Descripción */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Descripción</h3>
-            <div className="text-gray-600 whitespace-pre-line">
-              {product.description}
-            </div>
+            <div className="text-gray-600 whitespace-pre-line">{product.description}</div>
           </div>
-          
-          {/* Características adicionales si existen */}
+
+          {/* Características */}
           {product.subcategories && product.subcategories.length > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Características</h3>
@@ -182,18 +229,18 @@ const ProductDetails = ({ productId }) => {
               </ul>
             </div>
           )}
-          
+
           {/* Añadir al carrito */}
-          <div className="mt-auto]">
+          <div className="mt-auto">
             <AddToCartButton product={product} className="w-full bg-[#8f5f49] text-white" />
           </div>
         </div>
       </div>
-      
+
       {/* Área de detalles adicionales */}
       <div className="border-t p-4 md:p-6">
         <h2 className="text-lg font-medium text-gray-800 mb-4">Información adicional</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2">Detalles del producto</h3>
@@ -214,17 +261,17 @@ const ProductDetails = ({ productId }) => {
                 {product.subcategories && product.subcategories.length > 0 && (
                   <tr className="border-b">
                     <td className="py-2 font-medium text-gray-600">Tipo</td>
-                    <td className="py-2 text-gray-600">{product.subcategories.join(', ')}</td>
+                    <td className="py-2 text-gray-600">{product.subcategories.join(", ")}</td>
                   </tr>
                 )}
                 <tr>
                   <td className="py-2 font-medium text-gray-600">SKU</td>
-                  <td className="py-2 text-gray-600">{product.id?.substring(0, 8) || 'No disponible'}</td>
+                  <td className="py-2 text-gray-600">{product.id?.substring(0, 8) || "No disponible"}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2">Envío y entrega</h3>
             <ul className="space-y-2 text-sm text-gray-600">

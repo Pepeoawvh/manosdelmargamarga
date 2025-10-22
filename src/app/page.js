@@ -4,7 +4,6 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { firestoreDB } from "../lib/firebase/config";
 import ProductCard from "./components/product/ProductCard";
 import Link from "next/link";
-import FeatureCard from "./components/FeatureCard";
 import HeroCarousel from "./components/HeroCarousel";
 import WspButton from "./components/WspButton";
 import BotoneraInfo from "./components/BotoneraInfo";
@@ -12,13 +11,9 @@ import BotoneraInfo from "./components/BotoneraInfo";
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Añadir estado para controlar el renderizado en cliente
   const [isMounted, setIsMounted] = useState(false);
 
-  // Controlar el montaje del componente
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -32,34 +27,25 @@ export default function Home() {
           id: doc.id,
           ...doc.data(),
         }));
-setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (error) {
+        setFeaturedProducts(products.filter((p) => Number(p.stock) > 0));
+      } catch (error) {
         console.error("Error fetching featured products:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    if (isMounted) {
-      fetchFeaturedProducts();
-    }
+    if (isMounted) fetchFeaturedProducts();
   }, [isMounted]);
 
-  // Mostrar un esqueleto de carga mientras el componente se monta
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-white">
-        {/* Esqueleto de carga para el hero */}
-        <div className="w-full h-[60vh] bg-gray-100 animate-pulse"></div>
-        
-        {/* Esqueleto para las secciones */}
-        <div className="max-w-6xl mx-auto px-4 py-20">
-          <div className="h-8 w-60 bg-gray-200 mx-auto mb-12 rounded-md animate-pulse"></div>
+        <div className="w-full h-[60vh] bg-gray-100 animate-pulse" aria-hidden="true" />
+        <div className="max-w-6xl mx-auto px-4 py-20" aria-busy="true" aria-live="polite">
+          <div className="h-8 w-60 bg-gray-200 mx-auto mb-12 rounded-md animate-pulse" />
           <div className="grid md:grid-cols-3 gap-8">
             {[...Array(3)].map((_, i) => (
-              <div 
-                key={i} 
-                className="h-64 bg-gray-200 rounded-lg animate-pulse"
-              ></div>
+              <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
             ))}
           </div>
         </div>
@@ -69,21 +55,24 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
 
   return (
     <div className="min-h-screen">
+      {/* Botón flotante de WhatsApp (si ya es fixed, no dupliques en CTA) */}
       <WspButton />
+
+      {/* Hero con imágenes optimizadas en el componente */}
       <HeroCarousel />
-      <BotoneraInfo/>
+
+      <BotoneraInfo />
 
       {/* Productos destacados */}
-      <section className="py-20 bg-[#ffffff7a]">
+      <section className="py-16 bg-[#ffffff7a]">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#467302]">
-            Productos Destacados
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#467302]">
+            Productos destacados de papel artesanal
           </h2>
+
           {loading ? (
-            <div className="text-center py-8">
-              <p className="text-xl text-gray-600">
-                Cargando diseños destacados...
-              </p>
+            <div className="text-center py-8" aria-live="polite">
+              <p className="text-lg text-gray-600">Cargando diseños destacados…</p>
             </div>
           ) : featuredProducts.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-8">
@@ -93,27 +82,35 @@ setFeaturedProducts(products.filter(p => Number(p.stock) > 0));      } catch (er
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-xl text-gray-600">
-                No hay diseños destacados disponibles
+              <p className="text-lg text-gray-600">
+                No hay diseños destacados disponibles por ahora.
               </p>
             </div>
           )}
-          <div className="text-center mt-12">
-<Link href="/catalogo">
-  <button className="bg-[#467302] text-white px-8 py-3 rounded-lg hover:bg-opacity-50 ">
-    Ver Todos los Productos
-  </button>
-</Link>
+
+          <div className="text-center mt-10">
+            <Link
+              href="/catalogo"
+              className="inline-block bg-[#467302] text-white px-8 py-3 rounded-lg hover:bg-opacity-90"
+              aria-label="Ver todos los productos del catálogo"
+            >
+              Ver todos los productos
+            </Link>
           </div>
         </div>
       </section>
-      {/* Testimonials Section */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#87a644]">
-            ¡Contactanos por Whatsapp!
-          </h2>
 
+      {/* CTA WhatsApp en bloque (opcional si el botón flotante ya está) */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#87a644]">
+            ¿Tienes un proyecto en mente?
+          </h2>
+          <p className="text-gray-700 mb-6">
+            Escríbenos por WhatsApp para cotizar papel artesanal, reciclado o papel semilla a medida.
+          </p>
+          {/* O quita este si WspButton ya es fixed */}
+          {/* <WspButton /> */}
         </div>
       </section>
     </div>

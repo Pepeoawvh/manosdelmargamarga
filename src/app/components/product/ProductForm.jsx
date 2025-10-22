@@ -1,100 +1,97 @@
-'use client'
+"use client";
 
-import { useState } from 'react';
-import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '../../hooks/shared/useProducts';
+import { useState } from "react";
+import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from "../../hooks/shared/useProducts";
+import { toSlug } from "../../utils/slug"; // crea este helper o pega la función en este archivo
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
-    title: product?.title || '',
-    subtitle: product?.subtitle || '',
-    description: product?.description || '',
-    price: product?.price || '',
+    title: product?.title || "",
+    subtitle: product?.subtitle || "",
+    description: product?.description || "",
+    price: product?.price || "",
     stock: product?.stock || 0,
     categories: Array.isArray(product?.categories) ? product?.categories : [],
     subcategories: Array.isArray(product?.subcategories) ? product?.subcategories : [],
-    image: product?.image || '',
+    image: product?.image || "",
     featured: product?.featured || false,
+    // Si ya existe slug en el doc, úsalo; permite editarlo manualmente si quieres
+    slug: product?.slug || "",
   });
 
-  // Log inicial
-  console.log('ProductForm inicializado con datos:', product || 'nuevo producto');
-  
-  // Obtener subcategorías disponibles basadas en las categorías seleccionadas
+  // console.log("ProductForm inicializado con datos:", product || "nuevo producto");
+
   const getAvailableSubcategories = () => {
     let available = [];
-    formData.categories.forEach(category => {
+    formData.categories.forEach((category) => {
       if (PRODUCT_SUBCATEGORIES[category]) {
         available = [...available, ...PRODUCT_SUBCATEGORIES[category]];
       }
     });
-    return [...new Set(available)]; // Eliminar duplicados
+    return [...new Set(available)];
   };
 
   const availableSubcategories = getAvailableSubcategories();
 
   const handleCategoryChange = (category) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       let newCategories;
       if (prev.categories.includes(category)) {
-        newCategories = prev.categories.filter(c => c !== category);
+        newCategories = prev.categories.filter((c) => c !== category);
       } else {
         newCategories = [...prev.categories, category];
       }
-      const validSubcategories = prev.subcategories.filter(sub => {
-        return newCategories.some(cat => 
-          PRODUCT_SUBCATEGORIES[cat] && PRODUCT_SUBCATEGORIES[cat].includes(sub)
-        );
-      });
+      const validSubcategories = prev.subcategories.filter((sub) =>
+        newCategories.some((cat) => PRODUCT_SUBCATEGORIES[cat] && PRODUCT_SUBCATEGORIES[cat].includes(sub))
+      );
       return {
         ...prev,
         categories: newCategories,
-        subcategories: validSubcategories
+        subcategories: validSubcategories,
       };
     });
-  };  
+  };
 
   const handleSubcategoryChange = (subcategory) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       if (prev.subcategories.includes(subcategory)) {
-        return {
-          ...prev,
-          subcategories: prev.subcategories.filter(s => s !== subcategory)
-        };
+        return { ...prev, subcategories: prev.subcategories.filter((s) => s !== subcategory) };
       } else {
-        return {
-          ...prev,
-          subcategories: [...prev.subcategories, subcategory]
-        };
+        return { ...prev, subcategories: [...prev.subcategories, subcategory] };
       }
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validar campos obligatorios
+
     if (!formData.title.trim()) {
-      alert('El título es obligatorio');
+      alert("El título es obligatorio");
       return;
     }
     if (!formData.image.trim()) {
-      alert('La URL de la imagen es obligatoria');
+      alert("La URL de la imagen es obligatoria");
       return;
     }
     if (!formData.categories || formData.categories.length === 0) {
-      alert('Debes seleccionar al menos una categoría');
+      alert("Debes seleccionar al menos una categoría");
       return;
     }
 
-    // Formatear datos para envío y forzar arrays
+    // Genera/normaliza el slug
+    const generatedSlug = toSlug(formData.title);
+    const finalSlug = (formData.slug && toSlug(formData.slug)) || generatedSlug;
+
     const dataToSubmit = {
       ...formData,
-      price: formData.price === '' ? 0 : Number(formData.price),
-      stock: formData.stock === '' ? 0 : Number(formData.stock),
+      slug: finalSlug, // asegura que exista y esté normalizado
+      price: formData.price === "" ? 0 : Number(formData.price),
+      stock: formData.stock === "" ? 0 : Number(formData.stock),
       categories: Array.isArray(formData.categories) ? formData.categories : [],
       subcategories: Array.isArray(formData.subcategories) ? formData.subcategories : [],
     };
 
-    // 🔹 Solo incluir id si es edición
+    // Solo incluir id si es edición
     if (product?.id) {
       dataToSubmit.id = product.id;
     }
@@ -105,11 +102,9 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   return (
     <div className="bg-white w-full border border-gray-200 rounded shadow-sm text-sm">
       <div className="border-b px-3 py-2 bg-gray-50">
-        <h3 className="text-base font-medium text-gray-700">
-          {product ? 'Editar producto' : 'Nuevo producto'}
-        </h3>
+        <h3 className="text-base font-medium text-gray-700">{product ? "Editar producto" : "Nuevo producto"}</h3>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="p-3 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Columna izquierda */}
@@ -119,42 +114,44 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
                 placeholder="Ej: Papel reciclado 20x30"
                 required
               />
             </div>
-            
+
+            {/* Campo opcional para slug editable por SEO/URL */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Subtítulo/Promocional</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Slug (opcional)</label>
               <input
                 type="text"
-                value={formData.subtitle}
-                onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                 className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
-                placeholder="Ej: ¡Ideal para invitaciones!"
+                placeholder="papel-reciclado-20x30"
               />
+              <p className="text-[11px] text-gray-400 mt-0.5">Si lo dejas vacío, se genera desde el título.</p>
             </div>
-            
+
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">URL de la imagen w320xh360</label>
               <input
                 type="url"
                 value={formData.image}
-                onChange={(e) => setFormData({...formData, image: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                 className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
                 placeholder="https://ejemplo.com/imagen.jpg"
                 required
               />
               <p className="text-xs text-gray-400 mt-0.5">Ingrese una URL válida de imagen</p>
             </div>
-            
+
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
                 rows="3"
                 placeholder="Describa su producto en detalle..."
@@ -162,7 +159,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               />
             </div>
           </div>
-          
+
           {/* Columna derecha */}
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -175,13 +172,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     min="0"
                     step="1"
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full pl-5 py-1 px-2 text-xs border border-gray-300 rounded"
                     required
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Stock</label>
                 <input
@@ -189,12 +186,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                   min="0"
                   step="1"
                   value={formData.stock}
-                  onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
                   required
                 />
               </div>
             </div>
+
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Categorías</label>
               <div className="max-h-32 overflow-y-auto border border-gray-300 rounded p-1 bg-white">
@@ -214,7 +212,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               </div>
               <p className="text-xs text-gray-400 mt-0.5">Seleccione al menos una categoría</p>
             </div>
-            
+
             {formData.categories.length > 0 && availableSubcategories.length > 0 && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Subcategorías</label>
@@ -236,13 +234,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 <p className="text-xs text-gray-400 mt-0.5">Seleccione las subcategorías correspondientes</p>
               </div>
             )}
-            
+
             <div className="mt-1">
               <label className="flex items-center space-x-1 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.featured}
-                  onChange={(e) => setFormData({...formData, featured: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
                   className="rounded text-emerald-600 focus:ring-emerald-500 h-3 w-3"
                 />
                 <span className="text-xs font-medium text-gray-700">Producto destacado</span>
@@ -251,7 +249,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="border-t pt-3 flex justify-end space-x-2 mt-2">
           <button
             type="button"
@@ -260,10 +258,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
           >
             Cancelar
           </button>
-          <button
-            type="submit"
-            className="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700"
-          >
+          <button type="submit" className="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700">
             Guardar producto
           </button>
         </div>
