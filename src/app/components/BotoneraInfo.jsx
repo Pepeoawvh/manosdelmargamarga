@@ -5,7 +5,7 @@ const botones = [
     icon: <FaSeedling className="text-[#5e8c30] text-3xl mb-2" />,
     title: "¿CÓMO PLANTAR?",
     desc: "Haz germinar tu papel semilla.",
-    href: "/tutoriales/como-plantar",
+    href: "/como-plantar-papel-germinable-manos-del-marga-marga",
   },
   {
     icon: <FaCompass className="text-[#5e8c30] text-3xl mb-2" />,

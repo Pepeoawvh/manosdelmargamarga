@@ -77,10 +77,11 @@ const Navbar = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const tutorialSlugMap = {
-    "¿Como plantar?": "como-plantar",
-    "¿Cómo funciona un pedido?": "como-trabajamos",
-    "Ayuda para diseñadores": "protocolo-grafico",
+  // Mapeo actualizado de tutoriales a URLs directas
+  const tutorialUrlMap = {
+    "¿Como plantar?": "/como-plantar-papel-germinable-manos-del-marga-marga",
+    "¿Cómo funciona un pedido?": "/como-funciona-un-pedido-manos-del-marga-marga",
+    "Ayuda para diseñadores": "/ayuda-para-disenadores-manos-del-marga-marga",
   };
 
   const menuItems = [
@@ -97,7 +98,7 @@ const Navbar = () => {
       path: "/tutoriales",
       color: "blue",
       submenu: [
-        "¿Cómo plantar?",
+        "¿Cómo plantar papel germinable manos del marga marga?",
         "Ayuda para diseñadores",
         "¿Cómo funciona un pedido?",
       ],
@@ -129,7 +130,6 @@ const Navbar = () => {
 
   const slugify = (str) => {
     if (!str) return "";
-    if (tutorialSlugMap[str]) return tutorialSlugMap[str];
     return str
       .toLowerCase()
       .normalize("NFD")
@@ -262,15 +262,22 @@ const Navbar = () => {
     }
   };
 
-  // Menú
+  // Menú - CORREGIDO
   const handleMenuItemClick = async (item, subItem = null) => {
     if (subItem) {
       if (item.name === "Tienda") {
         const newPath = `${item.path}?categoria=${encodeURIComponent(subItem)}`;
         await router.push(newPath);
       } else if (item.name === "Tutoriales") {
-        const slug = slugify(subItem);
-        await router.push(`${item.path}/${slug}`);
+        // Usar el mapeo directo para tutoriales - URL COMPLETA
+        const url = tutorialUrlMap[subItem];
+        if (url) {
+          await router.push(url);
+        } else {
+          // Fallback por si acaso
+          const slug = slugify(subItem);
+          await router.push(`/${slug}`);
+        }
       } else {
         const slug = slugify(subItem);
         await router.push(`${item.path}/${slug}`);
@@ -568,7 +575,8 @@ const Navbar = () => {
                       className="relative group"
                       ref={(el) => (dropdownRefs.current[item.name] = el)}
                     >
-                      {item.name === "Tienda" ? (
+                      {/* Items con submenu dividido (Tienda y Tutoriales) */}
+                      {(item.name === "Tienda" || item.name === "Tutoriales") ? (
                         <div className="flex items-center">
                           <Link
                             href={item.path}
@@ -627,6 +635,7 @@ const Navbar = () => {
                           {renderSubmenuInline(item)}
                         </div>
                       ) : (
+                        /* Items sin submenu o con submenu simple */
                         <>
                           <Link
                             href={item.path}
@@ -802,7 +811,8 @@ const Navbar = () => {
                       className="relative group"
                       ref={(el) => (dropdownRefs.current[item.name] = el)}
                     >
-                      {item.name === "Tienda" ? (
+                      {/* Items con submenu dividido (Tienda y Tutoriales) */}
+                      {(item.name === "Tienda" || item.name === "Tutoriales") ? (
                         <div className="flex items-center">
                           <Link
                             href={item.path}
@@ -861,6 +871,7 @@ const Navbar = () => {
                           {renderSubmenuInline(item)}
                         </div>
                       ) : (
+                        /* Items sin submenu o con submenu simple */
                         <>
                           <Link
                             href={item.path}
@@ -919,7 +930,7 @@ const Navbar = () => {
             >
               <Image
                 src="/images/logos/mmm.png"
-                alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
+                alt="Manos del Marga Marga - Taller de papel artesanal y productos sostenibles"
                 width={150}
                 height={30}
                 className="h-10 w-auto"

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const cards = [
   {
-    href: "/tutoriales/como-plantar",
+    href: "/como-plantar-papel-germinable-manos-del-marga-marga",
     title: "¿Cómo plantar?",
     desc: "Guía paso a paso para plantar papel germinable.",
     emoji: "🌱",

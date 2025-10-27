@@ -1,7 +1,6 @@
 "use client";
-
-import TutorialPlanting from "../../components/tutoriales/plantar";
-import WspButton from "../../components/WspButton";
+import TutorialPlanting from "../components/tutoriales/plantar";
+import WspButton from "../components/WspButton";
 
 export default function ComoPlantarPage() {
   return (
