@@ -401,7 +401,7 @@ const Navbar = () => {
             "name": "Manos del Marga Marga",
             "url": typeof window !== 'undefined' ? window.location.origin : '',
             "logo": typeof window !== 'undefined' ? `${window.location.origin}/images/logos/mmm.png` : '',
-            "description": "Tienda especializada en plantas, productos sostenibles y jardinería. Calidad y servicio en todo Chile.",
+            "description": "Taller de papel artesanal germinable y productos sostenibles. Calidad y servicio en todo Chile.",
             "sameAs": [],
             "potentialAction": {
               "@type": "SearchAction",
@@ -439,7 +439,7 @@ const Navbar = () => {
                 >
                   <Image
                     src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
+                    alt="Manos del Marga Marga - Taller de papel artesanal germinable y productos sostenibles"
                     width={200}
                     height={40}
                     className="h-14 w-auto"
@@ -458,7 +458,7 @@ const Navbar = () => {
                         ref={inputRef}
                         type="search"
                         name="q"
-                        placeholder="Buscar plantas, productos sostenibles..."
+                        placeholder="Buscar..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => searchQuery && setOpenSearchPanel(true)}
@@ -478,7 +478,7 @@ const Navbar = () => {
                     </div>
                   </form>
                   <span id="search-help" className="sr-only">
-                    Busca entre nuestro catálogo de plantas y productos sostenibles
+                    Busca entre nuestro catálogo
                   </span>
 
                   {openSearchPanel && (
@@ -694,7 +694,7 @@ const Navbar = () => {
                 >
                   <Image
                     src="/images/logos/mmm.png"
-                    alt="Manos del Marga Marga - Tienda de plantas y productos sostenibles"
+                    alt="Manos del Marga Marga - Taller de papel artesanal germinable y productos sostenibles"
                     width={120}
                     height={24}
                     className="h-8 w-auto"
@@ -711,7 +711,7 @@ const Navbar = () => {
                           ref={inputRef}
                           type="search"
                           name="q"
-                          placeholder="Buscar plantas..."
+                          placeholder="Buscar..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           onFocus={() => searchQuery && setOpenSearchPanel(true)}
@@ -990,7 +990,7 @@ const Navbar = () => {
                       ref={inputRef}
                       type="search"
                       name="q"
-                      placeholder="Buscar plantas, productos..."
+                      placeholder="Buscar productos..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onFocus={() => searchQuery && setOpenSearchPanel(true)}
