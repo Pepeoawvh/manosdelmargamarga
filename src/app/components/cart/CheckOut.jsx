@@ -261,7 +261,7 @@ const CheckOut = () => {
         </div>
 
         <p className="text-xs text-gray-500 mt-4 text-center">
-          Al completar la compra, aceptas nuestros términos y condiciones y política de
+          Al completar la compra, aceptas nuestros <Link href="/terminosycondiciones">Términos y Condiciones</Link> y política de
           privacidad.
         </p>
       </form>

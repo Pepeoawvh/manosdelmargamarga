@@ -4,15 +4,25 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#ebead6] border-t border-gray-200" role="contentinfo" aria-label="Pie de página">
+    <footer
+      className="bg-[#ebead6] border-t border-gray-200"
+      role="contentinfo"
+      aria-label="Pie de página"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 justify-items-center text-center gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 justify-items-left text-center gap-8">
           {/* Enlaces rápidos */}
           <nav aria-label="Enlaces rápidos">
-            <h3 className="text-lg font-semibold text-gray-800">Enlaces rápidos</h3>
-            <ul className="mt-4 space-y-2">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Enlaces rápidos
+            </h3>
+            <ul className="mt-4 space-y-2 md:text-left md:ml-32 ">
               <li>
-                <Link href="/" className="text-gray-800 hover:text-gray-500" title="Ir al inicio">
+                <Link
+                  href="/"
+                  className="text-gray-800 hover:text-gray-500"
+                  title="Ir al inicio"
+                >
                   Inicio
                 </Link>
               </li>
@@ -57,6 +67,15 @@ export default function Footer() {
                 >
                   Protocolo gráfico
                 </Link>
+              </li>{" "}
+              <li className="text-sm">
+                <Link
+                  href="/terminosycondiciones"
+                  className="text-gray-800 hover:text-gray-500"
+                  title="Protocolo gráfico"
+                >
+                  Términos y Condiciones
+                </Link>
               </li>
             </ul>
           </nav>
@@ -64,11 +83,11 @@ export default function Footer() {
           {/* Contacto */}
           <div aria-label="Información de contacto">
             <h3 className="text-lg font-semibold text-gray-800">Contacto</h3>
-                  <div className="mt-4">
-                    <h1 className="text-[#87a644] text-lg">manosdelmargamarga@gmail.com</h1>
-                  </div>
-
-
+            <div className="mt-4">
+              <h1 className="text-[#87a644] text-lg">
+                manosdelmargamarga@gmail.com
+              </h1>
+            </div>
           </div>
 
           {/* Síguenos */}
@@ -123,7 +142,8 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="mt-12 border-t border-gray-200 pt-8 text-center text-[#b4cf66] text-sm">
-          © {new Date().getFullYear()} Manos del MargaMarga. Todos los derechos reservados.
+          © {new Date().getFullYear()} Manos del MargaMarga. Todos los derechos
+          reservados.
         </div>
 
         {/* JSON-LD Organization (no altera UI) */}
@@ -139,16 +159,16 @@ export default function Footer() {
               sameAs: [
                 "https://facebook.com/manosdelmargamarga",
                 "https://instagram.com/manosdelmargamarga",
-                "https://linkedin.com"
+                "https://linkedin.com",
               ],
               contactPoint: [
                 {
                   "@type": "ContactPoint",
                   email: "manosdelmargamarga@gmail.com",
                   contactType: "customer support",
-                  availableLanguage: ["es"]
-                }
-              ]
+                  availableLanguage: ["es"],
+                },
+              ],
             }).replace(/</g, "\\u003c"),
           }}
         />
