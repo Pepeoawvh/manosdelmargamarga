@@ -52,7 +52,7 @@ export default function TermsPage() {
                 <p className="text-sm text-stone-600">Nuestro equipo te responderá en un plazo máximo de 48 horas hábiles.</p>
 
                 <h2 className="text-2xl font-semibold mt-10 mb-4 text-[#3f4f1c]">Primero: Identificación de la empresa y aceptación</h2>
-                <p>¿Quiénes Somos? Estos Términos y Condiciones regulan el uso del sitio web www.manosdelmargamarga.cl, operado por MANOS DEL MARGA MARGA SpA, RUT 76.781.664-2. Nuestra representante legal es LIZBETH CAROLINA VALDÉS HERNÁNDEZ, y nuestro domicilio se encuentra en QUILPUÉ, Valle del Marga Marga.</p>
+                <p>Estos Términos y Condiciones regulan el uso del sitio web www.manosdelmargamarga.cl, operado por MANOS DEL MARGA MARGA SpA, RUT 76.781.664-2. Nuestra representante legal es LIZBETH CAROLINA VALDÉS HERNÁNDEZ, y nuestro domicilio se encuentra en QUILPUÉ, Valle del Marga Marga.</p>
                 <p>Aceptación: Al visitar, usar o comprar en nuestro sitio web, manifiestas tu aceptación a estos Términos y Condiciones. Si no estás de acuerdo con ellos, te pedimos no utilizar nuestros servicios.</p>
                 <p>Legislación Aplicable: El uso de este sitio y los contratos que celebres se encuentran sujetos a las leyes de la República de Chile y, en especial, a la Ley 19.496 de protección de los derechos de los consumidores. En todo momento aplicaremos los derechos y garantías reconocidos a favor de nuestros clientes.</p>
 
