@@ -1,15 +1,19 @@
 // app/catalogo/page.jsx
-import CatalogPageClient from "./components/CatalogClient"
+import CatalogPageClient from "./components/CatalogClient";
 
 export async function generateMetadata({ searchParams }) {
-  const categoria = searchParams?.categoria || "";
-  const destacados = searchParams?.destacados === "1";
+  const sp = await searchParams;
 
-  const baseTitle = "Catálogo de papel artesanal y papel semilla | Manos del Marga Marga";
+  const categoria = sp?.categoria || "";
+  const destacados = sp?.destacados === "1";
+
+  const baseTitle =
+    "Catálogo de papel artesanal y papel semilla | Manos del Marga Marga";
+
   const title = categoria
     ? `Catálogo: ${categoria} | Manos del Marga Marga`
     : destacados
-      ? "Productos destacados | Manos del Marga Marga"  
+      ? "Productos destacados | Manos del Marga Marga"
       : baseTitle;
 
   const description = categoria
@@ -46,10 +50,13 @@ export async function generateMetadata({ searchParams }) {
   };
 }
 
-export default function Page({ searchParams }) {
+// 👇 ESTE ES EL PUNTO CLAVE QUE FALTABA
+export default function Page() {
   return (
-    <main className="max-w-6xl mx-auto px-4 py-2" aria-label="Catálogo de productos de papel artesanal y papel semilla">
-      {/* Si quieres, podrías emitir aquí JSON-LD SSR usando searchParams */}
+    <main
+      className="max-w-6xl mx-auto px-4 py-2"
+      aria-label="Catálogo de productos de papel artesanal y papel semilla"
+    >
       <CatalogPageClient />
     </main>
   );

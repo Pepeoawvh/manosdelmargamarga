@@ -8,6 +8,7 @@ import PaymentMethods from "./PaymentMethods";
 import Button from "../../components/ui/Button";
 import BuyWspButton from "./BuyWspButton";
 import PaymentNotice from "../ui/Notice";
+import Link from "next/link";
 
 const CheckOut = () => {
   const searchParams = useSearchParams();
