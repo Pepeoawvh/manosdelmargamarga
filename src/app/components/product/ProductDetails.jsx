@@ -1,5 +1,7 @@
 // components/product/ProductDetails.jsx
+// components/product/ProductDetails.jsx
 "use client";
+
 import { useState, useEffect } from "react";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { firestoreDB } from "../../../lib/firebase/config";
@@ -8,14 +10,17 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 
-const ProductDetails = ({ productId, productSlug }) => {
+const isFirestoreId = (value) => typeof value === "string" && value.length === 20;
+
+const ProductDetails = ({ productSlug }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
-  const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
+    if (!productSlug) return;
+
     const fetchById = async (id) => {
       const snap = await getDoc(doc(firestoreDB, "productosmmm", id));
       return snap.exists() ? { id: snap.id, ...snap.data() } : null;
@@ -30,27 +35,22 @@ const ProductDetails = ({ productId, productSlug }) => {
     };
 
     const fetchProduct = async () => {
-      // No prop válida, no consultes
-      if (!productId && !productSlug) return;
-
       setLoading(true);
       setError(null);
+
       try {
-        let payload = null;
-        if (productId) {
-          payload = await fetchById(productId);
-          // fallback: si llegó id pero el doc tiene slug, ok; si no existe, intenta por slug igual si enviaron ambos
-          if (!payload && productSlug) {
-            payload = await fetchBySlug(productSlug);
-          }
-        } else if (productSlug) {
-          payload = await fetchBySlug(productSlug);
+        let data = null;
+
+        if (isFirestoreId(productSlug)) {
+          data = await fetchById(productSlug);
+        } else {
+          data = await fetchBySlug(productSlug);
         }
 
-        if (!payload) {
+        if (!data) {
           setError("Producto no encontrado");
         } else {
-          setProduct(payload);
+          setProduct(data);
         }
       } catch (err) {
         console.error("Error al cargar el producto:", err);
@@ -61,12 +61,12 @@ const ProductDetails = ({ productId, productSlug }) => {
     };
 
     fetchProduct();
-  }, [productId, productSlug]);
+  }, [productSlug]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-pulse flex flex-col space-y-4 w-full max-w-3xl" aria-busy="true" aria-live="polite">
+        <div className="animate-pulse flex flex-col space-y-4 w-full max-w-3xl">
           <div className="h-64 bg-gray-200 rounded" />
           <div className="h-8 bg-gray-200 rounded w-3/4" />
           <div className="h-4 bg-gray-200 rounded w-1/2" />
@@ -80,30 +80,23 @@ const ProductDetails = ({ productId, productSlug }) => {
     return (
       <div className="text-center py-10">
         <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
-        <p className="text-gray-600">{error || "No se pudo cargar el producto"}</p>
-        <Link href="/catalogo" className="mt-4 inline-block px-4 py-2 bg-[#b4cf66] text-white rounded hover:bg-[#87a644]">
+        <p className="text-gray-600">{error}</p>
+        <Link href="/catalogo" className="mt-4 inline-block px-4 py-2 bg-[#b4cf66] text-white rounded">
           Ver todos los productos
         </Link>
       </div>
     );
   }
 
-  // Imágenes
-  const images = [product.image].filter(Boolean);
-  if (product.additionalImages && Array.isArray(product.additionalImages)) {
-    images.push(...product.additionalImages.filter(Boolean));
-  }
-
-  const priceInt = Number.parseInt(product.price || 0);
+  const images = [product.image, ...(product.additionalImages || [])].filter(Boolean);
+  const priceInt = Number(product.price || 0);
   const stockInt = Number(product.stock || 0);
 
-  // URL preferente con slug si existe
   const canonicalPath = `/producto/${product.slug || product.id}`;
   const canonicalUrl = `https://www.manosdelmargamarga.cl${canonicalPath}`;
 
   return (
     <div className="bg-white mt-12 rounded-lg shadow-sm overflow-hidden">
-      {/* JSON-LD Product (SEO) */}
       <Script id="ld-product" type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org/",
@@ -119,7 +112,10 @@ const ProductDetails = ({ productId, productSlug }) => {
             url: canonicalUrl,
             priceCurrency: "CLP",
             price: priceInt,
-            availability: stockInt > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            availability:
+              stockInt > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
           },
         })}
       </Script>
