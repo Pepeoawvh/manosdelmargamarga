@@ -46,6 +46,7 @@ export default function useProducts() {
           categories: Array.isArray(data.categories) ? data.categories : [],
           subcategories: Array.isArray(data.subcategories) ? data.subcategories : [],
           featured: Boolean(data.featured),
+          reservable: Boolean(data.reservable), // nuevo campo
         };
       });
       setProducts(productsData);
@@ -75,6 +76,7 @@ export default function useProducts() {
         price: Number(cleanedProduct.price || 0),
         categories: Array.isArray(cleanedProduct.categories) ? cleanedProduct.categories : [],
         subcategories: Array.isArray(cleanedProduct.subcategories) ? cleanedProduct.subcategories : [],
+        reservable: Boolean(cleanedProduct.reservable), // nuevo campo
         createdAt: new Date(),
       };
 
@@ -133,6 +135,7 @@ export default function useProducts() {
         ...cleanedProduct,
         categories: Array.isArray(cleanedProduct.categories) ? cleanedProduct.categories : [],
         subcategories: Array.isArray(cleanedProduct.subcategories) ? cleanedProduct.subcategories : [],
+        reservable: Boolean(cleanedProduct.reservable), // nuevo campo
         updatedAt: new Date(),
       });
 

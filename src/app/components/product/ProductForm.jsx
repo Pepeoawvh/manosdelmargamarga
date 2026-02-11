@@ -15,6 +15,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     subcategories: Array.isArray(product?.subcategories) ? product?.subcategories : [],
     image: product?.image || "",
     featured: product?.featured || false,
+    reservable: product?.reservable || false,
     // Si ya existe slug en el doc, úsalo; permite editarlo manualmente si quieres
     slug: product?.slug || "",
   });
@@ -84,6 +85,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 
     const dataToSubmit = {
       ...formData,
+      reservable: !!formData.reservable,
       slug: finalSlug, // asegura que exista y esté normalizado
       price: formData.price === "" ? 0 : Number(formData.price),
       stock: formData.stock === "" ? 0 : Number(formData.stock),
@@ -235,7 +237,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               </div>
             )}
 
-            <div className="mt-1">
+            <div className="mt-1 flex flex-col gap-2">
               <label className="flex items-center space-x-1 cursor-pointer">
                 <input
                   type="checkbox"
@@ -246,6 +248,17 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 <span className="text-xs font-medium text-gray-700">Producto destacado</span>
               </label>
               <p className="text-xs text-gray-400 ml-4">Los productos destacados aparecen en la página principal</p>
+
+              <label className="flex items-center space-x-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.reservable}
+                  onChange={(e) => setFormData({ ...formData, reservable: e.target.checked })}
+                  className="rounded text-blue-600 focus:ring-blue-500 h-3 w-3"
+                />
+                <span className="text-xs font-medium text-gray-700">Producto reservable</span>
+              </label>
+              <p className="text-xs text-gray-400 ml-4">Si está activo, el producto podrá ser reservado</p>
             </div>
           </div>
         </div>

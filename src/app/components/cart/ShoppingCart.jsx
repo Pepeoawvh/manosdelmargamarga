@@ -20,6 +20,8 @@
     
     // Verificar si hay productos sin stock (stock === 0)
     const hasOutOfStockItems = cart.some(item => item.stock === 0);
+    // Verificar si todos los productos son reservables
+    const allReservable = cart.length > 0 && cart.every(item => item.reservable);
     
     // Función para ir a reservar carrito
     const handleReserveCart = () => {
@@ -143,14 +145,17 @@
                       Iniciar Compra (No disponible)
                     </button>
                   )}
-                  
-                  <button
-                    onClick={handleReserveCart}
-                    className="block w-full py-2 px-4 bg-[#8f5f49] text-white text-center text-sm font-medium rounded hover:bg-[#7ecd07] transition-colors"
-                  >
-                    Reservar Carrito
-                  </button>
-                  
+
+                  {/* Mostrar botón de reservar carrito solo si todos los productos son reservables */}
+                  {allReservable && (
+                    <button
+                      onClick={handleReserveCart}
+                      className="block w-full py-2 px-4 bg-[#8f5f49] text-white text-center text-sm font-medium rounded hover:bg-[#7ecd07] transition-colors"
+                    >
+                      Reservar Carrito
+                    </button>
+                  )}
+
                   <button
                     onClick={clearCart}
                     className="block w-full py-2 px-4 border border-gray-300 text-gray-700 text-center text-sm font-medium rounded hover:bg-gray-100 transition-colors"

@@ -352,10 +352,12 @@ const ProductDetails = ({ productSlug }) => {
               product={product}
               className="w-full bg-[#8f5f49] text-white py-3 rounded-md shadow"
             />
-            <ReservationButton
-              product={product}
-              className="py-3 rounded-md shadow"
-            />
+            {product.reservable && (
+              <ReservationButton
+                product={product}
+                className="py-3 rounded-md shadow"
+              />
+            )}
           </div>
         </div>
       </div>

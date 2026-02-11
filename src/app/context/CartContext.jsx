@@ -101,6 +101,7 @@ export function CartProvider({ children }) {
           quantity: initialQty,
           sku: product.sku || "",
           stock: maxStock,
+          reservable: !!product.reservable, // Asegura que reservable esté presente
         },
       ];
     });
