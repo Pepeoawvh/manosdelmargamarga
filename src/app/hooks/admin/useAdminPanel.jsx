@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from "react";import {
   orderBy,
   where,
   getDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -28,6 +29,8 @@ export default function useAdminPanel() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [orderSortField, setOrderSortField] = useState("date"); // Campo por defecto para ordenar
+  const [reservations, setReservations] = useState([]);
+  const [loadingReservations, setLoadingReservations] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -40,6 +43,7 @@ export default function useAdminPanel() {
       // Cargar pedidos cuando el usuario esté autenticado
       if (user) {
         fetchOrders();
+        fetchReservations();
       }
     });
     return () => unsubscribe();
@@ -55,6 +59,42 @@ export default function useAdminPanel() {
         : "No hay usuario autenticado"
     );
   }, []);
+
+  // Listener en tiempo real para reservas cuando el admin está autenticado
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const reservationsRef = collection(firestoreDB, "reservations");
+    const q = query(reservationsRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        try {
+          const reservationsData = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt:
+                data.createdAt?.toDate?.() || new Date(data.createdAt),
+              updatedAt:
+                data.updatedAt?.toDate?.() || new Date(data.updatedAt),
+            };
+          });
+          setReservations(reservationsData);
+          setLoadingReservations(false);
+        } catch (err) {
+          console.error("Error procesando snapshot de reservas:", err);
+        }
+      },
+      (err) => {
+        console.error("onSnapshot reservas error:", err);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [isLoggedIn]);
 
   // Función para obtener los pedidos desde Firestore
   const fetchOrders = useCallback(async () => {
@@ -94,6 +134,58 @@ export default function useAdminPanel() {
       console.error("Error al cargar pedidos:", error);
     } finally {
       setLoadingOrders(false);
+    }
+  }, []);
+
+  // Función para obtener las reservas desde Firestore
+  const fetchReservations = useCallback(async () => {
+    try {
+      setLoadingReservations(true);
+
+      const reservationsRef = collection(firestoreDB, "reservations");
+      const q = query(reservationsRef, orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+
+      const reservationsData = snapshot.docs.map((doc) => {
+        const data = doc.data() || {};
+
+        // Normalizar campos para que coincidan con la estructura de orders
+        const productPrice = Number(data.productPrice || data.product?.price || 0);
+        const quantity = Number(data.quantity || 1);
+        const total = productPrice * quantity;
+
+        const customerFirst = data.customerFirstName || data.customer?.firstName || "";
+        const customerLast = data.customerLastName || data.customer?.lastName || "";
+
+        return {
+          id: doc.id,
+          // mantener los campos originales por si se necesitan
+          raw: data,
+          productId: data.productId || data.product?.id || null,
+          productTitle: data.productTitle || data.product?.title || "Producto",
+          productPrice: productPrice,
+          quantity: quantity,
+          total: total,
+          customerName: `${customerFirst} ${customerLast}`.trim() || "Cliente",
+          customerFirstName: customerFirst,
+          customerLastName: customerLast,
+          customerEmail: data.customerEmail || data.customer?.email || "No disponible",
+          customerPhone: data.customerPhone || data.customer?.phone || null,
+          customerAddress: data.customerAddress || data.customer?.address || null,
+          customerCity: data.customerCity || data.customer?.city || null,
+          customerRegion: data.customerRegion || data.customer?.region || null,
+          customerNotes: data.customerNotes || data.customer?.notes || "",
+          status: data.status || "pending",
+          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt || Date.now()),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt || Date.now()),
+        };
+      });
+
+      setReservations(reservationsData);
+    } catch (error) {
+      console.error("Error al cargar reservas:", error);
+    } finally {
+      setLoadingReservations(false);
     }
   }, []);
 
@@ -486,6 +578,213 @@ export default function useAdminPanel() {
     }
   };
 
+  // Función para eliminar una reserva
+  const deleteReservation = async (reservationId) => {
+    try {
+      if (!reservationId) {
+        console.error("ID de reserva no proporcionado");
+        return false;
+      }
+
+      console.log(`Intentando eliminar reserva: ${reservationId}`);
+
+      // Usar el ID directamente como docId en Firestore
+      const reservationRef = doc(firestoreDB, "reservations", reservationId);
+      
+      // Eliminar directamente
+      await deleteDoc(reservationRef);
+      console.log(`Reserva ${reservationId} eliminada de Firestore`);
+
+      // Actualizar en estado local
+      setReservations((prev) =>
+        prev.filter((r) => r.id !== reservationId)
+      );
+
+      console.log(`Reserva ${reservationId} eliminada correctamente del estado local`);
+      return true;
+    } catch (error) {
+      console.error("Error general al eliminar reserva:", error);
+      return false;
+    }
+  };
+
+  // Función para actualizar el estado de una reserva
+  const updateReservationStatus = async (reservationId, newStatus) => {
+    try {
+      if (!reservationId || !newStatus) {
+        console.error("ID de reserva o nuevo estado no proporcionados");
+        return false;
+      }
+
+      console.log(
+        `Actualizando reserva ${reservationId} al estado ${newStatus}`
+      );
+
+      // Primero intenta obtener el documento para verificar si existe
+      try {
+        const reservationRef = doc(firestoreDB, "reservations", reservationId);
+        const reservationDoc = await getDoc(reservationRef);
+
+        if (reservationDoc.exists()) {
+          console.log(
+            `Documento de reserva encontrado directamente con ID ${reservationId}`
+          );
+
+          await updateDoc(reservationRef, {
+            status: newStatus,
+            updatedAt: new Date(),
+          });
+
+          // Actualizar en estado local
+          setReservations((prevReservations) =>
+            prevReservations.map((reservation) => {
+              if (reservation.id === reservationId) {
+                return { ...reservation, status: newStatus };
+              }
+              return reservation;
+            })
+          );
+
+          console.log(
+            `Reserva ${reservationId} actualizada correctamente a estado: ${newStatus}`
+          );
+          return true;
+        }
+
+        // Si llegamos aquí, el documento no existe con ese ID directo
+        console.log(
+          `Documento con ID ${reservationId} no encontrado directamente`
+        );
+        throw new Error("Documento no encontrado directamente");
+      } catch (directError) {
+        console.log("Búsqueda directa falló, intentando consulta alternativa");
+
+        // Intento alternativo: buscar por campo 'id'
+        const reservationsCollection = collection(
+          firestoreDB,
+          "reservations"
+        );
+        const q = query(
+          reservationsCollection,
+          where("id", "==", reservationId)
+        );
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          console.error(
+            `No se encontró ninguna reserva con id=${reservationId}`
+          );
+          return false;
+        }
+
+        // Usar el primer documento encontrado
+        const reservationDoc = snapshot.docs[0];
+        console.log(`Reserva encontrada con documento ID: ${reservationDoc.id}`);
+
+        // Actualizar usando el ID real del documento
+        await updateDoc(doc(firestoreDB, "reservations", reservationDoc.id), {
+          status: newStatus,
+          updatedAt: new Date(),
+        });
+
+        // Actualizar en estado local
+        setReservations((prevReservations) =>
+          prevReservations.map((reservation) => {
+            if (reservation.id === reservationId) {
+              return { ...reservation, status: newStatus };
+            }
+            return reservation;
+          })
+        );
+
+        console.log(
+          `Reserva ${reservationId} actualizada correctamente a estado: ${newStatus} (usando búsqueda por campo)`
+        );
+        return true;
+      }
+    } catch (error) {
+      console.error("Error general al actualizar estado de reserva:", error);
+      return false;
+    }
+  };
+
+  // Función para actualizar la cantidad de una reserva (no toca stock de productos)
+  const updateReservationQuantity = async (reservationId, newQuantity) => {
+    try {
+      if (!reservationId || typeof newQuantity !== "number") {
+        console.error("ID de reserva o cantidad no proporcionados");
+        return false;
+      }
+
+      console.log(
+        `Actualizando cantidad de reserva ${reservationId} a ${newQuantity}`
+      );
+
+      // Intento directo por ID
+      try {
+        const reservationRef = doc(firestoreDB, "reservations", reservationId);
+        const reservationDoc = await getDoc(reservationRef);
+
+        if (reservationDoc.exists()) {
+          await updateDoc(reservationRef, {
+            quantity: newQuantity,
+            updatedAt: new Date(),
+          });
+
+          // Actualizar en estado local
+          setReservations((prevReservations) =>
+            prevReservations.map((reservation) => {
+              if (reservation.id === reservationId) {
+                return { ...reservation, quantity: newQuantity };
+              }
+              return reservation;
+            })
+          );
+
+          console.log(
+            `Cantidad de reserva ${reservationId} actualizada a ${newQuantity}`
+          );
+          return true;
+        }
+
+        throw new Error("Documento no encontrado directamente");
+      } catch (directError) {
+        console.log("Búsqueda directa falló, intentando consulta alternativa");
+        const reservationsCollection = collection(firestoreDB, "reservations");
+        const q = query(reservationsCollection, where("id", "==", reservationId));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          console.error(`No se encontró ninguna reserva con id=${reservationId}`);
+          return false;
+        }
+
+        const reservationDoc = snapshot.docs[0];
+        await updateDoc(doc(firestoreDB, "reservations", reservationDoc.id), {
+          quantity: newQuantity,
+          updatedAt: new Date(),
+        });
+
+        setReservations((prevReservations) =>
+          prevReservations.map((reservation) => {
+            if (reservation.id === reservationId) {
+              return { ...reservation, quantity: newQuantity };
+            }
+            return reservation;
+          })
+        );
+
+        console.log(
+          `Cantidad de reserva ${reservationId} actualizada a ${newQuantity} (usando búsqueda por campo)`
+        );
+        return true;
+      }
+    } catch (error) {
+      console.error("Error general al actualizar cantidad de reserva:", error);
+      return false;
+    }
+  };
+
   // Función mejorada para ordenar pedidos, pero simplificada para orderNumber
   const requestSort = (field) => {
     console.log(`Ordenando por ${field}`);
@@ -567,6 +866,8 @@ export default function useAdminPanel() {
     orders,
     loading,
     loadingOrders,
+    reservations,
+    loadingReservations,
     orderSortField,
     // Handlers
     handleLogin,
@@ -584,6 +885,11 @@ export default function useAdminPanel() {
     requestSort,
     formatAddress,
     fetchOrders,
+    // Funciones para reservas
+    fetchReservations,
+    deleteReservation,
+    updateReservationStatus,
+    updateReservationQuantity,
     assignOrderNumber, // Esta es la función que estamos agregando
   };
 }

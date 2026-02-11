@@ -50,7 +50,6 @@ export async function generateMetadata({ searchParams }) {
   };
 }
 
-// 👇 ESTE ES EL PUNTO CLAVE QUE FALTABA
 export default function Page() {
   return (
     <main

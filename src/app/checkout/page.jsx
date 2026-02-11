@@ -1,26 +1,27 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import CheckOut from '../components/cart/CheckOut';
 import Link from 'next/link';
 
-
 export default function CheckoutPage() {
   const { cart } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isReservation = searchParams.get('type') === 'reservation';
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
     setMounted(true);
   }, []);
   
-  // Redirigir si el carrito está vacío
+  // Redirigir si el carrito está vacío (pero NO si es una reserva)
   useEffect(() => {
-    if (mounted && cart.length === 0) {
+    if (mounted && cart.length === 0 && !isReservation) {
       router.push('/catalogo');
     }
-  }, [cart, mounted, router]);
+  }, [cart, mounted, router, isReservation]);
   
   if (!mounted) return null;
   
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
       </div>
       
       {cart.length > 0 ? (
-        <CheckOut />
+        <CheckOut isReservation={isReservation} />  // Prop agregada para condicionar OrderSummary
       ) : (
         <div className="text-center py-12">
           <div className="bg-gray-100 inline-block p-3 rounded-full mb-4">

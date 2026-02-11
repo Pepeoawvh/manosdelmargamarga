@@ -14,6 +14,7 @@ const CheckOut = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isRetry = searchParams.get("retry") === "true";
+  const isReservation = searchParams.get("type") === "reservation";
 
   const {
     cart,
@@ -27,6 +28,8 @@ const CheckOut = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
+  const [reservationSuccess, setReservationSuccess] = useState(false);
+  const [reservationId, setReservationId] = useState(null);
   const [paymentMethod] = useState("webpay"); // Siempre Webpay
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
@@ -191,14 +194,81 @@ const CheckOut = () => {
     }
   };
 
+  // Función para manejar la reserva
+  const handleReserveCart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (!validateForm()) {
+        setLoading(false);
+        return;
+      }
+
+      if (cart.length === 0) {
+        setError("Tu carrito está vacío");
+        setLoading(false);
+        return;
+      }
+
+      // Guardar info de envío
+      saveShippingInfo(shippingInfo);
+
+      // Crear arreglo de reservas para cada producto en el carrito
+      const reservationItems = cart.map(item => ({
+        productId: item.id,
+        productTitle: item.title,
+        productPrice: item.price,
+        quantity: item.quantity,
+        total: item.price * item.quantity,
+      }));
+
+      // Enviar solicitud de reserva del carrito
+      const res = await fetch("/api/create-reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: reservationItems,
+          customer: shippingInfo,
+          cartTotal: subtotal,
+          timestamp: Date.now(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error al registrar la reserva");
+      }
+
+      // Mostrar confirmación de éxito
+      setReservationSuccess(true);
+      setReservationId(data.reservationId);
+      setMessage("");
+      setError(null);
+    } catch (err) {
+      console.error("handleReserveCart error:", err);
+      setError(err.message || "Ocurrió un error al registrar la reserva");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm">
       {/* <PaymentNotice /> */}
       <div className="p-4 md:p-6 border-b border-[#c4de86]">
-        <h1 className="text-md font-bold text-gray-800">Finalizar Compra</h1>
+        <h1 className="text-md font-bold text-gray-800">
+          {isReservation ? "Formulario de Reserva" : "Finalizar Compra"}
+        </h1>
         {isRetry && (
           <p className="text-sm text-amber-600 mt-1">
             Estás realizando un nuevo intento de pago. Tus datos se han mantenido.
+          </p>
+        )}
+        {isReservation && (
+          <p className="text-sm text-blue-600 mt-1">
+            Completa el formulario para reservar los productos en tu carrito. Nos contactaremos pronto.
           </p>
         )}
       </div>
@@ -215,57 +285,113 @@ const CheckOut = () => {
         </div>
       )}
 
-      <form className="p-4 md:p-6" onSubmit={(e) => e.preventDefault()}>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <div>
-            <ShippingInfoForm
-              shippingInfo={shippingInfo}
-              setShippingInfo={setShippingInfo}
-            />
-            <div className="mt-4">
-              <PaymentMethods
-                paymentMethod={paymentMethod}
-                setPaymentMethod={() => {}}
-                onlyWebpay={false}
-              />
-            </div>
+      {/* Mostrar confirmación de reserva exitosa */}
+      {reservationSuccess && isReservation ? (
+        <div className="p-8 text-center">
+          <div className="mb-6">
+            <svg className="h-16 w-16 text-green-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-
-          <div className="text-xs">
-            <OrderSummary
-              cart={cart}
-              subtotal={subtotal}
-              shippingCost={shippingCost}
-              total={total}
-            />
-
-            <div className="grid w-full justify-center space-y-4 mt-4">
-              <Button
-                type="button"
-                className="w-full bg-[#5e8c30] hover:bg-[#4d7528] py-3 items-center justify-center text-white rounded"
-                disabled={loading || cart.length === 0}
-                onClick={handleCheckout}
-              >
-                {loading ? "Redirigiendo..." : "Pagar con Webpay"}
-              </Button>
-
-              <BuyWspButton
-                orderData={{
-                  customer: shippingInfo,
-                  cart,
-                  summary: { subtotal, shippingCost, total },
-                }}
-                phoneNumber="56322121504"
-              />
-            </div>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Reserva Registrada!</h2>
+          <p className="text-gray-600 mb-4">
+            Tu solicitud de reserva ha sido registrada correctamente.
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Número de reserva: <span className="font-mono font-semibold">{reservationId}</span>
+          </p>
+          <p className="text-gray-600 mb-8">
+            Nos contactaremos pronto a través del email <span className="font-semibold">{shippingInfo.email}</span> o por Whatsapp al <span className="font-semibold">{shippingInfo.phone}</span> para confirmar tu reserva.
+          </p>
+          <Link href="/catalogo" className="inline-block px-6 py-2 bg-[#8f5f49] text-white rounded hover:bg-[#7ecd07] transition-all">
+            Volver al catálogo
+          </Link>
         </div>
+      ) : (
+        <form className="p-4 md:p-6" onSubmit={(e) => e.preventDefault()}>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div>
+              <ShippingInfoForm
+                shippingInfo={shippingInfo}
+                setShippingInfo={setShippingInfo}
+              />
+              {!isReservation && (
+                <div className="mt-4">
+                  <PaymentMethods
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={() => {}}
+                    onlyWebpay={false}
+                  />
+                </div>
+              )}
+            </div>
 
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          Al completar la compra, aceptas nuestros <Link href="/terminosycondiciones">Términos y Condiciones</Link> y política de
-          privacidad.
-        </p>
-      </form>
+            <div className="text-xs">
+              {/* Condicional para OrderSummary: solo mostrar si NO es reserva */}
+              {!isReservation && (
+                <OrderSummary
+                  cart={cart}
+                  subtotal={subtotal}
+                  shippingCost={shippingCost}
+                  total={total}
+                />
+              )}
+
+              <div className="grid w-full justify-center space-y-4 mt-4">
+                {!isReservation ? (
+                  <>
+                    <Button
+                      type="button"
+                      className="w-full bg-[#5e8c30] hover:bg-[#4d7528] py-3 items-center justify-center text-white rounded"
+                      disabled={loading || cart.length === 0}
+                      onClick={handleCheckout}
+                    >
+                      {loading ? "Redirigiendo..." : "Pagar con Webpay"}
+                    </Button>
+
+                    <BuyWspButton
+                      orderData={{
+                        customer: shippingInfo,
+                        cart,
+                        summary: { subtotal, shippingCost, total },
+                      }}
+                      phoneNumber="56322121504"
+                    />
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    className="w-full bg-[#8f5f49] hover:bg-[#7ecd07] py-3 items-center justify-center text-white rounded"
+                    disabled={loading || cart.length === 0}
+                    onClick={handleReserveCart}
+                  >
+                    {loading ? "Procesando reserva..." : "Confirmar Reserva"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {reservationSuccess && (
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Tu reserva ha sido registrada exitosamente. Te contactaremos pronto.
+            </p>
+          )}
+          
+          {!reservationSuccess && !isReservation && (
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Al completar la compra, aceptas nuestros <Link href="/terminosycondiciones">Términos y Condiciones</Link> y política de
+              privacidad.
+            </p>
+          )}
+          
+          {!reservationSuccess && isReservation && (
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Al confirmar la reserva, aceptas que te contactemos por medio de Correo electrónico o Whatsapp para coordinar los detalles de tu reserva.
+            </p>
+          )}
+        </form>
+      )}
     </div>
   );
 };

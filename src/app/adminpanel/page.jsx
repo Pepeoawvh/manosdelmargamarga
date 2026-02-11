@@ -4,6 +4,7 @@ import ProductForm from "../components/product/ProductForm";
 import InventoryManager from "../components/admin/InventoryManager";
 import TabSystem from "../components/ui/TabSystem";
 import OrderTable from "../components/admin/OrderTable";
+import ReservationTable from "../components/admin/ReservationTable";
 import CarouselManager from "@/app/components/admin/CarouselManager";
 import SalesReport from "../components/admin/SalesReport";
 import Dashboard from "../components/admin/Dashboard";
@@ -24,6 +25,8 @@ export default function AdminPanel() {
     orders,
     loading,
     loadingOrders,
+    reservations,
+    loadingReservations,
     // Handlers
     handleLogin,
     handleLogout,
@@ -39,6 +42,10 @@ export default function AdminPanel() {
     updateOrderStatus,
     requestSort,
     formatAddress,
+    // Funciones para reservas
+    deleteReservation,
+    updateReservationStatus,
+    updateReservationQuantity,
     // IMPORTANTE: Asegúrate de extraer esta función del hook
     assignOrderNumber,
   } = useAdminPanel();
@@ -246,6 +253,20 @@ export default function AdminPanel() {
     {
       label: "Informes de Ventas",
       content: <SalesReport />,
+    },
+    {
+      label: "Reservas",
+      content: (
+        <div className="p-4">
+          <h2 className="text-lg font-medium text-gray-700 mb-4">
+            Gestión de Reservas
+          </h2>
+          <ReservationTable
+            reservations={Array.isArray(reservations) ? reservations : []}
+            formatDate={formatDate}
+          />
+        </div>
+      ),
     },
      ];
 

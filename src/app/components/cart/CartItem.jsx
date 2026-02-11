@@ -32,14 +32,14 @@ export default function CartItem({ item }) {
     }
     const next = qty + 1;
     updateQuantity(item.id, next);
-    if (next >= stock) setHint("Stock máximo alcanzado");
+    if (next >= stock) setHint("Stock máximo alcanzado, si necesita un mayor stock de este producto puede realizar una reserva y le contactaremos");
     else setHint("");
   };
 
-  const handleInput = (e) => {
+  const handleChange = (e) => {
     const raw = e.target.value.replace(/\D/g, "");
     if (raw === "") {
-      // no aplicar 0, espera blur o siguiente input
+      // Permitir vacío temporalmente, manejar en blur
       return;
     }
     let next = Number(raw);
@@ -65,8 +65,7 @@ export default function CartItem({ item }) {
 
   return (
     <div className="flex items-center gap-3 border rounded p-2">
-      <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
         <img
           src={item.image || "/placeholder.png"}
           alt={item.title}
@@ -95,15 +94,15 @@ export default function CartItem({ item }) {
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              className="w-12 text-center text-sm py-1 outline-none"
-              defaultValue={qty}
-              onInput={handleInput}
+              className="w-12 text-center text-sm py-1 text-[#648801ff] outline-none "
+              value={qty}  // Cambiado: de defaultValue a value para input controlado
+              onChange={handleChange}  // Cambiado: de onInput a onChange
               onBlur={handleBlur}
             />
             <button
               type="button"
               className={`px-2 py-1 text-sm ${
-                canInc ? "text-gray-700 hover:bg-gray-100" : "text-gray-400 cursor-not-allowed"
+                canInc ? "text-gray-700 hover:bg-gray-600" : "text-gray-800 cursor-not-allowed"
               }`}
               onClick={handleInc}
               disabled={!canInc}
@@ -115,7 +114,7 @@ export default function CartItem({ item }) {
           </div>
 
           {Number.isFinite(stock) && (
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-gray-700">
               Stock: {stock}
             </span>
           )}
