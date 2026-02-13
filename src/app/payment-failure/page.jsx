@@ -1,10 +1,10 @@
 'use client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, Suspense } from 'react';
 import { FiAlertTriangle } from 'react-icons/fi';
 
-export default function PaymentFailure() {
+function PaymentFailureContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -74,5 +74,17 @@ export default function PaymentFailure() {
         ) : null}
       </div>
     </div>
+  );
+}
+
+export default function PaymentFailure() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#f5f3e6] flex items-center justify-center">
+        <div className="animate-pulse text-gray-600">Cargando...</div>
+      </div>
+    }>
+      <PaymentFailureContent />
+    </Suspense>
   );
 }

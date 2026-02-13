@@ -80,8 +80,8 @@ const Navbar = () => {
   // Mapeo actualizado de tutoriales a URLs directas
   const tutorialUrlMap = {
     "¿Como plantar?": "/como-plantar-papel-germinable-manos-del-marga-marga",
-    "¿Cómo funciona un pedido?": "/como-funciona-un-pedido-manos-del-marga-marga",
-    "Ayuda para diseñadores": "/ayuda-para-disenadores-manos-del-marga-marga",
+    "¿Cómo funciona un pedido?": "/tutoriales/como-trabajamos",
+    "Ayuda para diseñadores": "/tutoriales/protocolo-grafico",
   };
 
   const menuItems = [
@@ -91,8 +91,8 @@ const Navbar = () => {
       color: "yellow",
       submenu: PRODUCT_CATEGORIES,
     },
-    { name: "Nosotras", path: "/nosotras", color: "pink" },
-    { name: "Sostenible", path: "/sostenible", color: "green" },
+    // { name: "Nosotras", path: "/nosotras", color: "pink" },
+    // { name: "Sostenible", path: "/sostenible", color: "green" },
     {
       name: "Tutoriales",
       path: "/tutoriales",
@@ -399,15 +399,15 @@ const Navbar = () => {
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Manos del Marga Marga",
-            "url": typeof window !== 'undefined' ? window.location.origin : '',
-            "logo": typeof window !== 'undefined' ? `${window.location.origin}/images/logos/mmm.png` : '',
+            "url": "https://www.manosdelmargamarga.cl",
+            "logo": "https://www.manosdelmargamarga.cl/images/logos/mmm.png",
             "description": "Taller de papel artesanal germinable y productos sostenibles. Calidad y servicio en todo Chile.",
             "sameAs": [],
             "potentialAction": {
               "@type": "SearchAction",
               "target": {
                 "@type": "EntryPoint",
-                "urlTemplate": typeof window !== 'undefined' ? `${window.location.origin}/catalogo?query={search_term_string}` : ''
+                "urlTemplate": "https://www.manosdelmargamarga.cl/catalogo?query={search_term_string}"
               },
               "query-input": "required name=search_term_string"
             }

@@ -28,12 +28,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href={`/tutoriales/${"como-plantar"
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[¿?]/g, "")
-                    .replace(/\s+/g, "-")}`}
+                  href="/como-plantar-papel-germinable-manos-del-marga-marga"
                   className="text-gray-800 hover:text-gray-500"
                   title="Cómo plantar"
                 >

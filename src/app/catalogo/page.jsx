@@ -1,4 +1,5 @@
 // app/catalogo/page.jsx
+import { Suspense } from "react";
 import CatalogPageClient from "./components/CatalogClient";
 
 export async function generateMetadata({ searchParams }) {
@@ -56,7 +57,13 @@ export default function Page() {
       className="max-w-6xl mx-auto px-4 py-2"
       aria-label="Catálogo de productos de papel artesanal y papel semilla"
     >
-      <CatalogPageClient />
+      <Suspense fallback={
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-pulse text-gray-600">Cargando catálogo...</div>
+        </div>
+      }>
+        <CatalogPageClient />
+      </Suspense>
     </main>
   );
 }

@@ -32,7 +32,7 @@ export default function CartItem({ item }) {
     }
     const next = qty + 1;
     updateQuantity(item.id, next);
-    if (next >= stock) setHint("Stock máximo alcanzado, si necesita un mayor stock de este producto puede realizar una reserva y le contactaremos");
+    if (next >= stock) setHint("Stock máximo alcanzado, si necesita un mayor stock de este producto puede contactarnos por WhatsApp");
     else setHint("");
   };
 

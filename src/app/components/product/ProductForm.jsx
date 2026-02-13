@@ -14,6 +14,9 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     categories: Array.isArray(product?.categories) ? product?.categories : [],
     subcategories: Array.isArray(product?.subcategories) ? product?.subcategories : [],
     image: product?.image || "",
+    additionalImages: Array.isArray(product?.additionalImages) 
+      ? [...product.additionalImages, "", "", ""].slice(0, 3)
+      : ["", "", ""],
     featured: product?.featured || false,
     reservable: product?.reservable || false,
     // Si ya existe slug en el doc, úsalo; permite editarlo manualmente si quieres
@@ -83,6 +86,9 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     const generatedSlug = toSlug(formData.title);
     const finalSlug = (formData.slug && toSlug(formData.slug)) || generatedSlug;
 
+    // Filtrar imágenes adicionales no vacías
+    const filteredAdditionalImages = formData.additionalImages.filter(img => img.trim() !== "");
+
     const dataToSubmit = {
       ...formData,
       reservable: !!formData.reservable,
@@ -91,6 +97,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       stock: formData.stock === "" ? 0 : Number(formData.stock),
       categories: Array.isArray(formData.categories) ? formData.categories : [],
       subcategories: Array.isArray(formData.subcategories) ? formData.subcategories : [],
+      additionalImages: filteredAdditionalImages,
     };
 
     // Solo incluir id si es edición
@@ -137,7 +144,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">URL de la imagen w320xh360</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">URL de la imagen principal w320xh360</label>
               <input
                 type="url"
                 value={formData.image}
@@ -146,7 +153,28 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 placeholder="https://ejemplo.com/imagen.jpg"
                 required
               />
-              <p className="text-xs text-gray-400 mt-0.5">Ingrese una URL válida de imagen</p>
+              <p className="text-xs text-gray-400 mt-0.5">Imagen principal del producto (obligatoria)</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Imágenes adicionales (opcional)</label>
+              <div className="space-y-2">
+                {[0, 1, 2].map((index) => (
+                  <input
+                    key={index}
+                    type="url"
+                    value={formData.additionalImages[index] || ""}
+                    onChange={(e) => {
+                      const newAdditionalImages = [...formData.additionalImages];
+                      newAdditionalImages[index] = e.target.value;
+                      setFormData({ ...formData, additionalImages: newAdditionalImages });
+                    }}
+                    className="w-full py-1 px-2 text-xs border border-gray-300 rounded"
+                    placeholder={`Imagen adicional ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">Hasta 3 imágenes adicionales (opcional)</p>
             </div>
 
             <div>
