@@ -49,10 +49,14 @@ const ProductCard = ({
   const productHref = `/producto/${slug || id}`;
   const priceInt = Number.parseInt(price || 0);
 
-  // Textos enriquecidos
+  // Textos enriquecidos con keywords SEO
   const titleText = title || "Producto de papel artesanal";
   const descText = description || "Papel artesanal hecho a mano.";
-  const altText = `${titleText}${mainCategory ? `, categoría ${mainCategory}` : ""}`;
+  
+  // Alt text optimizado para SEO con contexto descriptivo
+  const altText = mainCategory
+    ? `${titleText} - papel artesanal hecho a mano, categoría ${mainCategory}`
+    : `${titleText} - papel artesanal sostenible hecho a mano`;
 
   // Imagen fallback
   const handleImgError = (e) => {

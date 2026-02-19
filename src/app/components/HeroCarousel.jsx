@@ -12,56 +12,159 @@ import "swiper/css/navigation";
 
 const heights = "h-[340px] sm:h-[420px] md:h-[560px] lg:h-[520px]";
 
+// Función optimizada para generar alt text descriptivo y SEO-friendly
 function AltText(slide) {
+  // Si hay alt text personalizado, úsalo
   if (slide?.alt) return slide.alt;
-  if (slide?.title && slide?.description) return `${slide.title} — ${slide.description}`.slice(0, 140);
-  if (slide?.title) return slide.title;
-  return "Papel artesanal y reciclado de Manos del Marga Marga";
+  
+  // Si hay título y descripción, combínalos con contexto
+  if (slide?.title && slide?.description) {
+    const combined = `${slide.title} — ${slide.description}`;
+    // Asegurarnos de que incluya "papel artesanal" para SEO
+    if (!combined.toLowerCase().includes("papel")) {
+      return `${combined.slice(0, 120)} - papel artesanal sostenible`;
+    }
+    return combined.slice(0, 140);
+  }
+  
+  // Si solo hay título, agregar contexto descriptivo
+  if (slide?.title) {
+    if (!slide.title.toLowerCase().includes("papel")) {
+      return `${slide.title} - papel artesanal hecho a mano`;
+    }
+    return slide.title;
+  }
+  
+  // Fallback descriptivo
+  return "Papel artesanal, reciclado y papel semilla sostenible - Manos del Marga Marga";
 }
 
-const FullSlide = ({ slide, priority = false }) => (
-  <div className={`relative w-full ${heights} overflow-hidden`}>
-    <Image
-      src={slide.imageUrl}
-      alt={AltText(slide)}
-      fill
-      className="object-cover"
-      priority={priority}
-      sizes="100vw"
-    />
-    <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
-    <div className="relative h-full flex items-center">
-      <div className="container mx-auto px-4 md:px-6 text-white">
-        {slide.title && (
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-4">{slide.title}</h1>
-        )}
-        {slide.description && (
-          <p className="text-base sm:text-lg md:text-xl mb-6 md:mb-8 max-w-2xl">{slide.description}</p>
-        )}
-        <div className="flex flex-wrap gap-3 md:gap-4">
-          {slide.primaryButton?.show && (
-            <a
-              href={slide.primaryButton.url}
-              className="px-5 py-2.5 bg-white text-black font-medium rounded-md hover:bg-opacity-90 text-sm md:text-base"
-              aria-label={slide.primaryButton.text || "Ver más"}
+const FullSlide = ({ slide, priority = false }) => {
+  // Valores por defecto para retrocompatibilidad
+  const layout = slide.layout || {
+    horizontalAlign: "left",
+    verticalAlign: "center",
+    textAlign: "left",
+    maxWidth: "2xl",
+  };
+  
+  const styling = slide.styling || {
+    titleSize: "large",
+    titleColor: "#ffffff",
+    descriptionColor: "#ffffff",
+    overlayOpacity: 40,
+    overlayColor: "black",
+  };
+
+  // Mapeo de clases de alineación
+  const alignClasses = {
+    horizontal: {
+      left: "justify-start",
+      center: "justify-center",
+      right: "justify-end",
+    },
+    vertical: {
+      top: "items-start",
+      center: "items-center",
+      bottom: "items-end",
+    },
+    text: {
+      left: "text-left",
+      center: "text-center",
+    },
+  };
+
+  // Mapeo de anchos máximos
+  const maxWidthClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "3xl": "max-w-3xl",
+    "4xl": "max-w-4xl",
+    full: "max-w-full",
+  };
+
+  // Mapeo de tamaños de título
+  const titleSizes = {
+    small: "text-xl sm:text-2xl md:text-3xl",
+    medium: "text-2xl sm:text-3xl md:text-4xl",
+    large: "text-2xl sm:text-3xl md:text-5xl",
+    xlarge: "text-3xl sm:text-4xl md:text-6xl",
+  };
+
+  // Color del overlay
+  const overlayColors = {
+    black: "#000000",
+    white: "#ffffff",
+    green: "#798f38",
+  };
+
+  const overlayBg = overlayColors[styling.overlayColor] || overlayColors.black;
+  const overlayOpacity = (styling.overlayOpacity || 40) / 100;
+
+  return (
+    <div className={`relative w-full ${heights} overflow-hidden`}>
+      <Image
+        src={slide.imageUrl}
+        alt={AltText(slide)}
+        fill
+        className="object-cover"
+        priority={priority}
+        sizes="100vw"
+      />
+      <div 
+        className="absolute inset-0" 
+        style={{ 
+          backgroundColor: overlayBg,
+          opacity: overlayOpacity
+        }}
+        aria-hidden="true" 
+      />
+      <div className={`relative h-full flex ${alignClasses.vertical[layout.verticalAlign]} ${alignClasses.horizontal[layout.horizontalAlign]} px-4 md:px-6 lg:px-8`}>
+        <div className={`w-full ${maxWidthClasses[layout.maxWidth] || maxWidthClasses["2xl"]} ${alignClasses.text[layout.textAlign]}`}>
+          {slide.title && (
+            <h1 
+              className={`${titleSizes[styling.titleSize]} font-bold mb-4`}
+              style={{ color: styling.titleColor }}
             >
-              {slide.primaryButton.text}
-            </a>
+              {slide.title}
+            </h1>
           )}
-          {slide.secondaryButton?.show && (
-            <a
-              href={slide.secondaryButton.url}
-              className="px-5 py-2.5 border border-white text-white font-medium rounded-md hover:bg-white/10 text-sm md:text-base"
-              aria-label={slide.secondaryButton.text || "Ver detalles"}
+          {slide.description && (
+            <p 
+              className="text-base sm:text-lg md:text-xl mb-6 md:mb-8"
+              style={{ color: styling.descriptionColor }}
             >
-              {slide.secondaryButton.text}
-            </a>
+              {slide.description}
+            </p>
           )}
+          <div className={`flex flex-wrap gap-3 md:gap-4 ${layout.textAlign === 'center' ? 'justify-center' : ''}`}>
+            {slide.primaryButton?.show && (
+              <a
+                href={slide.primaryButton.url}
+                className="px-5 py-2.5 bg-white text-black font-medium rounded-md hover:bg-opacity-90 text-sm md:text-base transition-all"
+                aria-label={slide.primaryButton.text || "Ver más"}
+              >
+                {slide.primaryButton.text}
+              </a>
+            )}
+            {slide.secondaryButton?.show && (
+              <a
+                href={slide.secondaryButton.url}
+                className="px-5 py-2.5 border-2 border-white text-white font-medium rounded-md hover:bg-white/10 text-sm md:text-base transition-all"
+                aria-label={slide.secondaryButton.text || "Ver detalles"}
+              >
+                {slide.secondaryButton.text}
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ImageOnly = ({ slide, priority = false }) => (
   <div className={`relative w-full ${heights} overflow-hidden`}>
@@ -77,29 +180,112 @@ const ImageOnly = ({ slide, priority = false }) => (
   </div>
 );
 
-const ImageText = ({ slide, priority = false }) => (
-  <div className={`relative w-full ${heights} overflow-hidden`}>
-    <Image
-      src={slide.imageUrl}
-      alt={AltText(slide)}
-      fill
-      className="object-cover"
-      priority={priority}
-      sizes="100vw"
-    />
-    <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
-    <div className="relative h-full flex items-center">
-      <div className="container mx-auto px-4 md:px-6 text-white">
-        {slide.title && (
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-4">{slide.title}</h2>
-        )}
-        {slide.description && (
-          <p className="text-base sm:text-lg md:text-xl mb-6 md:mb-8 max-w-2xl">{slide.description}</p>
-        )}
+const ImageText = ({ slide, priority = false }) => {
+  // Valores por defecto para retrocompatibilidad
+  const layout = slide.layout || {
+    horizontalAlign: "left",
+    verticalAlign: "center",
+    textAlign: "left",
+    maxWidth: "2xl",
+  };
+  
+  const styling = slide.styling || {
+    titleSize: "large",
+    titleColor: "#ffffff",
+    descriptionColor: "#ffffff",
+    overlayOpacity: 30,
+    overlayColor: "black",
+  };
+
+  // Mapeo de clases de alineación
+  const alignClasses = {
+    horizontal: {
+      left: "justify-start",
+      center: "justify-center",
+      right: "justify-end",
+    },
+    vertical: {
+      top: "items-start",
+      center: "items-center",
+      bottom: "items-end",
+    },
+    text: {
+      left: "text-left",
+      center: "text-center",
+    },
+  };
+
+  // Mapeo de anchos máximos
+  const maxWidthClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "3xl": "max-w-3xl",
+    "4xl": "max-w-4xl",
+    full: "max-w-full",
+  };
+
+  // Mapeo de tamaños de título
+  const titleSizes = {
+    small: "text-xl sm:text-2xl md:text-3xl",
+    medium: "text-2xl sm:text-3xl md:text-4xl",
+    large: "text-2xl sm:text-3xl md:text-5xl",
+    xlarge: "text-3xl sm:text-4xl md:text-6xl",
+  };
+
+  // Color del overlay
+  const overlayColors = {
+    black: "#000000",
+    white: "#ffffff",
+    green: "#798f38",
+  };
+
+  const overlayBg = overlayColors[styling.overlayColor] || overlayColors.black;
+  const overlayOpacity = (styling.overlayOpacity || 30) / 100;
+
+  return (
+    <div className={`relative w-full ${heights} overflow-hidden`}>
+      <Image
+        src={slide.imageUrl}
+        alt={AltText(slide)}
+        fill
+        className="object-cover"
+        priority={priority}
+        sizes="100vw"
+      />
+      <div 
+        className="absolute inset-0" 
+        style={{ 
+          backgroundColor: overlayBg,
+          opacity: overlayOpacity
+        }}
+        aria-hidden="true" 
+      />
+      <div className={`relative h-full flex ${alignClasses.vertical[layout.verticalAlign]} ${alignClasses.horizontal[layout.horizontalAlign]} px-4 md:px-6 lg:px-8`}>
+        <div className={`w-full ${maxWidthClasses[layout.maxWidth] || maxWidthClasses["2xl"]} ${alignClasses.text[layout.textAlign]}`}>
+          {slide.title && (
+            <h2 
+              className={`${titleSizes[styling.titleSize]} font-bold mb-4`}
+              style={{ color: styling.titleColor }}
+            >
+              {slide.title}
+            </h2>
+          )}
+          {slide.description && (
+            <p 
+              className="text-base sm:text-lg md:text-xl mb-6 md:mb-8"
+              style={{ color: styling.descriptionColor }}
+            >
+              {slide.description}
+            </p>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function HeroCarousel() {
   const [slides, setSlides] = useState([]);
@@ -121,6 +307,20 @@ export default function HeroCarousel() {
               primaryButton: d.primaryButton || { show: false, text: "", url: "" },
               secondaryButton: d.secondaryButton || { show: false, text: "", url: "" },
               visible: d.visible ?? true,
+              // Valores por defecto para nuevas opciones de diseño
+              layout: d.layout || {
+                horizontalAlign: "left",
+                verticalAlign: "center",
+                textAlign: "left",
+                maxWidth: "2xl",
+              },
+              styling: d.styling || {
+                titleSize: "large",
+                titleColor: "#ffffff",
+                descriptionColor: "#ffffff",
+                overlayOpacity: 40,
+                overlayColor: "black",
+              },
             };
           })
           .filter((s) => s.visible && s.imageUrl);

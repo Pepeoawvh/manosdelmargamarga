@@ -1,118 +1,41 @@
-"use client";
-import { useState, useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { firestoreDB } from "../lib/firebase/config";
-import ProductCard from "./components/product/ProductCard";
-import Link from "next/link";
-import HeroCarousel from "./components/HeroCarousel";
-import WspButton from "./components/WspButton";
-import BotoneraInfo from "./components/BotoneraInfo";
+import HomeClient from "./components/HomeClient";
+
+export const metadata = {
+  title: "Inicio",
+  description:
+    "Descubre papel artesanal, papel reciclado y papel semilla germinable hecho a mano en Chile. Diseños sostenibles para invitaciones, bodas, packaging ecológico y proyectos creativos.",
+  keywords: [
+    "papel artesanal Chile",
+    "papel semilla germinable",
+    "invitaciones papel reciclado",
+    "papel hecho a mano",
+    "packaging sostenible",
+    "tarjetas papel semilla bodas",
+    "papel biodegradable",
+    "diseño ecológico",
+  ],
+  openGraph: {
+    title: "Manos del Marga Marga | Papel artesanal sostenible",
+    description:
+      "Papel artesanal, reciclado y papel semilla para invitaciones, bodas y proyectos creativos. Hecho a mano en Chile.",
+    type: "website",
+    images: [
+      {
+        url: "/images/logos/mmm.png",
+        width: 1200,
+        height: 630,
+        alt: "Taller de papel artesanal Manos del Marga Marga",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Manos del Marga Marga | Papel artesanal sostenible",
+    description:
+      "Papel artesanal, reciclado y papel semilla para proyectos creativos. Hecho a mano en Chile.",
+  },
+};
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => { setIsMounted(true); }, []);
-
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const q = query(
-          collection(firestoreDB, "productosmmm"),
-          where("featured", "==", true)
-        );
-        const querySnapshot = await getDocs(q);
-        const products = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFeaturedProducts(products.filter((p) => Number(p.stock) > 0));
-      } catch (error) {
-        console.error("Error fetching featured products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (isMounted) fetchFeaturedProducts();
-  }, [isMounted]);
-
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="w-full h-[60vh] bg-gray-100 animate-pulse" aria-hidden="true" />
-        <div className="max-w-6xl mx-auto px-4 py-20" aria-busy="true" aria-live="polite">
-          <div className="h-8 w-60 bg-gray-200 mx-auto mb-12 rounded-md animate-pulse" />
-          <div className="grid md:grid-cols-3 gap-8">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen">
-      {/* Botón flotante de WhatsApp (si ya es fixed, no dupliques en CTA) */}
-      <WspButton />
-
-      {/* Hero con imágenes optimizadas en el componente */}
-      <HeroCarousel />
-
-      <BotoneraInfo />
-
-      {/* Productos destacados */}
-      <section className="py-16 bg-[#ffffff7a]">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#467302]">
-            Productos destacados de papel artesanal
-          </h2>
-
-          {loading ? (
-            <div className="text-center py-8" aria-live="polite">
-              <p className="text-lg text-gray-600">Cargando diseños destacados…</p>
-            </div>
-          ) : featuredProducts.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-lg text-gray-600">
-                No hay diseños destacados disponibles por ahora.
-              </p>
-            </div>
-          )}
-
-          <div className="text-center mt-10">
-            <Link
-              href="/catalogo"
-              className="inline-block bg-[#467302] text-white px-8 py-3 rounded-lg hover:bg-opacity-90"
-              aria-label="Ver todos los productos del catálogo"
-            >
-              Ver todos los productos
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA WhatsApp en bloque (opcional si el botón flotante ya está) */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#87a644]">
-            ¿Tienes un proyecto en mente?
-          </h2>
-          <p className="text-gray-700 mb-6">
-            Escríbenos por WhatsApp para cotizar papel artesanal, reciclado o papel semilla a medida.
-          </p>
-          {/* O quita este si WspButton ya es fixed */}
-          {/* <WspButton /> */}
-        </div>
-      </section>
-    </div>
-  );
+  return <HomeClient />;
 }

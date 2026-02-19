@@ -1,6 +1,39 @@
 import { FaSeedling } from "react-icons/fa";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Sobre Nosotras | Taller de Papel Artesanal",
+  description:
+    "Conoce a Manos del Marga Marga: taller chileno dedicado al papel artesanal, reciclado y papel semilla. Nuestra historia, valores y proceso artesanal sostenible.",
+  alternates: {
+    canonical: "https://www.manosdelmargamarga.cl/nosotras",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://www.manosdelmargamarga.cl/nosotras",
+    title: "Sobre Nosotras | Manos del Marga Marga",
+    description:
+      "Taller chileno de papel artesanal y reciclado. Conoce nuestra historia, proceso y compromiso con la sostenibilidad.",
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Manos del Marga Marga - Taller de papel artesanal",
+      },
+    ],
+    siteName: "Manos del Marga Marga",
+    locale: "es_CL",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sobre Nosotras | Manos del Marga Marga",
+    description:
+      "Taller chileno de papel artesanal y reciclado. Conoce nuestra historia y proceso sostenible.",
+    images: ["/og.jpg"],
+  },
+};
+
 export default function EnConstruccion() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#e6e5df] px-6">

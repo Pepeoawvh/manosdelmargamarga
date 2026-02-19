@@ -68,7 +68,6 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    cursor: isDragging ? "grabbing" : "grab",
   };
 
   return (
@@ -76,11 +75,13 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
       aria-label={`Slide ${slide.title || "sin título"}`}
     >
-      {/* Contenedor thumbnail + texto */}
-      <div className="flex items-center space-x-3">
+      {/* Área draggable - thumbnail + texto */}
+      <div 
+        className="flex items-center space-x-3 flex-1 cursor-grab active:cursor-grabbing"
+        {...listeners}
+      >
         <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-300">
           {slide.imageUrl ? (
             <img
@@ -99,23 +100,29 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
         </div>
       </div>
 
-      {/* Botones */}
+      {/* Botones - NO draggable */}
       <div className="flex items-center space-x-2">
         <button
-          onClick={() => onEdit(slide)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(slide);
+          }}
           title="Editar slide"
-          className="p-1 rounded hover:bg-blue-100 text-blue-700"
+          className="p-1 rounded hover:bg-blue-100 text-blue-700 cursor-pointer transition-colors"
           type="button"
         >
           <IconEdit />
         </button>
 
         <button
-          onClick={() => onDelete(slide.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(slide.id);
+          }}
           title={isDeleting ? "Eliminando..." : "Eliminar slide"}
           disabled={isDeleting}
-          className={`p-1 rounded hover:bg-red-100 text-red-700 ${
-            isDeleting ? "opacity-50 cursor-not-allowed" : ""
+          className={`p-1 rounded hover:bg-red-100 text-red-700 transition-colors ${
+            isDeleting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
           type="button"
         >
