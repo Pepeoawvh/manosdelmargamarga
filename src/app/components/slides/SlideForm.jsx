@@ -1,49 +1,57 @@
 import React, { useEffect, useState } from "react";
 
+// Valores por defecto fuera del componente para evitar recreación en cada render
+const SLIDE_DEFAULTS = {
+  type: "full",
+  title: "",
+  description: "",
+  imageUrl: "",
+  mobileImageUrl: "",
+  primaryButton: { text: "", url: "", show: false },
+  secondaryButton: { text: "", url: "", show: false },
+  visible: true,
+  // Nuevas opciones de diseño
+  layout: {
+    horizontalAlign: "left", // left, center, right
+    verticalAlign: "center", // top, center, bottom
+    textAlign: "left", // left, center
+    maxWidth: "2xl", // sm, md, lg, xl, 2xl, full
+  },
+  styling: {
+    titleSize: "large", // small, medium, large, xlarge
+    titleColor: "#ffffff",
+    descriptionColor: "#ffffff",
+    overlayOpacity: 40, // 0-100
+    overlayColor: "black", // black, white, green, custom
+  },
+};
+
 export default function SlideForm({ initialData, onSubmit, onCancel }) {
-  const defaults = {
-    type: "full",
-    title: "",
-    description: "",
-    imageUrl: "",
-    mobileImageUrl: "",
-    primaryButton: { text: "", url: "", show: false },
-    secondaryButton: { text: "", url: "", show: false },
-    visible: true,
-    // Nuevas opciones de diseño
-    layout: {
-      horizontalAlign: "left", // left, center, right
-      verticalAlign: "center", // top, center, bottom
-      textAlign: "left", // left, center
-      maxWidth: "2xl", // sm, md, lg, xl, 2xl, full
-    },
-    styling: {
-      titleSize: "large", // small, medium, large, xlarge
-      titleColor: "#ffffff",
-      descriptionColor: "#ffffff",
-      overlayOpacity: 40, // 0-100
-      overlayColor: "black", // black, white, green, custom
-    },
-  };
-  const [formData, setFormData] = useState(initialData || defaults);
+  const [formData, setFormData] = useState(initialData || SLIDE_DEFAULTS);
   const [preview, setPreview] = useState(initialData?.imageUrl || "");
   const [activeSection, setActiveSection] = useState("basic"); // basic, layout, styling
 
+  // Actualizar formData cuando initialData cambie (incluyendo cuando se abre/cierra el modal)
   useEffect(() => {
     if (initialData) {
       // Asegurar que el initialData tenga todas las propiedades necesarias
       const mergedData = {
-        ...defaults,
+        ...SLIDE_DEFAULTS,
         ...initialData,
-        layout: { ...defaults.layout, ...(initialData.layout || {}) },
-        styling: { ...defaults.styling, ...(initialData.styling || {}) },
-        primaryButton: { ...defaults.primaryButton, ...(initialData.primaryButton || {}) },
-        secondaryButton: { ...defaults.secondaryButton, ...(initialData.secondaryButton || {}) },
+        layout: { ...SLIDE_DEFAULTS.layout, ...(initialData.layout || {}) },
+        styling: { ...SLIDE_DEFAULTS.styling, ...(initialData.styling || {}) },
+        primaryButton: { ...SLIDE_DEFAULTS.primaryButton, ...(initialData.primaryButton || {}) },
+        secondaryButton: { ...SLIDE_DEFAULTS.secondaryButton, ...(initialData.secondaryButton || {}) },
       };
       setFormData(mergedData);
       setPreview(initialData.imageUrl || "");
+    } else {
+      // Si no hay initialData, resetear a defaults (nuevo slide)
+      setFormData(SLIDE_DEFAULTS);
+      setPreview("");
+      setActiveSection("basic");
     }
-  }, [initialData?.id]);
+  }, [initialData]); // Cambiar dependencia: ejecutar cada vez que initialData cambie, no solo el ID
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -70,6 +78,15 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
 
   const submit = (e) => {
     e.preventDefault();
+    console.log("📝 SlideForm enviando datos:", {
+      type: formData.type,
+      title: formData.title,
+      hasLayout: !!formData.layout,
+      layout: formData.layout,
+      hasStyling: !!formData.styling,
+      styling: formData.styling,
+      allKeys: Object.keys(formData),
+    });
     onSubmit(formData);
   };
 

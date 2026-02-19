@@ -147,6 +147,12 @@ export default function CarouselManager() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSlide, setEditingSlide] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 5000);
+  };
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -162,14 +168,28 @@ export default function CarouselManager() {
 
   const handleSubmit = async (data) => {
     try {
+      console.log("💾 Guardando slide...", {
+        editing: !!editingSlide,
+        slideId: editingSlide?.id,
+        dataKeys: Object.keys(data),
+        hasLayout: !!data.layout,
+        hasStyling: !!data.styling,
+        fullData: data,
+      });
+      
       if (editingSlide) {
         await updateSlide(editingSlide.id, data);
+        console.log("✅ Slide actualizado exitosamente");
+        showToast("success", `✅ Slide "${data.title || 'sin título'}" actualizado correctamente en Firestore`);
       } else {
         await addSlide(data);
+        console.log("✅ Slide creado exitosamente");
+        showToast("success", `✅ Slide "${data.title || 'sin título'}" creado correctamente`);
       }
       closeForm();
     } catch (e) {
-      alert("Error guardando slide");
+      console.error("❌ Error guardando slide:", e);
+      showToast("error", `❌ Error al guardar: ${e.message}`);
     }
   };
 
@@ -211,6 +231,17 @@ export default function CarouselManager() {
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
+      {/* Toast de notificación */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all ${
+            toast.type === "success" ? "bg-green-600" : "bg-red-600"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
       <button
         onClick={() => openForm()}
         className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"

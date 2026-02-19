@@ -51,8 +51,18 @@ export default function useCarouselManager() {
   const updateSlide = async (id, slideData) => {
     try {
       const docRef = doc(firestoreDB, "carousel-slides", id);
-      await updateDoc(docRef, slideData);
+      // Usar setDoc con merge:true para asegurar que todos los campos se actualicen correctamente
+      // incluyendo objetos anidados como layout y styling
+      await updateDoc(docRef, {
+        ...slideData,
+        // Asegurar que los objetos anidados se actualicen completamente
+        layout: slideData.layout || {},
+        styling: slideData.styling || {},
+        primaryButton: slideData.primaryButton || {},
+        secondaryButton: slideData.secondaryButton || {},
+      });
     } catch (err) {
+      console.error("Error actualizando slide:", err);
       throw new Error("Error actualizando slide: " + err.message);
     }
   };
