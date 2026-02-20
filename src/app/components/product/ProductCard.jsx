@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import AddToCartButton from "../cart/AddToCartButton";
+import QuoteButton from "../cart/QuoteButton";
 
 const ProductCard = ({
   product = {},
@@ -27,6 +28,7 @@ const ProductCard = ({
     stock = 0,
     featured = false,
     videoUrl,
+    cotizable = false,
   } = product;
 
   const mainCategory = categories?.[0] || "";
@@ -123,7 +125,12 @@ const ProductCard = ({
             {mainCategory}
           </span>
         )}
-        {isOutOfStock && !isAdmin && (
+        {cotizable && (
+          <span className="text-xs font-medium px-2 py-1 bg-[#8f5f49] text-white rounded-full" aria-label="Producto cotizable">
+            Cotizable
+          </span>
+        )}
+        {isOutOfStock && !isAdmin && !cotizable && (
           <span className="text-xs font-medium px-2 py-1 bg-red-500 text-white rounded-full" aria-label="Sin stock">
             Agotado
           </span>
@@ -158,7 +165,9 @@ const ProductCard = ({
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
             <p className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              {priceInt > 0 ? (
+              {cotizable ? (
+                <span className="text-[#f5d6c8]">Precio a cotizar</span>
+              ) : priceInt > 0 ? (
                 <>
                   <span itemProp="priceCurrency" content="CLP">CLP</span>{" "}
                   <span itemProp="price" content={String(priceInt)}>{`$${priceInt.toLocaleString()}`}</span>
@@ -167,7 +176,7 @@ const ProductCard = ({
                 <span>Consultar precio</span>
               )}
               <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
-              {stock > 0 && stock <= 10 && (
+              {!cotizable && stock > 0 && stock <= 10 && (
                 <span className="ml-2 text-xs font-medium text-amber-300" aria-label={`Quedan ${stock} unidades`}>
                   (Quedan {stock})
                 </span>
@@ -209,12 +218,20 @@ const ProductCard = ({
               >
                 Ver más
               </Link>
-              <AddToCartButton
-                product={product}
-                compact={true}
-                className="px-3 py-1.5 text-white text-xs font-medium rounded hover:bg-[#467302]"
-                aria-label={`Agregar ${titleText} al carrito`}
-              />
+              {cotizable ? (
+                <QuoteButton
+                  product={product}
+                  compact={true}
+                  aria-label={`Cotizar ${titleText}`}
+                />
+              ) : (
+                <AddToCartButton
+                  product={product}
+                  compact={true}
+                  className="px-3 py-1.5 text-white text-xs font-medium rounded hover:bg-[#467302]"
+                  aria-label={`Agregar ${titleText} al carrito`}
+                />
+              )}
             </div>
           )}
         </div>

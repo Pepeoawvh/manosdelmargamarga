@@ -19,6 +19,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       : ["", "", ""],
     featured: product?.featured || false,
     reservable: product?.reservable || false,
+    cotizable: product?.cotizable || false,
     // Si ya existe slug en el doc, úsalo; permite editarlo manualmente si quieres
     slug: product?.slug || "",
   });
@@ -92,6 +93,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     const dataToSubmit = {
       ...formData,
       reservable: !!formData.reservable,
+      cotizable: !!formData.cotizable,
       slug: finalSlug, // asegura que exista y esté normalizado
       price: formData.price === "" ? 0 : Number(formData.price),
       stock: formData.stock === "" ? 0 : Number(formData.stock),
@@ -287,6 +289,17 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 <span className="text-xs font-medium text-gray-700">Producto reservable</span>
               </label>
               <p className="text-xs text-gray-400 ml-4">Si está activo, el producto podrá ser reservado</p>
+
+              <label className="flex items-center space-x-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.cotizable}
+                  onChange={(e) => setFormData({ ...formData, cotizable: e.target.checked })}
+                  className="rounded text-[#8f5f49] focus:ring-[#8f5f49] h-3 w-3"
+                />
+                <span className="text-xs font-medium text-gray-700">Producto cotizable</span>
+              </label>
+              <p className="text-xs text-gray-400 ml-4">Muestra botón «Cotizar por WhatsApp» en vez de comprar/reservar. Ideal para servicios o productos a pedido.</p>
             </div>
           </div>
         </div>

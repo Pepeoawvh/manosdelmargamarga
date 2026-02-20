@@ -14,6 +14,7 @@ import {
 import { firestoreDB } from "../../../lib/firebase/config";
 import AddToCartButton from "../cart/AddToCartButton";
 import ReservationButton from "../cart/ReservationButton";
+import QuoteButton from "../cart/QuoteButton";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -290,9 +291,11 @@ const ProductDetails = ({ productSlug }) => {
             <div>
               <div className="flex items-center gap-3">
                 <span className="text-4xl font-extrabold text-[#798f38]">
-                  {priceInt > 0
+                  {product.cotizable
+                    ? 'Precio a cotizar'
+                    : priceInt > 0
                     ? `$${priceInt.toLocaleString()}`
-                    : "Consultar precio"}
+                    : 'Consultar precio'}
                 </span>
                 {product.oldPrice && (
                   <span className="text-sm text-gray-500 line-through">
@@ -300,11 +303,15 @@ const ProductDetails = ({ productSlug }) => {
                   </span>
                 )}
               </div>
-              <div className="text-sm text-gray-500 mt-1">IVA incluido</div>
+              <div className="text-sm text-gray-500 mt-1">{product.cotizable ? 'Precio según requerimiento' : 'IVA incluido'}</div>
             </div>
 
             <div className="text-sm">
-              {stockInt > 0 ? (
+              {product.cotizable ? (
+                <span className="font-semibold inline-block rounded-full px-3 py-1 bg-[#f5e6e0] text-[#8f5f49]">
+                  Producto a pedido
+                </span>
+              ) : stockInt > 0 ? (
                 <div className="flex flex-col items-end gap-2">
                   <span
                     className={`font-semibold inline-block rounded-full px-3 py-1 ${
@@ -346,17 +353,28 @@ const ProductDetails = ({ productSlug }) => {
             </div>
           )}
 
-          {/* Añadir al carrito y Reservar */}
+          {/* Añadir al carrito, Reservar o Cotizar */}
           <div className="mt-auto space-y-3">
-            <AddToCartButton
-              product={product}
-              className="w-full bg-[#8f5f49] text-white py-3 rounded-md shadow"
-            />
-            {product.reservable && (
-              <ReservationButton
-                product={product}
-                className="py-3 rounded-md shadow"
-              />
+            {product.cotizable ? (
+              <>
+                <p className="text-sm text-gray-500 italic">
+                  Este producto es a pedido / servicio personalizado. Contáctanos para cotizar.
+                </p>
+                <QuoteButton product={product} />
+              </>
+            ) : (
+              <>
+                <AddToCartButton
+                  product={product}
+                  className="w-full bg-[#8f5f49] text-white py-3 rounded-md shadow"
+                />
+                {product.reservable && (
+                  <ReservationButton
+                    product={product}
+                    className="py-3 rounded-md shadow"
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
