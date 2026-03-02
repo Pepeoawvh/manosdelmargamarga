@@ -7,6 +7,7 @@ import Link from "next/link";
 import HeroCarousel from "./HeroCarousel";
 import WspButton from "./WspButton";
 import BotoneraInfo from "./BotoneraInfo";
+import ClientesBanner from "./ClientesBanner";
 
 export default function HomeClient() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -102,6 +103,9 @@ export default function HomeClient() {
           </div>
         </div>
       </section>
+
+      {/* Clientes que han trabajado con nosotras */}
+      <ClientesBanner />
 
       {/* CTA WhatsApp */}
       <section className="py-12 bg-gray-50" aria-labelledby="cta-heading">

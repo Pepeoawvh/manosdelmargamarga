@@ -166,19 +166,37 @@ const FullSlide = ({ slide, priority = false }) => {
   );
 };
 
-const ImageOnly = ({ slide, priority = false }) => (
-  <div className={`relative w-full ${heights} overflow-hidden`}>
-    <Image
-      src={slide.imageUrl}
-      alt={AltText(slide)}
-      fill
-      className="object-cover"
-      loading={priority ? "eager" : "lazy"}
-      priority={priority}
-      sizes="100vw"
-    />
-  </div>
-);
+const ImageOnly = ({ slide, priority = false }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const currentImage =
+    isMobile && slide.mobileImageUrl ? slide.mobileImageUrl : slide.imageUrl;
+
+  const objectPosition = isMobile
+    ? slide.mobileObjectPosition || slide.objectPosition || "center"
+    : slide.objectPosition || "center";
+
+  return (
+    <div className={`relative w-full ${heights} overflow-hidden`}>
+      <Image
+        src={currentImage}
+        alt={AltText(slide)}
+        fill
+        className="object-cover"
+        style={{ objectPosition }}
+        priority={priority}
+        sizes="(max-width: 767px) 100vw, 100vw"
+      />
+    </div>
+  );
+};
 
 const ImageText = ({ slide, priority = false }) => {
   // Valores por defecto para retrocompatibilidad

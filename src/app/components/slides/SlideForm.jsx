@@ -7,6 +7,8 @@ const SLIDE_DEFAULTS = {
   description: "",
   imageUrl: "",
   mobileImageUrl: "",
+  objectPosition: "center", // Punto focal imagen desktop
+  mobileObjectPosition: "center", // Punto focal imagen móvil
   primaryButton: { text: "", url: "", show: false },
   secondaryButton: { text: "", url: "", show: false },
   visible: true,
@@ -38,6 +40,8 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
       const mergedData = {
         ...SLIDE_DEFAULTS,
         ...initialData,
+        objectPosition: initialData.objectPosition || "center",
+        mobileObjectPosition: initialData.mobileObjectPosition || "center",
         layout: { ...SLIDE_DEFAULTS.layout, ...(initialData.layout || {}) },
         styling: { ...SLIDE_DEFAULTS.styling, ...(initialData.styling || {}) },
         primaryButton: { ...SLIDE_DEFAULTS.primaryButton, ...(initialData.primaryButton || {}) },
@@ -210,6 +214,62 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
                 Si no se especifica, se usará la imagen principal en móvil
               </p>
             </div>
+
+            {/* Controles de punto focal — solo para tipo Solo Imagen */}
+            {!showText && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-amber-50 rounded border border-amber-200">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Punto focal — Desktop
+                    <span className="text-gray-400 font-normal ml-1">(objectPosition)</span>
+                  </label>
+                  <select
+                    name="objectPosition"
+                    value={formData.objectPosition || "center"}
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  >
+                    <option value="center">Centro</option>
+                    <option value="top">Arriba</option>
+                    <option value="bottom">Abajo</option>
+                    <option value="left">Izquierda</option>
+                    <option value="right">Derecha</option>
+                    <option value="top left">Arriba izquierda</option>
+                    <option value="top right">Arriba derecha</option>
+                    <option value="bottom left">Abajo izquierda</option>
+                    <option value="bottom right">Abajo derecha</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Controla qué parte de la imagen se muestra en pantallas anchas
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Punto focal — Móvil
+                    <span className="text-gray-400 font-normal ml-1">(objectPosition)</span>
+                  </label>
+                  <select
+                    name="mobileObjectPosition"
+                    value={formData.mobileObjectPosition || "center"}
+                    onChange={handleChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  >
+                    <option value="center">Centro</option>
+                    <option value="top">Arriba</option>
+                    <option value="bottom">Abajo</option>
+                    <option value="left">Izquierda</option>
+                    <option value="right">Derecha</option>
+                    <option value="top left">Arriba izquierda</option>
+                    <option value="top right">Arriba derecha</option>
+                    <option value="bottom left">Abajo izquierda</option>
+                    <option value="bottom right">Abajo derecha</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Controla qué parte de la imagen se muestra en móvil
+                  </p>
+                </div>
+              </div>
+            )}
 
             {showText && (
               <>
