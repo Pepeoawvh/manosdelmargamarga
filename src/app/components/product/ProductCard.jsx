@@ -120,11 +120,6 @@ const ProductCard = ({
 
       {/* Badges */}
       <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
-        {mainCategory && (
-          <span className="text-xs font-medium px-2 py-1 bg-[#96bf49] text-white rounded-full" aria-label={`Categoría ${mainCategory}`}>
-            {mainCategory}
-          </span>
-        )}
         {cotizable && (
           <span className="text-xs font-medium px-2 py-1 bg-[#8f5f49] text-white rounded-full" aria-label="Producto cotizable">
             Cotizable
@@ -176,11 +171,6 @@ const ProductCard = ({
                 <span>Consultar precio</span>
               )}
               <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
-              {!cotizable && stock > 0 && stock <= 10 && (
-                <span className="ml-2 text-xs font-medium text-amber-300" aria-label={`Quedan ${stock} unidades`}>
-                  (Quedan {stock})
-                </span>
-              )}
             </p>
           )}
 
@@ -208,15 +198,15 @@ const ProductCard = ({
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Link
                 href={productHref}
-                className="px-3 py-1.5 bg-white text-[#5e8c30] text-xs font-medium rounded hover:bg-[#ebead6] transition-colors"
+                className="px-3 py-[5px] bg-white/90 text-[#5e8c30] text-[11px] font-semibold rounded-full hover:bg-white transition-colors backdrop-blur-sm"
                 aria-label={`Ver detalle de ${titleText}`}
                 title={`Ver ${titleText}`}
                 prefetch
               >
-                Ver más
+                Ver detalle
               </Link>
               {cotizable ? (
                 <QuoteButton
@@ -228,7 +218,7 @@ const ProductCard = ({
                 <AddToCartButton
                   product={product}
                   compact={true}
-                  className="px-3 py-1.5 text-white text-xs font-medium rounded hover:bg-[#467302]"
+                  className="px-3 py-[5px] text-[11px] font-semibold rounded-full"
                   aria-label={`Agregar ${titleText} al carrito`}
                 />
               )}

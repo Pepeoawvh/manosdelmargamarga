@@ -87,7 +87,7 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
     <button
       onClick={handleAddToCart}
       disabled={isButtonDisabled}
-      className={` inline-flex items-center justify-center text-sm text-white rounded-md ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#7ecd07]'} w-full bg-[#549c21] transition-all duration-200`}
+      className={`inline-flex items-center justify-center text-white ${isButtonDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#467302]'} bg-[#549c21] transition-all duration-200 ${compact ? '' : 'w-full text-sm rounded-md'} ${className}`}
     >
       {isAdding ? (
         // Estado de carga

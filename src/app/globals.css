@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #F9F9F9;
   --foreground: #ffffff;
   --primary: #4CAF50; /* Verde */
   --secondary: #FF9800; /* Naranja */
@@ -12,7 +12,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
+    --background: #F9F9F9;
     --foreground: #ededed;
   }
 }

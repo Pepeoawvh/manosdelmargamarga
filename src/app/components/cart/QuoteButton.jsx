@@ -49,7 +49,7 @@ const QuoteButton = ({ product, compact = false, className = '' }) => {
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className={`inline-flex items-center gap-1 px-3 py-1.5 bg-[#8f5f49] text-white text-xs font-medium rounded hover:bg-[#7a5040] transition-colors ${className}`}
+        className={`inline-flex items-center gap-1 px-3 py-[5px] bg-[#8f5f49] text-white text-[11px] font-semibold rounded-full hover:bg-[#7a5040] transition-colors ${className}`}
         aria-label={`Cotizar ${product.title || 'producto'} por WhatsApp`}
         title="Cotizar por WhatsApp"
       >

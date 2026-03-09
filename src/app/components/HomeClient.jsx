@@ -40,7 +40,7 @@ export default function HomeClient() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[#F9F9F9]">
         <div className="w-full h-[60vh] bg-gray-100 animate-pulse" aria-hidden="true" />
         <div className="max-w-6xl mx-auto px-4 py-20" aria-busy="true" aria-live="polite">
           <div className="h-8 w-60 bg-gray-200 mx-auto mb-12 rounded-md animate-pulse" />
@@ -114,7 +114,7 @@ export default function HomeClient() {
             ¿Tienes un proyecto en mente?
           </h2>
           <p className="text-gray-700 mb-6">
-            Escríbenos por WhatsApp para cotizar papel artesanal, reciclado o papel semilla a medida.
+            Escríbenos por WhatsApp y te ayudamos personal y rápidamente.
           </p>
         </div>
       </section>
