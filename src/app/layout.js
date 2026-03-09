@@ -96,7 +96,7 @@ export default function RootLayout({ children }) {
       className="scrollbar-thin scrollbar-thumb-[#5e8c30] scrollbar-track-gray-100 hover:scrollbar-thumb-[#89cb46] scrollbar-thumb-rounded-full"
     >
     {/* FONDO SITIO */}
-      <body className={`${lexend.className} relative min-h-screen bg-[#F4F6F2]`}>
+      <body className={`${lexend.className} relative min-h-screen bg-[#F9F9F9]`}>
         
         <AuthProvider>
           <ClientProviders>{children}</ClientProviders>

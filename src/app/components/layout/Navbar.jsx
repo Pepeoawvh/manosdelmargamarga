@@ -177,7 +177,7 @@ const Navbar = () => {
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      setIsScrolled(y > 10);
+      setIsScrolled(y > 40);
       if (y > 50 && showAnnouncement && !scrollCloseTimeoutRef.current) {
         scrollCloseTimeoutRef.current = setTimeout(() => {
           closeAnnouncement(true);
@@ -417,10 +417,10 @@ const Navbar = () => {
 
       <nav
         ref={navRef}
-        className={`sticky top-0 z-50 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 ${
+        className={`sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-[padding,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           isScrolled
             ? "bg-white shadow-md py-2"
-            : "bg-white/90 backdrop-blur-sm py-3"
+            : "bg-white/90 backdrop-blur-sm py-4"
         }`}
         role="navigation"
         aria-label="Navegación principal"
@@ -429,7 +429,7 @@ const Navbar = () => {
           {/* Desktop */}
           <div className="hidden md:block">
             {/* Sin scroll */}
-            <div className={`${!isScrolled ? "block" : "hidden"} space-y-4`}>
+            <div className={`space-y-4 transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${!isScrolled ? "opacity-100 max-h-[200px] translate-y-0" : "opacity-0 max-h-0 -translate-y-2"}`}>
               <div className="flex justify-center">
                 <Link 
                   href="/" 
@@ -684,7 +684,7 @@ const Navbar = () => {
             </div>
 
             {/* Con scroll */}
-            <div className={`${isScrolled ? "block" : "hidden"}`}>
+            <div className={`transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${isScrolled ? "opacity-100 max-h-[80px] translate-y-0" : "opacity-0 max-h-0 translate-y-2"}`}>
               <div className="flex items-center justify-between">
                 <Link 
                   href="/" 
