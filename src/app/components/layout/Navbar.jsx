@@ -175,9 +175,17 @@ const Navbar = () => {
 
   // SCROLL + cierre de anuncio por scroll
   useEffect(() => {
+    // Histeresis amplia para evitar el bucle causado por el propio cambio
+    // de altura del navbar al condensarse/expandirse
+    const SCROLL_ON = 100;  // umbral para condensar
+    const SCROLL_OFF = 30;  // umbral para expandir (brecha de 70px)
     const onScroll = () => {
       const y = window.scrollY || 0;
-      setIsScrolled(y > 40);
+      setIsScrolled((prev) => {
+        if (!prev && y > SCROLL_ON) return true;
+        if (prev && y < SCROLL_OFF) return false;
+        return prev;
+      });
       if (y > 50 && showAnnouncement && !scrollCloseTimeoutRef.current) {
         scrollCloseTimeoutRef.current = setTimeout(() => {
           closeAnnouncement(true);
