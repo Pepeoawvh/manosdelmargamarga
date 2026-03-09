@@ -178,7 +178,7 @@ const Navbar = () => {
     // Histeresis amplia para evitar el bucle causado por el propio cambio
     // de altura del navbar al condensarse/expandirse
     const SCROLL_ON = 100;  // umbral para condensar
-    const SCROLL_OFF = 30;  // umbral para expandir (brecha de 70px)
+    const SCROLL_OFF = 70;  // umbral para expandir 
     const onScroll = () => {
       const y = window.scrollY || 0;
       setIsScrolled((prev) => {
@@ -423,12 +423,22 @@ const Navbar = () => {
         }}
       />
 
+      {/* Spacer mobile: altura fija, el navbar no cambia en mobile */}
+      <div aria-hidden="true" className="block md:hidden h-16" />
+
+      {/* Spacer desktop: altura variable según scroll */}
+      <div
+        aria-hidden="true"
+        style={{ height: isScrolled ? "56px" : "140px" }}
+        className="hidden md:block transition-[height] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+      />
+
       <nav
         ref={navRef}
-        className={`sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-[padding,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        className={`fixed top-0 left-0 right-0 w-full z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-[padding,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] py-3 ${
           isScrolled
-            ? "bg-white shadow-md py-2"
-            : "bg-white/90 backdrop-blur-sm py-4"
+            ? "bg-white shadow-md md:py-2"
+            : "bg-white/90 backdrop-blur-sm md:py-4"
         }`}
         role="navigation"
         aria-label="Navegación principal"
