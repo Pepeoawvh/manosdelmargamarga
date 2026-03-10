@@ -39,7 +39,33 @@ function AltText(slide) {
   return "Papel artesanal, reciclado y papel semilla sostenible - Manos del Marga Marga";
 }
 
+// Hook que detecta si la imagen es vertical (portrait) al cargarse
+function useImageOrientation() {
+  const [isPortrait, setIsPortrait] = useState(null);
+  const handleLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    setIsPortrait(naturalHeight > naturalWidth);
+  };
+  return { isPortrait, handleLoad };
+}
+
+// Devuelve el object-fit correcto según orientación y dispositivo
+function getMobileFit(isPortrait) {
+  if (isPortrait === null) return "cover"; // antes de cargar, seguro
+  return isPortrait ? "cover" : "contain"; // portrait→cover, landscape→contain
+}
+
 const FullSlide = ({ slide, priority = false }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const { isPortrait, handleLoad } = useImageOrientation();
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   // Valores por defecto para retrocompatibilidad
   const layout = slide.layout || {
     horizontalAlign: "left",
@@ -105,12 +131,13 @@ const FullSlide = ({ slide, priority = false }) => {
   const overlayOpacity = (styling.overlayOpacity || 40) / 100;
 
   return (
-    <div className={`relative w-full ${heights} overflow-hidden`}>
+    <div className={`relative w-full ${heights} overflow-hidden bg-[#f2f2f0]`}>
       <Image
         src={slide.imageUrl}
         alt={AltText(slide)}
         fill
-        className="object-cover"
+        onLoad={handleLoad}
+        style={{ objectFit: isMobile ? getMobileFit(isPortrait) : "cover" }}
         priority={priority}
         sizes="100vw"
       />
@@ -168,6 +195,7 @@ const FullSlide = ({ slide, priority = false }) => {
 
 const ImageOnly = ({ slide, priority = false }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const { isPortrait, handleLoad } = useImageOrientation();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -184,13 +212,16 @@ const ImageOnly = ({ slide, priority = false }) => {
     : slide.objectPosition || "center";
 
   return (
-    <div className={`relative w-full ${heights} overflow-hidden`}>
+    <div className={`relative w-full ${heights} overflow-hidden bg-[#f2f2f0]`}>
       <Image
         src={currentImage}
         alt={AltText(slide)}
         fill
-        className="object-cover"
-        style={{ objectPosition }}
+        onLoad={handleLoad}
+        style={{
+          objectFit: isMobile ? getMobileFit(isPortrait) : "cover",
+          objectPosition,
+        }}
         priority={priority}
         sizes="(max-width: 767px) 100vw, 100vw"
       />
@@ -199,6 +230,16 @@ const ImageOnly = ({ slide, priority = false }) => {
 };
 
 const ImageText = ({ slide, priority = false }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const { isPortrait, handleLoad } = useImageOrientation();
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   // Valores por defecto para retrocompatibilidad
   const layout = slide.layout || {
     horizontalAlign: "left",
@@ -264,12 +305,13 @@ const ImageText = ({ slide, priority = false }) => {
   const overlayOpacity = (styling.overlayOpacity || 30) / 100;
 
   return (
-    <div className={`relative w-full ${heights} overflow-hidden`}>
+    <div className={`relative w-full ${heights} overflow-hidden bg-[#f2f2f0]`}>
       <Image
         src={slide.imageUrl}
         alt={AltText(slide)}
         fill
-        className="object-cover"
+        onLoad={handleLoad}
+        style={{ objectFit: isMobile ? getMobileFit(isPortrait) : "cover" }}
         priority={priority}
         sizes="100vw"
       />

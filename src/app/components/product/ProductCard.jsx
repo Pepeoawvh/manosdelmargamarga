@@ -132,8 +132,8 @@ const ProductCard = ({
         )}
       </div>
 
-      {/* Destacado: path SVG corregido (sin .xtl) */}
-      {featured && (
+      {/* Destacado: solo visible en el panel de administración */}
+      {isAdmin && featured && (
         <div className="absolute top-2 right-2 z-10" aria-label="Producto destacado">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-yellow-400 drop-shadow-md">
             <path
@@ -150,12 +150,6 @@ const ProductCard = ({
         <h3 className="font-semibold text-lg mb-1 line-clamp-1" itemProp="name">
           {titleText}
         </h3>
-
-        {showInfo && (
-          <p className="text-white/80 text-xs mt-1 line-clamp-2 mb-2" itemProp="description">
-            {descText}
-          </p>
-        )}
 
         <div className="flex justify-between items-end mt-2">
           {showInfo && (

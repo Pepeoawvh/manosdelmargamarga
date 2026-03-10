@@ -12,48 +12,59 @@ import {
   Ephesis
 } from "next/font/google";
 
-export const montserrat = Montserrat({ subsets: ["latin"] });
+export const montserrat = Montserrat({ subsets: ["latin"], preload: false });
 
-export const roboto = Roboto({ subsets: ["latin"], weight: "500" });
+export const roboto = Roboto({ subsets: ["latin"], weight: "500", preload: false });
 
 export const jost = Jost({
   weight: ["400", "700"],
   subsets: ["latin"],
+  preload: false,
 });
 
 export const questrial = Questrial({
   weight: ["400"],
   subsets: ["latin"],
+  preload: false,
 });
 export const bebas = Bebas_Neue({
   weight: ["400"],
   subsets: ["latin"],
+  preload: false,
 });
 export const abel = Abel({
   weight: ["400"],
   subsets: ["latin"],
+  preload: false,
 });
 export const lexend = Lexend_Deca({
   weight: ["400", "500", "600"],
   subsets: ["latin"],
+  variable: "--font-lexend",
+  display: "swap",
+  preload: true,
 });
 
 export const redHat = Red_Hat_Display({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
+  preload: false,
 });
 
 export const fleurDeLeah = Fleur_De_Leah({
   weight: ["400"],
   subsets: ["latin"],
+  preload: false,
 });
 
 export const tangerine = Tangerine({
   weight: ["400", "700"],
   subsets: ["latin"],
+  preload: false,
 });
 
 export const ephesis = Ephesis({
   weight: ["400"],
   subsets: ["latin"],
+  preload: false,
 });
