@@ -103,10 +103,11 @@ const InventoryManager = () => {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded shadow-sm">
-        <div className="border-b px-3 py-2 bg-gray-50 flex flex-wrap justify-between items-center">
-          <div className="flex items-center mb-2 md:mb-0">
-            <h3 className="text-base font-medium text-gray-700">Gestión de Inventario</h3>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="border-b px-3 py-2.5 bg-gray-50 flex flex-wrap justify-between items-center">
+          <div className="flex items-center mb-2 md:mb-0 gap-2">
+            <span className="w-0.5 h-4 bg-emerald-500 rounded-full shrink-0"></span>
+            <h3 className="text-sm font-medium text-gray-700">Gestión de Inventario</h3>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
@@ -145,7 +146,7 @@ const InventoryManager = () => {
             />
             <button
               onClick={() => setShowAddForm(true)}
-              className="py-1 px-3 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+              className="py-1 px-3 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700"
               title="Agregar nuevo producto"
             >
               + Nuevo Producto

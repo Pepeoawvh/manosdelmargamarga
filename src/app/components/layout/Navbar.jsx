@@ -58,8 +58,13 @@ const Navbar = () => {
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState(null);
   const [openSearchPanel, setOpenSearchPanel] = useState(false);
-  const inputRef = useRef(null);
-  const panelRef = useRef(null);
+  // Refs separados: desktop expandido, desktop condensado, móvil
+  const inputRefDesktop1 = useRef(null);
+  const inputRefDesktop2 = useRef(null);
+  const inputRef = useRef(null); // móvil
+  const panelRefDesktop1 = useRef(null);
+  const panelRefDesktop2 = useRef(null);
+  const panelRef = useRef(null); // móvil
 
   // Anuncio
   const [showAnnouncement, setShowAnnouncement] = useState(false);
@@ -145,13 +150,18 @@ const Navbar = () => {
     function handleClickOutside(event) {
       if (!navRef.current) return;
 
-      // Ignorar clicks dentro del panel o del input
-      if (
-        (panelRef.current && panelRef.current.contains(event.target)) ||
-        (inputRef.current && inputRef.current.contains(event.target))
-      ) {
-        return;
-      }
+      const allPanelRefs = [panelRefDesktop1, panelRefDesktop2, panelRef];
+      const allInputRefs = [inputRefDesktop1, inputRefDesktop2, inputRef];
+
+      const clickedInsidePanel = allPanelRefs.some(
+        (r) => r.current && r.current.contains(event.target)
+      );
+      const clickedInsideInput = allInputRefs.some(
+        (r) => r.current && r.current.contains(event.target)
+      );
+
+      // Ignorar clicks dentro de algún panel o input
+      if (clickedInsidePanel || clickedInsideInput) return;
 
       // Cerrar dropdowns/menú si el click fue fuera del navbar
       if (!navRef.current.contains(event.target)) {
@@ -159,13 +169,8 @@ const Navbar = () => {
         setIsMenuOpen(false);
       }
 
-      // Cerrar panel si fue fuera del input y del panel
-      if (
-        panelRef.current &&
-        inputRef.current &&
-        !panelRef.current.contains(event.target) &&
-        !inputRef.current.contains(event.target)
-      ) {
+      // Cerrar panel si fue fuera de todos los inputs y paneles
+      if (!clickedInsidePanel && !clickedInsideInput) {
         setOpenSearchPanel(false);
       }
     }
@@ -343,8 +348,8 @@ const Navbar = () => {
   const MAX_ROWS = 6;
   const topResults = filteredResults.slice(0, MAX_ROWS);
 
-  const handleFocusSearch = () => {
-    inputRef.current?.focus();
+  const handleFocusSearch = (inputRefTarget) => {
+    inputRefTarget?.current?.focus();
     if (searchQuery.trim()) setOpenSearchPanel(true);
   };
 
@@ -447,7 +452,7 @@ const Navbar = () => {
           {/* Desktop */}
           <div className="hidden md:block">
             {/* Sin scroll */}
-            <div className={`space-y-4 transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${!isScrolled ? "opacity-100 max-h-[200px] translate-y-0" : "opacity-0 max-h-0 -translate-y-2"}`}>
+            <div className={`space-y-4 transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${!isScrolled ? "opacity-100 max-h-[200px] translate-y-0" : "opacity-0 max-h-0 -translate-y-2 overflow-hidden"}`}>
               <div className="flex justify-center">
                 <Link 
                   href="/" 
@@ -473,7 +478,7 @@ const Navbar = () => {
                   <form onSubmit={(e) => e.preventDefault()} role="search">
                     <div className="flex">
                       <input
-                        ref={inputRef}
+                        ref={inputRefDesktop1}
                         type="search"
                         name="q"
                         placeholder="Buscar..."
@@ -486,7 +491,7 @@ const Navbar = () => {
                       />
                       <button
                         type="button"
-                        onClick={handleFocusSearch}
+                        onClick={() => handleFocusSearch(inputRefDesktop1)}
                         className="px-4 py-2 bg-[#eff2d5] text-gray-600 rounded-r-md hover:bg-[#ebf8ca]"
                         aria-label="Ejecutar búsqueda"
                         title="Buscar en catálogo"
@@ -501,7 +506,7 @@ const Navbar = () => {
 
                   {openSearchPanel && (
                     <div
-                      ref={panelRef}
+                      ref={panelRefDesktop1}
                       className="absolute left-0 right-0 mt-2 rounded-lg border bg-white shadow-xl overflow-hidden z-[80] pointer-events-auto"
                       role="dialog"
                       aria-label="Resultados de búsqueda"
@@ -702,7 +707,7 @@ const Navbar = () => {
             </div>
 
             {/* Con scroll */}
-            <div className={`transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${isScrolled ? "opacity-100 max-h-[80px] translate-y-0" : "opacity-0 max-h-0 translate-y-2"}`}>
+            <div className={`transition-[opacity,max-height,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isScrolled ? "opacity-100 max-h-[80px] translate-y-0" : "opacity-0 max-h-0 translate-y-2 overflow-hidden"}`}>
               <div className="flex items-center justify-between">
                 <Link 
                   href="/" 
@@ -726,7 +731,7 @@ const Navbar = () => {
                     <form onSubmit={(e) => e.preventDefault()} role="search">
                       <div className="flex">
                         <input
-                          ref={inputRef}
+                          ref={inputRefDesktop2}
                           type="search"
                           name="q"
                           placeholder="Buscar..."
@@ -738,7 +743,7 @@ const Navbar = () => {
                         />
                         <button
                           type="button"
-                          onClick={handleFocusSearch}
+                          onClick={() => handleFocusSearch(inputRefDesktop2)}
                           className="px-3 py-1 bg-[#eff2d5] text-gray-600 rounded-r-md hover:bg-[#ebf8ca]"
                           aria-label="Ejecutar búsqueda"
                           title="Buscar en catálogo"
@@ -750,7 +755,7 @@ const Navbar = () => {
 
                     {openSearchPanel && (
                       <div
-                        ref={panelRef}
+                        ref={panelRefDesktop2}
                         className="absolute left-0 right-0 mt-2 rounded-lg border bg-white shadow-xl overflow-hidden z-[80] pointer-events-auto"
                         role="dialog"
                         aria-label="Resultados de búsqueda"
@@ -1017,7 +1022,7 @@ const Navbar = () => {
                     />
                     <button
                       type="button"
-                      onClick={handleFocusSearch}
+                      onClick={() => handleFocusSearch(inputRef)}
                       className="px-4 py-2 bg-gray-100 text-gray-600 rounded-r-md hover:bg-gray-200"
                       aria-label="Ejecutar búsqueda"
                       title="Buscar en catálogo"

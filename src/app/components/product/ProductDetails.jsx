@@ -158,7 +158,7 @@ const ProductDetails = ({ productSlug }) => {
           {product.title}
         </h1>
         {product.subtitle && (
-          <p className="text-[#798f38] italic text-sm mt-1">{product.subtitle}</p>
+          <p className="text-gray-400 italic text-sm mt-1">{product.subtitle}</p>
         )}
       </div>
 
@@ -305,7 +305,7 @@ const ProductDetails = ({ productSlug }) => {
               {product.title}
             </h1>
             {product.subtitle && (
-              <p className="text-[#798f38] italic mt-1">{product.subtitle}</p>
+              <p className="text-gray-400 italic mt-1">{product.subtitle}</p>
             )}
           </div>
 

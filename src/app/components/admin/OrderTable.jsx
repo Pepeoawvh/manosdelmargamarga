@@ -110,7 +110,7 @@ const OrderTable = ({
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-300">
-        <thead className="bg-green-100">
+        <thead className="bg-emerald-50 border-b border-emerald-200">
           <tr>
             {/* Código pedido (auto) */}
             <th

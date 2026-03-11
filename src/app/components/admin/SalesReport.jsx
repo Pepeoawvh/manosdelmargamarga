@@ -66,9 +66,12 @@ export default function SalesReport() {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       {/* Header con controles de filtro */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
         <div className="flex flex-wrap justify-between items-center gap-4">
-          <h2 className="text-xl font-bold text-gray-800">Informe de Ventas</h2>
+          <div className="flex items-center gap-2">
+            <span className="w-0.5 h-5 bg-emerald-500 rounded-full shrink-0"></span>
+            <h2 className="text-base font-semibold text-gray-800">Informe de Ventas</h2>
+          </div>
 
           <div className="flex gap-4 items-center">
             <div>
@@ -197,44 +200,48 @@ export default function SalesReport() {
                 Resumen de {months[selectedMonth]} {selectedYear}
               </h3>
 
-              {/* Tarjetas de estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-emerald-800 mb-1">
-                    Ventas Totales
-                  </h4>
-                  <p className="text-2xl font-bold text-emerald-700">
-                    {monthlyData ? formatCurrency(monthlyData.totalSales) : "-"}
-                  </p>
-                  <p className="text-xs text-emerald-600 mt-1">
-                    {monthlyData?.salesCount || 0} ventas totales
-                  </p>
+              {/* Barra de estadísticas unificada */}
+              <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-200 border border-gray-200 rounded-lg overflow-hidden mb-6">
+                {/* Ventas Totales */}
+                <div className="flex-1 flex items-center gap-3 bg-emerald-50 px-4 py-3">
+                  <div className="p-1.5 bg-emerald-100 rounded shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-emerald-800 uppercase tracking-wide">Ventas Totales</p>
+                    <p className="text-xl font-bold text-emerald-700 leading-tight">{monthlyData ? formatCurrency(monthlyData.totalSales) : "..."}</p>
+                    <p className="text-[11px] text-emerald-600">{monthlyData?.salesCount || 0} ventas</p>
+                  </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-blue-800 mb-1">
-                    Ventas Online
-                  </h4>
-                  <p className="text-2xl font-bold text-blue-700">
-                    {monthlyData ? formatCurrency(monthlyData.onlineSales) : "-"}
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    {monthlyData?.onlineCount || 0} ventas a través de la tienda
-                  </p>
+                {/* Ventas Online */}
+                <div className="flex-1 flex items-center gap-3 bg-blue-50 px-4 py-3">
+                  <div className="p-1.5 bg-blue-100 rounded shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-blue-800 uppercase tracking-wide">Ventas Online</p>
+                    <p className="text-xl font-bold text-blue-700 leading-tight">{monthlyData ? formatCurrency(monthlyData.onlineSales) : "..."}</p>
+                    <p className="text-[11px] text-blue-600">{monthlyData?.onlineCount || 0} a través de la tienda</p>
+                  </div>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-yellow-800 mb-1">
-                    Ventas Externas
-                  </h4>
-                  <p className="text-2xl font-bold text-yellow-700">
-                    {monthlyData
-                      ? formatCurrency(monthlyData.externalSalesTotal)
-                      : "-"}
-                  </p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    {monthlyData?.externalCount || 0} ventas registradas manualmente
-                  </p>
+                {/* Ventas Externas */}
+                <div className="flex-1 flex items-center gap-3 bg-amber-50 px-4 py-3">
+                  <div className="p-1.5 bg-amber-100 rounded shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-amber-800 uppercase tracking-wide">Ventas Externas</p>
+                    <p className="text-xl font-bold text-amber-700 leading-tight">{monthlyData ? formatCurrency(monthlyData.externalSalesTotal) : "..."}</p>
+                    <p className="text-[11px] text-amber-600">{monthlyData?.externalCount || 0} registradas manualmente</p>
+                  </div>
                 </div>
               </div>
 

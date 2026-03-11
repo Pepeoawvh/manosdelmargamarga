@@ -121,65 +121,61 @@ const result = unique.filter((o) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
-      {/* Tarjetas principales (compactas) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="p-1.5 bg-emerald-100 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-              </svg>
-            </div>
-            <div className="ml-2">
-              <h3 className="text-xs font-medium text-emerald-800">Productos</h3>
-              <p className="text-lg font-semibold text-emerald-700">{products.length}</p>
-              <p className="text-[11px] text-emerald-600">{featuredCount} destacados</p>
-            </div>
+      {/* Barra de resumen unificada */}
+      <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-200 border-b border-gray-200">
+        {/* Productos */}
+        <div className="flex-1 flex items-center gap-3 bg-emerald-50 px-4 py-3">
+          <div className="p-1.5 bg-emerald-100 rounded shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-emerald-800 uppercase tracking-wide">Productos</p>
+            <p className="text-xl font-bold text-emerald-700 leading-tight">{products.length}</p>
+            <p className="text-[11px] text-emerald-600">{featuredCount} destacados</p>
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="p-1.5 bg-blue-100 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-            </div>
-            <div className="ml-2">
-              <h3 className="text-xs font-medium text-blue-800">Pedidos</h3>
-              <p className="text-lg font-semibold text-blue-700">{operationalOrders.length}</p>
-              <p className="text-[11px] text-blue-600">Pedidos en proceso</p>
-            </div>
+        {/* Pedidos */}
+        <div className="flex-1 flex items-center gap-3 bg-blue-50 px-4 py-3">
+          <div className="p-1.5 bg-blue-100 rounded shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-blue-800 uppercase tracking-wide">Pedidos</p>
+            <p className="text-xl font-bold text-blue-700 leading-tight">{operationalOrders.length}</p>
+            <p className="text-[11px] text-blue-600">En proceso</p>
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="p-1.5 bg-amber-100 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-2">
-              <h3 className="text-xs font-medium text-amber-800">Ventas Mensual</h3>
-              <p className="text-lg font-semibold text-amber-700">{monthlyData ? formatCurrency(monthlyData.totalSales) : "..."}</p>
-              <p className="text-[11px] text-amber-600">{monthlyData?.salesCount || 0} ventas</p>
-            </div>
+        {/* Ventas mensuales */}
+        <div className="flex-1 flex items-center gap-3 bg-amber-50 px-4 py-3">
+          <div className="p-1.5 bg-amber-100 rounded shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-amber-800 uppercase tracking-wide">Ventas Mensual</p>
+            <p className="text-xl font-bold text-amber-700 leading-tight">{monthlyData ? formatCurrency(monthlyData.totalSales) : "..."}</p>
+            <p className="text-[11px] text-amber-600">{monthlyData?.salesCount || 0} ventas</p>
           </div>
         </div>
 
-        <div className="bg-purple-50 border border-purple-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="p-1.5 bg-purple-100 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div className="ml-2">
-              <h3 className="text-xs font-medium text-purple-800">Total Histórico</h3>
-              <p className="text-lg font-semibold text-purple-700">{allTimeData ? formatCurrency(allTimeData.totalSales) : "..."}</p>
-              <p className="text-[11px] text-purple-600">{allTimeData?.salesCount || 0} ventas totales</p>
-            </div>
+        {/* Total histórico */}
+        <div className="flex-1 flex items-center gap-3 bg-purple-50 px-4 py-3">
+          <div className="p-1.5 bg-purple-100 rounded shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-purple-800 uppercase tracking-wide">Total Histórico</p>
+            <p className="text-xl font-bold text-purple-700 leading-tight">{allTimeData ? formatCurrency(allTimeData.totalSales) : "..."}</p>
+            <p className="text-[11px] text-purple-600">{allTimeData?.salesCount || 0} ventas totales</p>
           </div>
         </div>
       </div>
@@ -188,7 +184,8 @@ const result = unique.filter((o) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 p-3">
         {/* Pedidos en proceso */}
         <div className="lg:col-span-2 border border-gray-200 rounded-md overflow-hidden">
-          <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
+          <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200 flex items-center gap-2">
+            <span className="w-0.5 h-4 bg-blue-400 rounded-full shrink-0"></span>
             <h3 className="text-sm font-medium text-gray-700">Pedidos en Proceso</h3>
           </div>
           {operationalOrders.length > 0 ? (
@@ -221,7 +218,8 @@ const result = unique.filter((o) => {
 
         {/* Productos con bajo stock */}
         <div className="border border-gray-200 rounded-md overflow-hidden">
-          <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
+          <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200 flex items-center gap-2">
+            <span className="w-0.5 h-4 bg-amber-400 rounded-full shrink-0"></span>
             <h3 className="text-sm font-medium text-gray-700">Bajo Stock</h3>
           </div>
           <div className="p-2">
@@ -269,7 +267,10 @@ const result = unique.filter((o) => {
 
       {/* Acciones rápidas */}
       <div className="border-t border-gray-200 bg-gray-50 p-3">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Acciones Rápidas</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-0.5 h-4 bg-emerald-500 rounded-full shrink-0"></span>
+          <h3 className="text-sm font-medium text-gray-700">Acciones Rápidas</h3>
+        </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => onOpenAddProductForm && onOpenAddProductForm()} className="bg-emerald-600 text-white py-1.5 px-3 text-xs rounded hover:bg-emerald-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
