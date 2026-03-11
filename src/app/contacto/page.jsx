@@ -5,7 +5,7 @@ import Image from "next/image";
 export default function ContactoPage() {
   return (
     <main className="min-h-screen bg-[#f5f3e6]">
-      <section className="max-w-6xl mx-auto px-4 py-10">
+      <section className="px-4 md:px-6 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Columna izquierda: frase e ilustración */}
           <div className="space-y-8">

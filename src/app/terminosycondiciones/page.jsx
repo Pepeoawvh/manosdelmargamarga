@@ -5,7 +5,7 @@ import Image from "next/image";
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[#f5f3e6]">
-      <section className="max-w-5xl mx-auto px-6 py-16">
+      <section className="px-4 md:px-6 py-16">
         <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12">
           <div className="grid lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-6">

@@ -31,6 +31,7 @@ const SLIDE_DEFAULTS = {
 export default function SlideForm({ initialData, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(initialData || SLIDE_DEFAULTS);
   const [preview, setPreview] = useState(initialData?.imageUrl || "");
+  const [mobilePreview, setMobilePreview] = useState(initialData?.mobileImageUrl || "");
   const [activeSection, setActiveSection] = useState("basic"); // basic, layout, styling
 
   // Actualizar formData cuando initialData cambie (incluyendo cuando se abre/cierra el modal)
@@ -49,10 +50,12 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
       };
       setFormData(mergedData);
       setPreview(initialData.imageUrl || "");
+      setMobilePreview(initialData.mobileImageUrl || "");
     } else {
       // Si no hay initialData, resetear a defaults (nuevo slide)
       setFormData(SLIDE_DEFAULTS);
       setPreview("");
+      setMobilePreview("");
       setActiveSection("basic");
     }
   }, [initialData]); // Cambiar dependencia: ejecutar cada vez que initialData cambie, no solo el ID
@@ -77,6 +80,7 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
         [name]: type === "checkbox" ? checked : value 
       }));
       if (name === "imageUrl") setPreview(value);
+      if (name === "mobileImageUrl") setMobilePreview(value);
     }
   };
 
@@ -176,22 +180,26 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">URL de imagen (Desktop)</label>
+              <label className="block text-sm font-medium mb-1">
+                URL de imagen — Desktop
+                <span className="ml-1 text-xs font-normal text-gray-400">(horizontal · recomendado 1920×560 px)</span>
+              </label>
               <input 
                 type="url" 
                 name="imageUrl" 
                 value={formData.imageUrl} 
                 onChange={handleChange} 
                 className="w-full border rounded px-3 py-2" 
-                placeholder="https://ejemplo.com/imagen.jpg"
+                placeholder="https://ejemplo.com/imagen-desktop.jpg"
                 required 
               />
               {preview && (
                 <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Vista previa desktop:</p>
                   <img 
                     src={preview} 
-                    alt="Vista previa" 
-                    className="h-32 w-auto rounded border object-cover" 
+                    alt="Vista previa desktop" 
+                    className="h-24 w-auto rounded border object-cover" 
                   />
                 </div>
               )}
@@ -199,8 +207,8 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
 
             <div>
               <label className="block text-sm font-medium mb-1">
-                URL de imagen para móvil 
-                <span className="text-gray-400 font-normal ml-1">(opcional)</span>
+                URL de imagen — Móvil
+                <span className="ml-1 text-xs font-normal text-gray-400">(vertical · recomendado 750×1000 px)</span>
               </label>
               <input 
                 type="url" 
@@ -208,11 +216,24 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
                 value={formData.mobileImageUrl || ""} 
                 onChange={handleChange} 
                 className="w-full border rounded px-3 py-2" 
-                placeholder="https://ejemplo.com/imagen-mobile.jpg"
+                placeholder="https://ejemplo.com/imagen-movil.jpg"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Si no se especifica, se usará la imagen principal en móvil
-              </p>
+              <div className="mt-2 p-3 bg-blue-50 rounded border border-blue-200 text-xs text-blue-800 space-y-1">
+                <p className="font-medium">💡 Imagen móvil (portrait)</p>
+                <p>Formato vertical ideal: <strong>750×1000 px</strong> o proporción <strong>3:4</strong></p>
+                <p>Si no se carga, se usará la imagen desktop (puede verse recortada en móvil)</p>
+              </div>
+              {mobilePreview && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Vista previa móvil:</p>
+                  <img 
+                    src={mobilePreview} 
+                    alt="Vista previa móvil" 
+                    className="h-36 w-auto rounded border object-cover" 
+                    style={{ maxWidth: "108px" }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Controles de punto focal — solo para tipo Solo Imagen */}

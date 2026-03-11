@@ -11,10 +11,9 @@ const CLIENTS = [
   { src: "/images/clientes/7.svg",  alt: "Empresa cliente 7 — Manos del Marga Marga" },
   { src: "/images/clientes/8.svg",  alt: "Empresa cliente 8 — Manos del Marga Marga" },
   { src: "/images/clientes/9.svg",  alt: "Empresa cliente 9 — Manos del Marga Marga" },
-  { src: "/images/clientes/10.svg", alt: "Empresa cliente 10 — Manos del Marga Marga" },
 ];
 
-// Duplicamos para el loop infinito sin salto visible
+//loop infinito sin salto visible
 const ITEMS = [...CLIENTS, ...CLIENTS];
 
 export default function ClientesBanner() {
@@ -29,7 +28,7 @@ export default function ClientesBanner() {
           100% { transform: translateX(-5570px); }
         }
         .marquee-track {
-          animation: marquee 27s linear infinite;
+          animation: marquee 40s linear infinite;
         }
         .marquee-wrapper:hover .marquee-track {
           animation-play-state: paused;

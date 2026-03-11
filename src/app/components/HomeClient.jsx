@@ -42,10 +42,10 @@ export default function HomeClient() {
     return (
       <div className="min-h-screen bg-[#F9F9F9]">
         <div className="w-full h-[60vh] bg-gray-100 animate-pulse" aria-hidden="true" />
-        <div className="max-w-6xl mx-auto px-4 py-20" aria-busy="true" aria-live="polite">
+        <div className="px-4 md:px-6 py-20" aria-busy="true" aria-live="polite">
           <div className="h-8 w-60 bg-gray-200 mx-auto mb-12 rounded-md animate-pulse" />
-          <div className="grid md:grid-cols-3 gap-8">
-            {[...Array(3)].map((_, i) => (
+          <div className="grid md:grid-cols-4 gap-8">
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
             ))}
           </div>
@@ -66,10 +66,10 @@ export default function HomeClient() {
 
       {/* Productos destacados */}
       <section className="py-16 bg-[#ffffff7a]" aria-labelledby="featured-heading">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="px-4 md:px-6">
           <h2 
             id="featured-heading" 
-            className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#467302]"
+            className="text-2xl md:text-3xl font-bold text-center mb-10 text-gray-700"
           >
             Productos destacados de papel artesanal
           </h2>
@@ -79,7 +79,7 @@ export default function HomeClient() {
               <p className="text-lg text-gray-600">Cargando diseños destacados…</p>
             </div>
           ) : featuredProducts.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -109,8 +109,8 @@ export default function HomeClient() {
 
       {/* CTA WhatsApp */}
       <section className="py-12 bg-gray-50" aria-labelledby="cta-heading">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 id="cta-heading" className="text-2xl md:text-3xl font-bold mb-4 text-[#87a644]">
+        <div className="px-4 md:px-6 text-center">
+          <h2 id="cta-heading" className="text-2xl md:text-3xl font-bold mb-4 text-gray-700">
             ¿Tienes un proyecto en mente?
           </h2>
           <p className="text-gray-700 mb-6">

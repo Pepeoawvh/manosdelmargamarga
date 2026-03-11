@@ -93,7 +93,7 @@ const Navbar = () => {
     {
       name: "Tienda",
       path: "/catalogo",
-      color: "yellow",
+      color: "gray",
       submenu: PRODUCT_CATEGORIES,
     },
     // { name: "Nosotras", path: "/nosotras", color: "pink" },
@@ -101,7 +101,7 @@ const Navbar = () => {
     {
       name: "Tutoriales",
       path: "/tutoriales",
-      color: "blue",
+      color: "gray",
       submenu: [
         "¿Cómo plantar papel germinable manos del marga marga?",
         "Ayuda para diseñadores",

@@ -26,7 +26,7 @@ function CheckoutContent() {
   if (!mounted) return null;
   
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div className="px-4 md:px-6 py-8 md:py-12">
       <div className="mb-6">
         <Link href="/catalogo" className="text-[#542e1d] hover:text-[#b3633e] flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -61,7 +61,7 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+      <div className="px-4 md:px-6 py-8 md:py-12">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-48 mb-8"></div>
           <div className="space-y-4">

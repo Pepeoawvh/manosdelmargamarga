@@ -63,7 +63,7 @@ export async function generateMetadata({ searchParams }) {
 export default function Page() {
   return (
     <main
-      className="max-w-6xl mx-auto px-4 py-2"
+      className="w-full py-2"
       aria-label="Catálogo de productos de papel artesanal y papel semilla"
     >
       <Suspense fallback={

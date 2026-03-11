@@ -40,7 +40,7 @@ const steps = [
 export default function TutorialPlanting() {
   return (
     <section className="py-16" aria-labelledby="como-plantar-papel-germinable" role="region">
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="px-4 md:px-6">
         {/* Grid de pasos */}
         <div className="grid md:grid-cols-2 gap-8">
           {steps.map((step, index) => (

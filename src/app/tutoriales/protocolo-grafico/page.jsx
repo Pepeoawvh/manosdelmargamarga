@@ -28,7 +28,7 @@ export default function ProtocoloGrafico() {
         </div>
       </div>
 
-      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <section className="px-4 md:px-6 py-12 md:py-16">
         {/* COBERTURA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -85,7 +85,7 @@ export default function ProtocoloGrafico() {
               </div>
 
               <div className="justify-self-center lg:justify-self-end">
-                <LargePreview />
+               
               </div>
             </div>
           </div>

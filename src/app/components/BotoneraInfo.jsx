@@ -29,7 +29,7 @@ const botones = [
 
 export default function BotoneraInfo() {
   return (
-    <div className=" bg-[#ebead5] rounded-lg p-4 flex flex-col md:flex-row justify-between items-stretch gap-4">
+    <div className="bg-[#ebead5] p-4 flex flex-col md:flex-row justify-between items-stretch gap-4">
       {botones.map((btn, idx) => (
         <a
           key={btn.title}

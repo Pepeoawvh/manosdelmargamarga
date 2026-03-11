@@ -17,6 +17,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     additionalImages: Array.isArray(product?.additionalImages) 
       ? [...product.additionalImages, "", "", ""].slice(0, 3)
       : ["", "", ""],
+    oldPrice: product?.oldPrice || "",
     featured: product?.featured || false,
     reservable: product?.reservable || false,
     cotizable: product?.cotizable || false,
@@ -96,6 +97,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       cotizable: !!formData.cotizable,
       slug: finalSlug, // asegura que exista y esté normalizado
       price: formData.price === "" ? 0 : Number(formData.price),
+      oldPrice: formData.oldPrice === "" ? 0 : Number(formData.oldPrice),
       stock: formData.stock === "" ? 0 : Number(formData.stock),
       categories: Array.isArray(formData.categories) ? formData.categories : [],
       subcategories: Array.isArray(formData.subcategories) ? formData.subcategories : [],
@@ -194,9 +196,9 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 
           {/* Columna derecha */}
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Precio</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Precio oferta</label>
                 <div className="relative">
                   <span className="absolute left-2 top-1 text-gray-500 text-xs">$</span>
                   <input
@@ -207,6 +209,25 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full pl-5 py-1 px-2 text-xs border border-gray-300 rounded"
                     required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Precio normal{" "}
+                  <span className="text-gray-400 font-normal">(tachado)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-2 top-1 text-gray-500 text-xs">$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.oldPrice}
+                    onChange={(e) => setFormData({ ...formData, oldPrice: e.target.value })}
+                    className="w-full pl-5 py-1 px-2 text-xs border border-gray-300 rounded"
+                    placeholder="Opcional"
                   />
                 </div>
               </div>

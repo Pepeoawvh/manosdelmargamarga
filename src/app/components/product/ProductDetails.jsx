@@ -251,7 +251,7 @@ const ProductDetails = ({ productSlug }) => {
                     key={idx}
                     onClick={() => setActiveImage(idx)}
                     className={`h-2 w-8 rounded-full transition-all ${
-                      activeImage === idx ? "bg-[#8f5f49] w-10" : "bg-gray-300"
+                      activeImage === idx ? "bg-[#5e8c30] w-10" : "bg-gray-300"
                     }`}
                     aria-label={`Ir a imagen ${idx + 1}`}
                   />
@@ -309,47 +309,28 @@ const ProductDetails = ({ productSlug }) => {
             )}
           </div>
 
-          {/* Precio y stock */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <span className="text-4xl font-extrabold text-[#798f38]">
-                  {product.cotizable
-                    ? 'Precio a cotizar'
-                    : priceInt > 0
-                    ? `$${priceInt.toLocaleString()}`
-                    : 'Consultar precio'}
+          {/* Precio */}
+          <div className="mb-6">
+            {product.oldPrice > 0 && !product.cotizable && (
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm text-gray-400 line-through">
+                  ${Number.parseInt(product.oldPrice)}
                 </span>
-                {product.oldPrice && (
-                  <span className="text-sm text-gray-500 line-through">
-                    ${Number.parseInt(product.oldPrice).toLocaleString()}
-                  </span>
-                )}
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full  text-green-600">
+                  Oferta
+                </span>
               </div>
-              <div className="text-sm text-gray-500 mt-1">{product.cotizable ? 'Precio según requerimiento' : 'IVA incluido'}</div>
+            )}
+            <div className="flex items-center gap-3">
+              <span className="text-4xl font-extrabold text-[#798f38]">
+                {product.cotizable
+                  ? 'Precio a cotizar'
+                  : priceInt > 0
+                  ? `$${priceInt}`
+                  : 'Consultar precio'}
+              </span>
             </div>
-
-            <div className="text-sm">
-              {product.cotizable ? (
-                <span className="font-semibold inline-block rounded-full px-3 py-1 bg-[#f5e6e0] text-[#8f5f49]">
-                  Producto a pedido
-                </span>
-              ) : stockInt > 0 ? (
-                <div className="flex flex-col items-end gap-2">
-                  <span
-                    className={`font-semibold inline-block rounded-full px-3 py-1 ${
-                      stockInt > 10
-                        ? "bg-green-100 text-green-800"
-                        : "bg-amber-100 text-amber-800"
-                    }`}
-                  >
-                    {stockInt > 10 ? "En stock" : `¡Solo quedan ${stockInt}!`}
-                  </span>
-                </div>
-              ) : (
-                <span className="text-red-600 font-semibold">Agotado</span>
-              )}
-            </div>
+            <div className="text-sm text-gray-500 mt-1">{product.cotizable ? 'Precio según requerimiento' : 'IVA incluido'}</div>
           </div>
 
           {/* Descripción */}
@@ -363,6 +344,23 @@ const ProductDetails = ({ productSlug }) => {
               </p>
             </div>
           )}
+
+          {/* Stock */}
+          <div className="text-sm">
+            {product.cotizable ? (
+              <span className="inline-block text-xs text-gray-400 border border-gray-200 rounded px-2 py-0.5">
+                Producto a pedido
+              </span>
+            ) : stockInt > 0 ? (
+              <span className="inline-block text-xs text-gray-400 border border-gray-200 rounded px-2 py-0.5">
+                {`Stock: ${stockInt}`}
+              </span>
+            ) : (
+              <span className="inline-block text-xs text-red-200 border border-gray-200 rounded px-2 py-0.5">
+                Agotado
+              </span>
+            )}
+          </div>
 
           {/* Características */}
           {product.subcategories && product.subcategories.length > 0 && (
@@ -391,7 +389,7 @@ const ProductDetails = ({ productSlug }) => {
               <>
                 <AddToCartButton
                   product={product}
-                  className="w-full bg-[#8f5f49] text-white py-3 rounded-md shadow"
+                  className="w-full bg-[#5e8c30] hover:bg-[#7fb43f] text-white py-3 rounded-md shadow"
                 />
                 {product.reservable && (
                   <ReservationButton
@@ -411,44 +409,13 @@ const ProductDetails = ({ productSlug }) => {
           Información adicional
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Detalles del producto */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <h3 className="text-xs uppercase tracking-widest font-semibold text-gray-400 mb-3">
-              Detalles del producto
-            </h3>
-            <dl className="divide-y divide-gray-200 text-sm">
-              {product.dimensions && (
-                <div className="flex justify-between py-2">
-                  <dt className="text-gray-500">Dimensiones</dt>
-                  <dd className="text-gray-800 font-medium">{product.dimensions}</dd>
-                </div>
-              )}
-              {product.material && (
-                <div className="flex justify-between py-2">
-                  <dt className="text-gray-500">Material</dt>
-                  <dd className="text-gray-800 font-medium">{product.material}</dd>
-                </div>
-              )}
-              {product.subcategories && product.subcategories.length > 0 && (
-                <div className="flex justify-between py-2">
-                  <dt className="text-gray-500">Tipo</dt>
-                  <dd className="text-gray-800 font-medium">{product.subcategories.join(", ")}</dd>
-                </div>
-              )}
-              <div className="flex justify-between py-2">
-                <dt className="text-gray-500">SKU</dt>
-                <dd className="text-gray-400 font-mono text-xs tracking-wider">{product.id?.substring(0, 8) || "—"}</dd>
-              </div>
-            </dl>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-5">
           {/* Envío y entrega */}
           <div className="bg-gray-50 rounded-xl p-4">
             <h3 className="text-xs uppercase tracking-widest font-semibold text-gray-400 mb-3">
               Envío y entrega
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:space-x-6 text-sm">
               <li className="flex items-center gap-3">
                 <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#eef6d6] flex items-center justify-center">
                   <svg className="h-4 w-4 text-[#5e8c30]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -20,16 +20,20 @@ const ProductCard = ({
     id,
     slug,
     image = "",
+    additionalImages = [],
     title = "",
     categories = [],
     subcategories = [],
     description = "",
     price = "0",
+    oldPrice = 0,
     stock = 0,
     featured = false,
     videoUrl,
     cotizable = false,
   } = product;
+
+  const secondImage = additionalImages[0] || null;
 
   const mainCategory = categories?.[0] || "";
   const isOutOfStock = Number(stock) === 0;
@@ -50,6 +54,7 @@ const ProductCard = ({
   // URL canónica por slug o id
   const productHref = `/producto/${slug || id}`;
   const priceInt = Number.parseInt(price || 0);
+  const oldPriceInt = Number.parseInt(oldPrice || 0);
 
   // Textos enriquecidos con keywords SEO
   const titleText = title || "Producto de papel artesanal";
@@ -89,8 +94,26 @@ const ProductCard = ({
             itemProp="image"
             onError={handleImgError}
           />
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-all duration-300" aria-hidden="true" />
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/15 transition-all duration-300" aria-hidden="true" />
         </div>
+
+        {/* Segunda imagen al hover (sin video) */}
+        {!videoUrl && secondImage && (
+          <div
+            className={`absolute inset-0 w-full h-full transition-opacity duration-500 hidden md:block ${
+              isHovered ? "opacity-100" : "opacity-0"
+            }`}
+            aria-hidden="true"
+          >
+            <img
+              src={secondImage}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+          </div>
+        )}
 
         {/* Video/GIF (solo al hover y no en mobile) */}
         {videoUrl && (
@@ -153,19 +176,26 @@ const ProductCard = ({
 
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
-            <p className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+            <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
               {cotizable ? (
-                <span className="text-[#f5d6c8]">Precio a cotizar</span>
+                <span className="text-[#f5d6c8] text-sm">Precio a cotizar</span>
               ) : priceInt > 0 ? (
-                <>
-                  <span itemProp="priceCurrency" content="CLP">CLP</span>{" "}
-                  <span itemProp="price" content={String(priceInt)}>{`$${priceInt.toLocaleString()}`}</span>
-                </>
+                <div className="flex flex-col items-start gap-0.5">
+                  {oldPriceInt > 0 && (
+                    <span className="text-xs text-white/60 line-through">
+                      ${oldPriceInt}
+                    </span>
+                  )}
+                  <span itemProp="price" content={String(priceInt)} className="text-base leading-tight">
+                    <span itemProp="priceCurrency" content="CLP" className="text-xs font-normal mr-0.5">CLP</span>
+                    {`$${priceInt}`}
+                  </span>
+                </div>
               ) : (
-                <span>Consultar precio</span>
+                <span className="text-sm">Consultar precio</span>
               )}
               <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
-            </p>
+            </div>
           )}
 
           {isAdmin ? (

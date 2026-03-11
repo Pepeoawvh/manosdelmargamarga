@@ -81,7 +81,7 @@ export default function HacerPedido() {
       </div>
 
       {/* Steps Section */}
-      <div className="max-w-5xl mx-auto px-4 py-16">
+      <div className="px-4 md:px-6 py-16">
         <ol className="relative border-l-4 border-[#b4cf66] ml-8 md:ml-0 md:border-l-0 space-y-12" role="list">
           {steps.map((step, index) => (
             <motion.li

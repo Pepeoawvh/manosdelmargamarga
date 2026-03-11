@@ -56,7 +56,7 @@ export default function Tutoriales() {
       </div>
 
       {/* Cards Section */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
+      <section className="px-4 md:px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cards.map((card, index) => (
             <motion.div

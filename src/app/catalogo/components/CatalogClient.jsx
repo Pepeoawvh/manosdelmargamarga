@@ -176,7 +176,7 @@ export default function CatalogPageClient() {
     : null;
 
   return (
-    <div className="min-h-screen text-[#535550] mt-4 pt-4 bg-gray-50">
+    <div className="min-h-screen text-[#535550] mt-4 pt-4 px-4 md:px-6 bg-gray-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJson }} />
       {itemListJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: itemListJson }} />}
 
@@ -190,7 +190,7 @@ export default function CatalogPageClient() {
 
       {loading ? (
         <section className="py-8 text-center" aria-busy="true" aria-live="polite">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4d7528] mb-2"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 mb-2"></div>
           <p className="text-[#362b26]">Cargando productos...</p>
         </section>
       ) : showCategories ? (
@@ -200,7 +200,7 @@ export default function CatalogPageClient() {
           {/* Vista móvil compacta: 3 columnas, botones tipo chip sin icono;
               En desktop (md+), 4 columnas, tamaños mayores */}
           <section
-            className="grid grid-cols-3 gap-2 mx-2 md:mx-4 md:grid-cols-4 md:gap-2"
+            className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-2"
             aria-label="Listas de categorías"
           >
             {PRODUCT_CATEGORIES.map((category) => {
@@ -214,10 +214,10 @@ export default function CatalogPageClient() {
                   aria-label={`Ver ${count} ${count === 1 ? "producto" : "productos"} en ${category}`}
                   aria-current={selected ? "true" : undefined}
                   className={`
-                    group w-full rounded-lg border
-                    ${selected ? "border-[#96bf49] bg-[#eef6e3]" : "border-[#e6e4d9] bg-[#f7f6ef]"}
+                    group w-full rounded-lg
+                    ${selected ? " bg-[#eef6e3]" : " bg-[#f7f6ef]"}
                     text-[#3f413e] px-2 py-2 text-xs font-medium shadow-sm
-                    hover:bg-[#f0efe7] hover:border-[#96bf49]
+                    hover:bg-[#f0efe7] 
                     focus:outline-none focus:ring-2 focus:ring-[#96bf49]
                     transition
                     md:px-3 md:py-3 md:text-sm
@@ -237,18 +237,18 @@ export default function CatalogPageClient() {
               {featuredProducts.length > 0 && (
                 <>
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-[#5e8c30] flex items-center">
-                      <span className="mr-2" aria-hidden="true">★</span> Productos destacados
+                    <h2 className="text-2xl font-bold text-gray-700">
+                      Productos destacados
                     </h2>
                     <Button
                       onClick={() => { setFilters({ category: "", subcategories: [], featured: true, inStock: false }); setShowCategories(false); router.push("/catalogo?destacados=1"); }}
                       variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
                       aria-label="Ver todos los productos destacados" title="Ver todos los destacados"
                     >
-                      Ver todos →
+                      Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {featuredProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -259,18 +259,18 @@ export default function CatalogPageClient() {
               {offerProducts.length > 0 && (
                 <>
                   <div className="flex justify-between items-center mb-4 mt-8">
-                    <h2 className="text-2xl font-bold text-red-600 flex items-center">
-                      <span className="mr-2" aria-hidden="true">🏷️</span> Ofertas especiales
+                    <h2 className="text-2xl font-bold text-gray-700">
+                      Ofertas especiales
                     </h2>
                     <Button
                       onClick={() => { setFilters({ category: "Ofertas", subcategories: [], featured: false, inStock: false }); setShowCategories(false); router.push("/catalogo?categoria=Ofertas"); }}
                       variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
                       aria-label="Ver todas las ofertas" title="Ver todas las ofertas"
                     >
-                      Ver todos →
+                      Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {offerProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -281,18 +281,18 @@ export default function CatalogPageClient() {
               {otherProducts.length > 0 && (
                 <>
                   <div className="flex justify-between items-center mb-4 mt-8">
-                    <h2 className="text-2xl font-bold text-[#5e8c30] flex items-center">
-                      <span className="mr-2" aria-hidden="true">▸</span> Otros productos
+                    <h2 className="text-2xl font-bold text-gray-700">
+                      Otros productos
                     </h2>
                     <Button
                       onClick={() => { clearFilters(); setShowCategories(false); router.push("/catalogo"); }}
                       variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
                       aria-label="Ver todo el catálogo" title="Ver todo el catálogo"
                     >
-                      Ver todos →
+                      Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {otherProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -321,7 +321,7 @@ export default function CatalogPageClient() {
             </nav>
           )}
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-label="Resultados filtrados del catálogo">
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
             {filteredProducts.map((product) => (
               <div key={product.id} className="min-h-[360px]">
                 <ProductCard product={product} showInfo />
