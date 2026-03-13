@@ -69,7 +69,7 @@ const ReservationButton = ({ product, className = '', disabled = false }) => {
       onClick={handleAddToReservationCart}
       disabled={isButtonDisabled}
       className={`inline-flex items-center justify-center text-md text-white rounded-md transition-all duration-200 ${
-        isButtonDisabled ? 'opacity-60 cursor-not-allowed bg-gray-400' : 'hover:bg-[#6b5447] bg-[#9f9f9f]'
+        isButtonDisabled ? 'opacity-60 cursor-not-allowed bg-gray-400' : 'hover:bg-[#4a7326] bg-[#5e8c30]'
       } w-full ${className}`}
     >
       {isProcessing ? (

@@ -26,8 +26,8 @@ const cards = [
     title: "Protocolo gráfico",
     desc: "Recomendaciones técnicas para diseñadores y mejores resultados de impresión.",
     icon: <FaPaintBrush className="text-3xl" />,
-    color: "from-[#8f5f49] to-[#7a4f3b]",
-    hoverColor: "hover:from-[#7a4f3b] hover:to-[#653f2f]",
+    color: "from-[#798f38] to-[#657a2e]",
+    hoverColor: "hover:from-[#657a2e] hover:to-[#536425]",
   },
 ];
 

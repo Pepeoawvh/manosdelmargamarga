@@ -5,7 +5,7 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 export default function Footer() {
   return (
     <footer
-      className="bg-[#ebead6] border-t border-gray-200"
+      className="bg-gray-200 border-t border-gray-300"
       role="contentinfo"
       aria-label="Pie de página"
     >

@@ -85,7 +85,7 @@ export default function TutorialPlanting() {
           className="mt-12 bg-gradient-to-r from-[#f5f3e9] to-[#e8e6db] rounded-2xl p-8 border-2 border-[#b4cf66]/20"
         >
           <h3 className="text-2xl font-bold text-[#798f38] mb-4 text-center">
-            💡 Consejos importantes
+            Consejos importantes
           </h3>
           <ul className="space-y-3 max-w-2xl mx-auto">
             <li className="flex items-start gap-3">

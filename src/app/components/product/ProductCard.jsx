@@ -144,7 +144,7 @@ const ProductCard = ({
       {/* Badges */}
       <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
         {cotizable && (
-          <span className="text-xs font-medium px-2 py-1 bg-[#8f5f49] text-white rounded-full" aria-label="Producto cotizable">
+          <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-full" aria-label="Producto cotizable">
             Cotizable
           </span>
         )}

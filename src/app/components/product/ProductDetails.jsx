@@ -242,44 +242,27 @@ const ProductDetails = ({ productSlug }) => {
             )}
           </div>
 
-          {/* Indicadores y miniaturas */}
+          {/* Miniaturas centradas */}
           {images.length > 1 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {images.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(idx)}
-                    className={`h-2 w-8 rounded-full transition-all ${
-                      activeImage === idx ? "bg-[#5e8c30] w-10" : "bg-gray-300"
-                    }`}
-                    aria-label={`Ir a imagen ${idx + 1}`}
+            <div className="flex items-center justify-center space-x-2 overflow-x-auto mt-2">
+              {images.map((img, idx) => (
+                <button
+                  key={`thumb-${idx}`}
+                  onClick={() => setActiveImage(idx)}
+                  className={`relative h-14 w-14 rounded-md overflow-hidden flex-shrink-0 transition-opacity ${
+                    activeImage === idx ? "opacity-100" : "opacity-50 hover:opacity-80"
+                  }`}
+                  aria-label={`Miniatura ${idx + 1}`}
+                >
+                  <Image
+                    src={img}
+                    alt={`Miniatura ${idx + 1} - ${product.title}`}
+                    fill
+                    className="object-cover"
+                    sizes="56px"
                   />
-                ))}
-              </div>
-
-              <div className="hidden sm:flex items-center space-x-2 overflow-x-auto">
-                {images.map((img, idx) => (
-                  <button
-                    key={`thumb-${idx}`}
-                    onClick={() => setActiveImage(idx)}
-                    className={`relative h-14 w-14 border-2 rounded-md overflow-hidden flex-shrink-0 ${
-                      activeImage === idx
-                        ? "border-[#cde582]"
-                        : "border-gray-200 hover:border-[#a3d01c]"
-                    }`}
-                    aria-label={`Miniatura ${idx + 1}`}
-                  >
-                    <Image
-                      src={img}
-                      alt={`Miniatura ${idx + 1} - ${product.title}`}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />  
-                  </button>
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
           )}
         </div>

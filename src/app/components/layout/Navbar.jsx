@@ -385,6 +385,20 @@ const Navbar = () => {
     if (!item.submenu || activeDropdown !== item.name) return null;
     return (
       <div className="bg-gray-50" role="menu" aria-label={`Submenú de ${item.name}`}>
+        {item.name === "Tienda" && (
+          <button
+            onClick={async () => {
+              await router.push(item.path);
+              setIsMenuOpen(false);
+              setActiveDropdown("");
+            }}
+            className={`block w-full text-left px-8 py-2 text-sm font-medium border-b border-gray-200 ${getHoverColorClass(item.color)}`}
+            role="menuitem"
+            title="Ver todas las categorías - Manos del Marga Marga"
+          >
+            Ver todas las categorías
+          </button>
+        )}
         {item.submenu.map((subItem) => (
           <button
             key={subItem}

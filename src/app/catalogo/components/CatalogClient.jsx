@@ -215,9 +215,9 @@ export default function CatalogPageClient() {
                   aria-current={selected ? "true" : undefined}
                   className={`
                     group w-full rounded-lg
-                    ${selected ? " bg-[#eef6e3]" : " bg-[#f7f6ef]"}
-                    text-[#3f413e] px-2 py-2 text-xs font-medium shadow-sm
-                    hover:bg-[#f0efe7] 
+                    ${selected ? "bg-gray-300 text-gray-800" : "bg-gray-100 text-gray-600"}
+                    px-2 py-2 text-xs font-medium shadow-sm
+                    hover:bg-gray-200 hover:text-gray-800
                     focus:outline-none focus:ring-2 focus:ring-[#96bf49]
                     transition
                     md:px-3 md:py-3 md:text-sm
