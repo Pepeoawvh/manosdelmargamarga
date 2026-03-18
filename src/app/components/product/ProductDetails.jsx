@@ -108,11 +108,16 @@ const ProductDetails = ({ productSlug }) => {
   const images = [product.image, ...(product.additionalImages || [])]
     .filter(Boolean)
     .slice(0, 5);
-  const priceInt = Number(product.price || 0);
+  const rawPrice = parseFloat(product.price);
+  const priceInt = isFinite(rawPrice) && rawPrice >= 0 ? Math.round(rawPrice) : 0;
   const stockInt = Number(product.stock || 0);
 
   const canonicalPath = `/producto/${product.slug || product.id}`;
   const canonicalUrl = `https://www.manosdelmargamarga.cl${canonicalPath}`;
+
+  const priceValidUntilDate = new Date();
+  priceValidUntilDate.setFullYear(priceValidUntilDate.getFullYear() + 1);
+  const priceValidUntil = priceValidUntilDate.toISOString().split("T")[0];
 
   return (
     <div className="bg-white mt-12 rounded-lg shadow-sm overflow-hidden">
@@ -131,10 +136,12 @@ const ProductDetails = ({ productSlug }) => {
             url: canonicalUrl,
             priceCurrency: "CLP",
             price: priceInt,
+            priceValidUntil: priceValidUntil,
             availability:
               stockInt > 0
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
           },
         })}
       </Script>
