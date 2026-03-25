@@ -120,12 +120,12 @@ const result = unique.filter((o) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
+    <div className="bg-white rounded-sm shadow-sm">
       {/* Barra de resumen unificada */}
       <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-200 border-b border-gray-200">
         {/* Productos */}
         <div className="flex-1 flex items-center gap-3 bg-emerald-50 px-4 py-3">
-          <div className="p-1.5 bg-emerald-100 rounded shrink-0">
+          <div className="p-1.5 bg-emerald-100 rounded-sm shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
@@ -139,7 +139,7 @@ const result = unique.filter((o) => {
 
         {/* Pedidos */}
         <div className="flex-1 flex items-center gap-3 bg-blue-50 px-4 py-3">
-          <div className="p-1.5 bg-blue-100 rounded shrink-0">
+          <div className="p-1.5 bg-blue-100 rounded-sm shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -153,7 +153,7 @@ const result = unique.filter((o) => {
 
         {/* Ventas mensuales */}
         <div className="flex-1 flex items-center gap-3 bg-amber-50 px-4 py-3">
-          <div className="p-1.5 bg-amber-100 rounded shrink-0">
+          <div className="p-1.5 bg-amber-100 rounded-sm shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -167,7 +167,7 @@ const result = unique.filter((o) => {
 
         {/* Total histórico */}
         <div className="flex-1 flex items-center gap-3 bg-purple-50 px-4 py-3">
-          <div className="p-1.5 bg-purple-100 rounded shrink-0">
+          <div className="p-1.5 bg-purple-100 rounded-sm shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -183,9 +183,9 @@ const result = unique.filter((o) => {
       {/* Secciones principales del dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 p-3">
         {/* Pedidos en proceso */}
-        <div className="lg:col-span-2 border border-gray-200 rounded-md overflow-hidden">
+        <div className="lg:col-span-2 border border-gray-200 rounded-sm overflow-hidden">
           <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200 flex items-center gap-2">
-            <span className="w-0.5 h-4 bg-blue-400 rounded-full shrink-0"></span>
+            <span className="w-0.5 h-4 bg-blue-400 rounded-sm shrink-0"></span>
             <h3 className="text-sm font-medium text-gray-700">Pedidos en Proceso</h3>
           </div>
           {operationalOrders.length > 0 ? (
@@ -217,20 +217,20 @@ const result = unique.filter((o) => {
         </div>
 
         {/* Productos con bajo stock */}
-        <div className="border border-gray-200 rounded-md overflow-hidden">
+        <div className="border border-gray-200 rounded-sm overflow-hidden">
           <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200 flex items-center gap-2">
-            <span className="w-0.5 h-4 bg-amber-400 rounded-full shrink-0"></span>
+            <span className="w-0.5 h-4 bg-amber-400 rounded-sm shrink-0"></span>
             <h3 className="text-sm font-medium text-gray-700">Bajo Stock</h3>
           </div>
           <div className="p-2">
             {lowStockProducts.length > 0 ? (
               <div className="space-y-1.5">
                 {lowStockProducts.slice(0, 6).map((product) => (
-                  <div key={product.id} className="flex items-center p-2 hover:bg-gray-50 rounded">
-                    <div className="flex-shrink-0 h-9 w-9 bg-gray-100 rounded">
+                  <div key={product.id} className="flex items-center p-2 hover:bg-gray-50 rounded-sm">
+                    <div className="flex-shrink-0 h-9 w-9 bg-gray-100 rounded-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       {product.images && product.images[0] ? (
-                        <img src={product.images[0]} alt={product.title} className="h-9 w-9 object-cover rounded" />
+                        <img src={product.images[0]} alt={product.title} className="h-9 w-9 object-cover rounded-sm" />
                       ) : (
                         <div className="h-9 w-9 flex items-center justify-center text-gray-400">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,7 +244,7 @@ const result = unique.filter((o) => {
                       <p className="text-[11px] text-gray-500 truncate">{product.category}</p>
                     </div>
                     <div>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${product.stock === 0 ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium ${product.stock === 0 ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
                         {product.stock || 0} disponibles
                       </span>
                     </div>
@@ -268,11 +268,11 @@ const result = unique.filter((o) => {
       {/* Acciones rápidas */}
       <div className="border-t border-gray-200 bg-gray-50 p-3">
         <div className="flex items-center gap-2 mb-2">
-          <span className="w-0.5 h-4 bg-emerald-500 rounded-full shrink-0"></span>
+          <span className="w-0.5 h-4 bg-emerald-500 rounded-sm shrink-0"></span>
           <h3 className="text-sm font-medium text-gray-700">Acciones Rápidas</h3>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => onOpenAddProductForm && onOpenAddProductForm()} className="bg-emerald-600 text-white py-1.5 px-3 text-xs rounded hover:bg-emerald-700 flex items-center">
+          <button onClick={() => onOpenAddProductForm && onOpenAddProductForm()} className="bg-emerald-600 text-white py-1.5 px-3 text-xs rounded-sm hover:bg-emerald-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>

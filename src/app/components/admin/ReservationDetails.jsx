@@ -128,7 +128,7 @@ Fecha: ${formatDate(reservation.createdAt)}
           {/* Información del cliente - 2 columnas en desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* COLUMNA 1: Información del cliente */}
-            <div className="bg-white rounded border border-gray-200 p-3">
+            <div className="bg-white rounded-sm border border-gray-200 p-3">
               <h3 className="text-sm font-medium mb-2 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +232,7 @@ Fecha: ${formatDate(reservation.createdAt)}
             </div>
 
             {/* COLUMNA 2: Información del producto y estado */}
-            <div className="bg-white rounded border border-gray-200 p-3">
+            <div className="bg-white rounded-sm border border-gray-200 p-3">
               <h3 className="text-sm font-medium mb-2 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -269,7 +269,7 @@ Fecha: ${formatDate(reservation.createdAt)}
                           min="1"
                           value={newQuantity}
                           onChange={(e) => setNewQuantity(e.target.value)}
-                          className="w-12 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                          className="w-12 px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
                           disabled={isProcessing}
                         />
                         <button
@@ -322,14 +322,14 @@ Fecha: ${formatDate(reservation.createdAt)}
           </div>
 
           {/* Estado y acciones */}
-          <div className="bg-white rounded border border-gray-200 p-3">
+          <div className="bg-white rounded-sm border border-gray-200 p-3">
             <h3 className="text-sm font-medium mb-2">Acciones</h3>
             <div className="space-y-2 text-xs">
               <div className="grid grid-cols-1  md:grid-cols-3 gap-2">
                 <div className="md:col-span-2">
                   <button
                     onClick={copyReservationData}
-                    className="w-full bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600 flex items-center justify-center gap-2"
+                    className="w-full bg-gray-500 text-white px-3 py-1 rounded-sm text-xs hover:bg-gray-600 flex items-center justify-center gap-2"
                   >
                     {copiedText === "all-data" ? (
                       <>

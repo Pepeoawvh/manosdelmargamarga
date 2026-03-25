@@ -61,7 +61,7 @@ const Table = ({
   // Renderizar tabla vacía durante carga
   if (isLoading) {
     return (
-      <div className={`bg-white border border-gray-200 rounded shadow-sm ${containerClassName}`}>
+      <div className={`bg-white border border-gray-200 rounded-sm shadow-sm ${containerClassName}`}>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -81,7 +81,7 @@ const Table = ({
                 <tr key={index}>
                   {columns.map((column) => (
                     <td key={column.key} className="px-3 py-4 whitespace-nowrap">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded-sm animate-pulse"></div>
                     </td>
                   ))}
                 </tr>
@@ -96,14 +96,14 @@ const Table = ({
   // Renderizar mensaje si no hay datos
   if (!data.length) {
     return (
-      <div className={`bg-white border border-gray-200 rounded shadow-sm p-4 text-center text-gray-500 ${containerClassName}`}>
+      <div className={`bg-white border border-gray-200 rounded-sm shadow-sm p-4 text-center text-gray-500 ${containerClassName}`}>
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className={`bg-white border border-gray-200 rounded shadow-sm ${containerClassName}`}>
+    <div className={`bg-white border border-gray-200 rounded-sm shadow-sm ${containerClassName}`}>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -162,7 +162,7 @@ const Table = ({
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              className="p-1 rounded-sm hover:bg-gray-200 disabled:opacity-50"
             >
               &lt;
             </button>
@@ -170,7 +170,7 @@ const Table = ({
               <button
                 key={index}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`px-2 py-1 rounded ${
+                className={`px-2 py-1 rounded-sm ${
                   currentPage === index + 1 
                     ? 'bg-emerald-100 text-emerald-700 font-medium' 
                     : 'hover:bg-gray-200'
@@ -182,7 +182,7 @@ const Table = ({
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              className="p-1 rounded-sm hover:bg-gray-200 disabled:opacity-50"
             >
               &gt;
             </button>

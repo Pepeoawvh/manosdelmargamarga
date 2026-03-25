@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from "react";import {
   where,
   getDoc,
   onSnapshot,
+  serverTimestamp,
 } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -27,7 +28,9 @@ export default function useAdminPanel() {
   const [editingProduct, setEditingProduct] = useState(null);
   const { products, loading, updateLocalProduct, setProducts } = useProducts();
   const [orders, setOrders] = useState([]);
+  const [externalOrders, setExternalOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingExternalOrders, setLoadingExternalOrders] = useState(true);
   const [orderSortField, setOrderSortField] = useState("date"); // Campo por defecto para ordenar
   const [reservations, setReservations] = useState([]);
   const [loadingReservations, setLoadingReservations] = useState(true);
@@ -43,6 +46,7 @@ export default function useAdminPanel() {
       // Cargar pedidos cuando el usuario esté autenticado
       if (user) {
         fetchOrders();
+        fetchExternalOrders();
         fetchReservations();
       }
     });
@@ -107,11 +111,21 @@ export default function useAdminPanel() {
       
       const ordersData = snapshot.docs.map((doc) => {
         const data = doc.data();
+        const normalizedItems = Array.isArray(data.cart) && data.cart.length
+          ? data.cart
+          : Array.isArray(data.items) && data.items.length
+          ? data.items
+          : Array.isArray(data.products) && data.products.length
+          ? data.products
+          : Array.isArray(data.rawData?.cart) && data.rawData.cart.length
+          ? data.rawData.cart
+          : [];
         
         return {
           id: doc.id,
           ...data,
-          cart: data.cart || [], // Aseguramos que el carrito siempre esté disponible
+          cart: normalizedItems,
+          items: normalizedItems,
           orderNumber: data.orderNumber || null,
           orderId: data.orderId || doc.id,
           date: data.createdAt?.toDate() || new Date(),
@@ -119,6 +133,7 @@ export default function useAdminPanel() {
             ? `${data.customer.firstName} ${data.customer.lastName || ""}`
             : "Cliente",
           customerEmail: data.customer?.email || "No disponible",
+          customerPhone: data.customer?.phone || "No especificado",
           total: data.summary?.total || 0,
           paymentStatus: data.paymentStatus || "pending",
           status: data.status || "pendiente",
@@ -136,6 +151,271 @@ export default function useAdminPanel() {
       setLoadingOrders(false);
     }
   }, []);
+
+  // Función para obtener ventas externas normalizadas como pedidos
+  const fetchExternalOrders = useCallback(async () => {
+    try {
+      setLoadingExternalOrders(true);
+
+      const externalRef = collection(firestoreDB, "external-sales");
+      const q = query(externalRef, orderBy("date", "desc"));
+      const snapshot = await getDocs(q);
+
+      const externalData = snapshot.docs.map((saleDoc) => {
+        const data = saleDoc.data() || {};
+        const normalizedItems = Array.isArray(data.items) && data.items.length
+          ? data.items
+              .map((item) => ({
+                title: item?.title || item?.name || "Producto",
+                quantity: Number(item?.quantity) || 1,
+                price: Number(item?.price) || 0,
+              }))
+              .filter((item) => item.quantity > 0 && item.price >= 0)
+          : [];
+        const totalFromItems = normalizedItems.reduce(
+          (sum, item) => sum + item.quantity * item.price,
+          0
+        );
+        const amount = Number(data.amount) || totalFromItems || 0;
+        const saleDate = data.date?.toDate?.() || new Date(data.date || Date.now());
+        const shortCode = saleDoc.id.slice(-4).toUpperCase();
+        const fallbackDescription =
+          data.description ||
+          (normalizedItems.length
+            ? normalizedItems
+                .map((item) => `${item.quantity}x ${item.title}`)
+                .join(", ")
+            : "Venta externa");
+        const items =
+          normalizedItems.length > 0
+            ? normalizedItems
+            : [
+                {
+                  title: fallbackDescription,
+                  quantity: 1,
+                  price: amount,
+                },
+              ];
+
+        return {
+          id: `ext-${saleDoc.id}`,
+          externalSaleId: saleDoc.id,
+          sourceType: "external",
+          orderShortCode: `EXT-${shortCode}`,
+          orderNumber: data.orderNumber || null,
+          date: saleDate,
+          customerName: data.customerName || "Cliente externo",
+          customerEmail: data.customerEmail || "No disponible",
+          customer: {
+            firstName: data.customerName || "Cliente externo",
+            email: data.customerEmail || "No disponible",
+            phone: data.customerPhone || "No especificado",
+            notes: data.notes || "",
+          },
+          total: amount,
+          paymentStatus: data.paymentStatus || "completed",
+          status: data.status || "FINALIZADO",
+          cart: items,
+          items,
+          description: fallbackDescription,
+          paymentMethod: data.paymentMethod || "efectivo",
+          hasCommission: Boolean(data.hasCommission),
+          isExternalSale: true,
+        };
+      });
+
+      setExternalOrders(externalData);
+    } catch (error) {
+      console.error("Error al cargar ventas externas:", error);
+      setExternalOrders([]);
+    } finally {
+      setLoadingExternalOrders(false);
+    }
+  }, []);
+
+  const addExternalSaleOrder = async (saleData) => {
+    try {
+      if (!saleData?.customerName || !saleData?.date) {
+        return {
+          success: false,
+          error: "Completa los campos requeridos (cliente y fecha)",
+        };
+      }
+
+      const sanitizedItems = Array.isArray(saleData.items)
+        ? saleData.items
+            .map((item) => ({
+              title: String(item?.title || "").trim(),
+              quantity: Number(item?.quantity) || 0,
+              price: Number(item?.price) || 0,
+            }))
+            .filter((item) => item.title && item.quantity > 0 && item.price >= 0)
+        : [];
+
+      const amountFromItems = sanitizedItems.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
+      const manualAmount = Number(saleData.amount);
+      const amount = amountFromItems > 0 ? amountFromItems : manualAmount;
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return {
+          success: false,
+          error: "Debes ingresar un monto válido o al menos un producto con precio",
+        };
+      }
+
+      const description =
+        saleData.description?.trim() ||
+        (sanitizedItems.length
+          ? sanitizedItems.map((item) => `${item.quantity}x ${item.title}`).join(", ")
+          : "Venta externa");
+
+      const normalizedDate =
+        typeof saleData.date === "string" ? new Date(saleData.date) : saleData.date;
+
+      if (!(normalizedDate instanceof Date) || Number.isNaN(normalizedDate.getTime())) {
+        return { success: false, error: "La fecha ingresada no es válida" };
+      }
+
+      await addDoc(collection(firestoreDB, "external-sales"), {
+        customerName: saleData.customerName,
+        customerEmail: saleData.customerEmail || "",
+        customerPhone: saleData.customerPhone || "",
+        description,
+        items: sanitizedItems,
+        amount,
+        paymentMethod: saleData.paymentMethod || "efectivo",
+        paymentStatus: "completed",
+        status: saleData.status || "FINALIZADO",
+        date: normalizedDate,
+        notes: saleData.notes || "",
+        hasCommission: Boolean(saleData.hasCommission),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      await fetchExternalOrders();
+      return { success: true };
+    } catch (error) {
+      console.error("Error al registrar venta externa:", error);
+      return { success: false, error: error.message || "Error inesperado" };
+    }
+  };
+
+  const updateExternalSaleStatus = async (externalOrderId, newStatus) => {
+    try {
+      if (!externalOrderId || !newStatus) return false;
+
+      const docId = String(externalOrderId).replace(/^ext-/, "");
+      await updateDoc(doc(firestoreDB, "external-sales", docId), {
+        status: newStatus,
+        updatedAt: serverTimestamp(),
+      });
+
+      setExternalOrders((prev) =>
+        prev.map((order) =>
+          order.id === externalOrderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Error al actualizar estado de venta externa:", error);
+      return false;
+    }
+  };
+
+  const updateExternalSaleOrderDetails = async (externalOrderId, externalData) => {
+    try {
+      if (!externalOrderId || !externalData) return false;
+
+      const docId = String(externalOrderId).replace(/^ext-/, "");
+
+      const sanitizedItems = Array.isArray(externalData.items)
+        ? externalData.items
+            .map((item) => ({
+              title: String(item?.title || "").trim(),
+              quantity: Number(item?.quantity) || 0,
+              price: Number(item?.price) || 0,
+            }))
+            .filter((item) => item.title && item.quantity > 0 && item.price >= 0)
+        : [];
+
+      const amountFromItems = sanitizedItems.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
+      const manualAmount = Number(externalData.amount);
+      const amount = amountFromItems > 0 ? amountFromItems : manualAmount;
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error("Debes ingresar un monto válido o productos con precio");
+      }
+
+      const description =
+        String(externalData.description || "").trim() ||
+        (sanitizedItems.length
+          ? sanitizedItems.map((item) => `${item.quantity}x ${item.title}`).join(", ")
+          : "Venta externa");
+
+      const payload = {
+        customerName: externalData.customerName || "Cliente externo",
+        customerEmail: externalData.customerEmail || "",
+        customerPhone: externalData.customerPhone || "",
+        paymentMethod: externalData.paymentMethod || "efectivo",
+        description,
+        notes: externalData.notes || "",
+        amount,
+        items: sanitizedItems,
+        updatedAt: serverTimestamp(),
+      };
+
+      await updateDoc(doc(firestoreDB, "external-sales", docId), payload);
+
+      setExternalOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== externalOrderId) return order;
+
+          const normalizedItems =
+            sanitizedItems.length > 0
+              ? sanitizedItems
+              : [
+                  {
+                    title: description,
+                    quantity: 1,
+                    price: amount,
+                  },
+                ];
+
+          return {
+            ...order,
+            customerName: payload.customerName,
+            customerEmail: payload.customerEmail || "No disponible",
+            customer: {
+              ...order.customer,
+              firstName: payload.customerName,
+              email: payload.customerEmail || "No disponible",
+              phone: payload.customerPhone || "No especificado",
+              notes: payload.notes || "",
+            },
+            paymentMethod: payload.paymentMethod,
+            description: payload.description,
+            total: payload.amount,
+            notes: payload.notes,
+            cart: normalizedItems,
+            items: normalizedItems,
+          };
+        })
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Error al actualizar detalle de venta externa:", error);
+      return false;
+    }
+  };
 
   // Función para obtener las reservas desde Firestore
   const fetchReservations = useCallback(async () => {
@@ -195,6 +475,22 @@ export default function useAdminPanel() {
       if (!orderId || !orderNumber) {
         console.error("ID de pedido o número de orden no proporcionados");
         return false;
+      }
+
+      if (String(orderId).startsWith("ext-")) {
+        const externalDocId = String(orderId).replace(/^ext-/, "");
+        await updateDoc(doc(firestoreDB, "external-sales", externalDocId), {
+          orderNumber,
+          updatedAt: serverTimestamp(),
+        });
+
+        setExternalOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === orderId ? { ...order, orderNumber } : order
+          )
+        );
+
+        return true;
       }
       
       console.log(`Asignando número de orden ${orderNumber} al pedido ${orderId}`);
@@ -864,8 +1160,10 @@ export default function useAdminPanel() {
     products,
     setProducts,
     orders,
+    externalOrders,
     loading,
     loadingOrders,
+    loadingExternalOrders,
     reservations,
     loadingReservations,
     orderSortField,
@@ -882,9 +1180,13 @@ export default function useAdminPanel() {
     getPaymentStatusText,
     getStatusClass,
     updateOrderStatus,
+    updateExternalSaleStatus,
+    updateExternalSaleOrderDetails,
     requestSort,
     formatAddress,
     fetchOrders,
+    fetchExternalOrders,
+    addExternalSaleOrder,
     // Funciones para reservas
     fetchReservations,
     deleteReservation,

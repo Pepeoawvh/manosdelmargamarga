@@ -8,7 +8,8 @@ import ReservationTable from "../components/admin/ReservationTable";
 import CarouselManager from "@/app/components/admin/CarouselManager";
 import SalesReport from "../components/admin/SalesReport";
 import Dashboard from "../components/admin/Dashboard";
-import { useState, useEffect } from "react";
+import ExternalSaleForm from "../components/admin/ExternalSalesForm";
+import { useState, useEffect, useMemo } from "react";
 
 export default function AdminPanel() {
   const {
@@ -23,8 +24,10 @@ export default function AdminPanel() {
     setEditingProduct,
     products,
     orders,
+    externalOrders,
     loading,
     loadingOrders,
+    loadingExternalOrders,
     reservations,
     loadingReservations,
     // Handlers
@@ -40,8 +43,10 @@ export default function AdminPanel() {
     getPaymentStatusText,
     getStatusClass,
     updateOrderStatus,
-    requestSort,
+    updateExternalSaleStatus,
+    updateExternalSaleOrderDetails,
     formatAddress,
+    addExternalSaleOrder,
     // Funciones para reservas
     deleteReservation,
     updateReservationStatus,
@@ -103,16 +108,127 @@ export default function AdminPanel() {
   );
   const OrdersTab = () => {
     const [expandedOrderId, setExpandedOrderId] = useState(null);
-    const [expandedSection, setExpandedSection] = useState(null);
+    const [showExternalForm, setShowExternalForm] = useState(false);
+    const [orderTypeFilter, setOrderTypeFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
 
-    const toggleExpandedSection = (section) => {
-      setExpandedSection((prev) => (prev === section ? null : section));
+    const normalizedWebOrders = useMemo(
+      () =>
+        (Array.isArray(orders) ? orders : []).map((order) => ({
+          ...order,
+          sourceType: "web",
+          isExternalSale: false,
+        })),
+      [orders]
+    );
+
+    const normalizedExternalOrders = useMemo(
+      () =>
+        (Array.isArray(externalOrders) ? externalOrders : []).map((order) => ({
+          ...order,
+          sourceType: "external",
+          isExternalSale: true,
+        })),
+      [externalOrders]
+    );
+
+    const requestCombinedSort = (field) => {
+      setSortConfig((prev) => ({
+        key: field,
+        direction: prev.key === field && prev.direction === "asc" ? "desc" : "asc",
+      }));
     };
 
-    // Validar que `orders` sea un array antes de usar `.find()`
-    const expandedOrder = Array.isArray(orders)
-      ? orders.find((order) => order.id === expandedOrderId)
-      : null;
+    const combinedOrders = useMemo(() => {
+      const merged = [...normalizedWebOrders, ...normalizedExternalOrders];
+
+      const filtered = merged.filter((order) => {
+        if (orderTypeFilter === "web" && order.sourceType !== "web") return false;
+        if (orderTypeFilter === "external" && order.sourceType !== "external") return false;
+
+        if (statusFilter !== "all" && (order.status || "") !== statusFilter) return false;
+
+        const query = searchTerm.trim().toLowerCase();
+        if (!query) return true;
+
+        const dateObj = new Date(order.date);
+        const dateFormats = Number.isNaN(dateObj.getTime())
+          ? []
+          : [
+              dateObj.toLocaleDateString("es-CL"),
+              dateObj.toLocaleDateString("es-ES"),
+              dateObj.toISOString().slice(0, 10),
+            ];
+
+        const searchableFields = [
+          order.customerName,
+          order.customerEmail,
+          order.orderNumber,
+          order.orderShortCode,
+          order.description,
+          ...dateFormats,
+        ]
+          .filter(Boolean)
+          .map((value) => String(value).toLowerCase());
+
+        return searchableFields.some((value) => value.includes(query));
+      });
+
+      const sorted = [...filtered].sort((a, b) => {
+        const direction = sortConfig.direction === "asc" ? 1 : -1;
+
+        if (sortConfig.key === "date") {
+          return direction * (new Date(a.date).getTime() - new Date(b.date).getTime());
+        }
+
+        if (sortConfig.key === "total") {
+          return direction * ((Number(a.total) || 0) - (Number(b.total) || 0));
+        }
+
+        const aValue = String(a?.[sortConfig.key] || "").toLowerCase();
+        const bValue = String(b?.[sortConfig.key] || "").toLowerCase();
+        return direction * aValue.localeCompare(bValue);
+      });
+
+      return sorted;
+    }, [
+      normalizedWebOrders,
+      normalizedExternalOrders,
+      orderTypeFilter,
+      statusFilter,
+      searchTerm,
+      sortConfig,
+    ]);
+
+    const availableStatuses = useMemo(() => {
+      const statuses = new Set(
+        [...normalizedWebOrders, ...normalizedExternalOrders]
+          .map((order) => order.status)
+          .filter(Boolean)
+      );
+      return Array.from(statuses).sort((a, b) => a.localeCompare(b));
+    }, [normalizedWebOrders, normalizedExternalOrders]);
+
+    const handleAddExternalSale = async (saleData) => {
+      const result = await addExternalSaleOrder(saleData);
+      if (result.success) {
+        setShowExternalForm(false);
+      } else {
+        alert(result.error || "No se pudo registrar la venta externa");
+      }
+    };
+
+    const handleOrderStatusUpdate = async (orderId, newStatus) => {
+      const order = combinedOrders.find((item) => item.id === orderId);
+
+      if (order?.sourceType === "external") {
+        return updateExternalSaleStatus(orderId, newStatus);
+      }
+
+      return updateOrderStatus(orderId, newStatus);
+    };
 
     // Logging para verificar disponibilidad de la función
     console.log(
@@ -122,21 +238,113 @@ export default function AdminPanel() {
 
     return (
       <div className="p-4">
-        <h2 className="text-lg font-medium text-gray-700 mb-4">
-          Gestión de Pedidos
-        </h2>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-medium text-gray-700">Gestión de Pedidos</h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Pedidos web y ventas externas en una sola vista operativa.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="w-full">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Filtrar por:
+                </label>
+              </div>
+
+              <div>
+                <label htmlFor="orderTypeFilter" className="block text-xs font-medium text-gray-600 mb-1">
+                  Tipo
+                </label>
+                <select
+                  id="orderTypeFilter"
+                  value={orderTypeFilter}
+                  onChange={(e) => setOrderTypeFilter(e.target.value)}
+                  className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                >
+                  <option value="all">Todos</option>
+                  <option value="web">Solo Web</option>
+                  <option value="external">Solo Externas</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="orderStatusFilter" className="block text-xs font-medium text-gray-600 mb-1">
+                  Estado
+                </label>
+                <select
+                  id="orderStatusFilter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                >
+                  <option value="all">Todos</option>
+                  {availableStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="orderSearch" className="block text-xs font-medium text-gray-600 mb-1">
+                  Buscar
+                </label>
+                <input
+                  id="orderSearch"
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-9 px-3 border border-gray-300 rounded-sm text-sm min-w-[260px]"
+                  placeholder="Nombre, correo o fecha (ej: 25/03/2026)"
+                />
+              </div>
+            </div>
+
+            <div className="border-l border-gray-200 pl-4 ml-1">
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Acciones</label>
+              <button
+                onClick={() => setShowExternalForm((prev) => !prev)}
+                className="h-9 px-4 bg-emerald-600 text-white rounded-sm text-sm hover:bg-emerald-700"
+              >
+                {showExternalForm ? "Cerrar formulario" : "Registrar venta externa"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {showExternalForm && (
+          <div className="mb-4">
+            <ExternalSaleForm
+              onSubmit={handleAddExternalSale}
+              onCancel={() => setShowExternalForm(false)}
+              existingProducts={products}
+            />
+          </div>
+        )}
+
+        {(loadingOrders || loadingExternalOrders) && (
+          <div className="mb-4 rounded-sm border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+            Cargando pedidos y ventas externas...
+          </div>
+        )}
+
         <OrderTable
-          orders={Array.isArray(orders) ? orders : []}
+          orders={combinedOrders}
           expandedOrderId={expandedOrderId}
           setExpandedOrderId={setExpandedOrderId}
-          requestSort={requestSort}
+          requestSort={requestCombinedSort}
           getPaymentStatusClass={getPaymentStatusClass}
           getPaymentStatusText={getPaymentStatusText}
           getStatusClass={getStatusClass}
           formatDate={formatDate}
           formatAddress={formatAddress}
-          updateOrderStatus={updateOrderStatus}
+          updateOrderStatus={handleOrderStatusUpdate}
           assignOrderNumber={assignOrderNumber} // AQUÍ ESTÁ EL CAMBIO - Añadir esta prop
+          updateExternalOrderDetails={updateExternalSaleOrderDetails}
         />
       </div>
     );
@@ -155,7 +363,7 @@ export default function AdminPanel() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <form
           onSubmit={handleSubmit}
-          className="bg-white border-2 border-emerald-700 p-8 rounded-lg shadow-md w-96"
+          className="bg-white border-2 border-emerald-700 p-8 rounded-sm shadow-md w-96"
         >
           <h2 className="text-2xl font-bold mb-6 text-center">
             Acceso Admin Panel Manos del Marga Marga
@@ -166,7 +374,7 @@ export default function AdminPanel() {
                 type="email"
                 value={email}
                 onChange={handleEmailChange}
-                className={`w-full p-2 border rounded focus:ring-primary focus:border-primary ${
+                className={`w-full p-2 border rounded-sm focus:ring-primary focus:border-primary ${
                   email && !isValidEmail(email) ? "border-red-500" : ""
                 }`}
                 required
@@ -189,7 +397,7 @@ export default function AdminPanel() {
                 type="password"
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full p-2 border rounded focus:ring-primary focus:border-primary"
+                className="w-full p-2 border rounded-sm focus:ring-primary focus:border-primary"
                 required
                 minLength="6"
                 maxLength="50"
@@ -205,7 +413,7 @@ export default function AdminPanel() {
             </div>
             <button
               type="submit"
-              className={`w-full py-2 rounded transition-colors ${
+              className={`w-full py-2 rounded-sm transition-colors ${
                 isValidEmail(email) && password.length >= 6
                   ? "bg-emerald-700 text-white hover:bg-emerald-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -271,14 +479,17 @@ export default function AdminPanel() {
      ];
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="w-full bg-white p-4 border border-emerald-200 shadow-md rounded-lg mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-lg font-bold">Panel de Administración</h1>
+    <div className="p-4 md:p-6 bg-gradient-to-b from-emerald-50/60 to-white min-h-screen">
+      <div className="w-full bg-white p-4 md:p-6 border border-emerald-200 shadow-lg rounded-sm mx-auto">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 pb-4 border-b border-emerald-100">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Manos del Marga Marga</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800">Panel de Administración</h1>
+          </div>
           <div className="flex items-center space-x-3">
             <button
               onClick={handleLogout}
-              className="bg-gray-200 text-gray-800 px-3 py-1.5 text-xs rounded hover:bg-gray-300 transition-colors"
+              className="bg-gray-100 text-gray-800 px-3 py-1.5 text-xs rounded-sm border border-gray-200 hover:bg-gray-200 transition-colors"
             >
               Cerrar Sesión
             </button>
@@ -289,7 +500,7 @@ export default function AdminPanel() {
 
         {editingProduct && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
+            <div className="bg-white rounded-sm overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
               <div className="p-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-gray-700">
@@ -319,7 +530,7 @@ export default function AdminPanel() {
       {/* Modal para agregar nuevo producto */}
 {showForm && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-lg overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
+    <div className="bg-white rounded-sm overflow-y-auto max-h-[90vh] w-[90%] md:w-3/4 lg:w-2/3">
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium text-gray-700">

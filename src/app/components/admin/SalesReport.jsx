@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useSalesReport from "../../hooks/admin/useSalesReport";
 import { Tab } from "@headlessui/react";
-import ExternalSaleForm from "./ExternalSalesForm";
 import {
   BarChart,
   Bar,
@@ -32,22 +31,13 @@ export default function SalesReport() {
     selectedYear,
     setSelectedYear,
     months,
-    years,
-    addExternalSale,
+    developerCommissionRate,
     formatCurrency,
     fetchSalesData,
   } = useSalesReport();
 
-  const [showForm, setShowForm] = useState(false);
-
-  const handleAddExternalSale = async (saleData) => {
-    const result = await addExternalSale(saleData);
-    if (result.success) {
-      setShowForm(false);
-    } else {
-      alert(`Error: ${result.error}`);
-    }
-  };
+  const [historicalYearFilter, setHistoricalYearFilter] = useState("all");
+  const [historicalMonthFilter, setHistoricalMonthFilter] = useState("all");
 
   // Utilidad: short code (igual que en success)
   const shortCode = (id) =>
@@ -63,83 +53,147 @@ export default function SalesReport() {
     }).format(date);
   };
 
+  const historicalBreakdown = allTimeData?.monthlyBreakdown || [];
+
+  const availablePeriodsDesc = useMemo(() => {
+    return [...historicalBreakdown].sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+  }, [historicalBreakdown]);
+
+  const availableSummaryYears = useMemo(() => {
+    const yearsSet = new Set(availablePeriodsDesc.map((entry) => entry.year));
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [availablePeriodsDesc]);
+
+  const availableSummaryMonthsForYear = useMemo(() => {
+    const monthsForYear = availablePeriodsDesc
+      .filter((entry) => entry.year === Number(selectedYear))
+      .map((entry) => entry.month);
+    const uniqueMonths = Array.from(new Set(monthsForYear)).sort((a, b) => a - b);
+    return uniqueMonths.map((monthNumber) => ({
+      value: monthNumber - 1,
+      label: months[monthNumber - 1],
+    }));
+  }, [availablePeriodsDesc, selectedYear, months]);
+
+  useEffect(() => {
+    if (!availablePeriodsDesc.length) return;
+
+    const hasSelectedYear = availableSummaryYears.includes(Number(selectedYear));
+    if (!hasSelectedYear) {
+      const fallback = availablePeriodsDesc[0];
+      setSelectedYear(fallback.year);
+      setSelectedMonth(fallback.month - 1);
+      return;
+    }
+
+    const hasSelectedMonth = availablePeriodsDesc.some(
+      (entry) =>
+        entry.year === Number(selectedYear) && entry.month === Number(selectedMonth) + 1
+    );
+
+    if (!hasSelectedMonth) {
+      const firstMonthForYear = availablePeriodsDesc.find(
+        (entry) => entry.year === Number(selectedYear)
+      );
+      if (firstMonthForYear) {
+        setSelectedMonth(firstMonthForYear.month - 1);
+      }
+    }
+  }, [
+    availablePeriodsDesc,
+    availableSummaryYears,
+    selectedYear,
+    selectedMonth,
+    setSelectedYear,
+    setSelectedMonth,
+  ]);
+
+  const historicalYears = useMemo(() => {
+    const yearsSet = new Set(historicalBreakdown.map((entry) => entry.year));
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [historicalBreakdown]);
+
+  const historicalMonthsForYear = useMemo(() => {
+    if (historicalYearFilter === "all") {
+      const monthSet = new Set(historicalBreakdown.map((entry) => entry.month));
+      return Array.from(monthSet)
+        .sort((a, b) => a - b)
+        .map((monthNumber) => ({ value: monthNumber, label: months[monthNumber - 1] }));
+    }
+    const targetYear = Number(historicalYearFilter);
+    const monthSet = new Set(
+      historicalBreakdown
+        .filter((entry) => entry.year === targetYear)
+        .map((entry) => entry.month)
+    );
+    return Array.from(monthSet)
+      .sort((a, b) => a - b)
+      .map((monthNumber) => ({ value: monthNumber, label: months[monthNumber - 1] }));
+  }, [historicalBreakdown, historicalYearFilter, months]);
+
+  const filteredHistoricalBreakdown = useMemo(() => {
+    return historicalBreakdown.filter((entry) => {
+      const yearMatch =
+        historicalYearFilter === "all" || entry.year === Number(historicalYearFilter);
+      const monthMatch =
+        historicalMonthFilter === "all" || entry.month === Number(historicalMonthFilter);
+      return yearMatch && monthMatch;
+    });
+  }, [historicalBreakdown, historicalYearFilter, historicalMonthFilter]);
+
+  const aggregateProductsFromBreakdown = (data, key) => {
+    const productMap = new Map();
+    data.forEach((entry) => {
+      (entry[key] || []).forEach((product) => {
+        const existing = productMap.get(product.id) || {
+          id: product.id,
+          name: product.name,
+          quantity: 0,
+          revenue: 0,
+          price: Number(product.price) || 0,
+        };
+        productMap.set(product.id, {
+          ...existing,
+          quantity: existing.quantity + (Number(product.quantity) || 0),
+          revenue: existing.revenue + (Number(product.revenue) || 0),
+        });
+      });
+    });
+
+    return Array.from(productMap.values());
+  };
+
+  const historicalTopByQuantity = useMemo(() => {
+    return aggregateProductsFromBreakdown(filteredHistoricalBreakdown, "topProducts")
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 10);
+  }, [filteredHistoricalBreakdown]);
+
+  const historicalTopByRevenue = useMemo(() => {
+    return aggregateProductsFromBreakdown(filteredHistoricalBreakdown, "topRevenueProducts")
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+  }, [filteredHistoricalBreakdown]);
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-sm shadow overflow-hidden">
       {/* Header con controles de filtro */}
-      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+      <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-emerald-50 via-white to-blue-50">
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="w-0.5 h-5 bg-emerald-500 rounded-full shrink-0"></span>
+            <span className="w-0.5 h-5 bg-emerald-500 rounded-sm shrink-0"></span>
             <h2 className="text-base font-semibold text-gray-800">Informe de Ventas</h2>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <div>
-              <label
-                htmlFor="month"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Mes
-              </label>
-              <select
-                id="month"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-              >
-                {months.map((month, index) => (
-                  <option key={index} value={index}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="year"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Año
-              </label>
-              <select
-                id="year"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-auto px-4 py-2 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700"
-            >
-              Agregar Venta Externa
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Formulario de venta externa (condicional) */}
-      {showForm && (
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <ExternalSaleForm
-            onSubmit={handleAddExternalSale}
-            onCancel={() => setShowForm(false)}
-          />
-        </div>
-      )}
-
       {/* Contenido principal */}
       {loading ? (
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700 mx-auto"></div>
+          <div className="animate-spin rounded-sm h-12 w-12 border-b-2 border-emerald-700 mx-auto"></div>
           <p className="mt-2 text-gray-600">Cargando datos...</p>
         </div>
       ) : error ? (
@@ -147,7 +201,7 @@ export default function SalesReport() {
           <p>{error}</p>
           <button
             onClick={fetchSalesData}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-sm"
           >
             Reintentar
           </button>
@@ -196,15 +250,55 @@ export default function SalesReport() {
           <Tab.Panels>
             {/* PANEL 1: RESUMEN MENSUAL */}
             <Tab.Panel className="p-4">
-              <h3 className="text-lg font-semibold mb-4">
-                Resumen de {months[selectedMonth]} {selectedYear}
-              </h3>
+              <div className="flex flex-wrap justify-between items-end gap-3 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Resumen de {months[selectedMonth]} {selectedYear}
+                </h3>
+
+                <div className="flex items-end gap-2">
+                  <div>
+                    <label htmlFor="summaryMonth" className="block text-xs font-medium text-gray-600 mb-1">
+                      Mes
+                    </label>
+                    <select
+                      id="summaryMonth"
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      {availableSummaryMonthsForYear.map((month) => (
+                        <option key={month.value} value={month.value}>
+                          {month.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="summaryYear" className="block text-xs font-medium text-gray-600 mb-1">
+                      Año
+                    </label>
+                    <select
+                      id="summaryYear"
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      {availableSummaryYears.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
               {/* Barra de estadísticas unificada */}
-              <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-200 border border-gray-200 rounded-lg overflow-hidden mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
                 {/* Ventas Totales */}
-                <div className="flex-1 flex items-center gap-3 bg-emerald-50 px-4 py-3">
-                  <div className="p-1.5 bg-emerald-100 rounded shrink-0">
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-sm px-4 py-3">
+                  <div className="p-1.5 bg-emerald-100 rounded-sm shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -217,8 +311,8 @@ export default function SalesReport() {
                 </div>
 
                 {/* Ventas Online */}
-                <div className="flex-1 flex items-center gap-3 bg-blue-50 px-4 py-3">
-                  <div className="p-1.5 bg-blue-100 rounded shrink-0">
+                <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-sm px-4 py-3">
+                  <div className="p-1.5 bg-blue-100 rounded-sm shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -231,8 +325,8 @@ export default function SalesReport() {
                 </div>
 
                 {/* Ventas Externas */}
-                <div className="flex-1 flex items-center gap-3 bg-amber-50 px-4 py-3">
-                  <div className="p-1.5 bg-amber-100 rounded shrink-0">
+                <div className="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-sm px-4 py-3">
+                  <div className="p-1.5 bg-amber-100 rounded-sm shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -243,18 +337,34 @@ export default function SalesReport() {
                     <p className="text-[11px] text-amber-600">{monthlyData?.externalCount || 0} registradas manualmente</p>
                   </div>
                 </div>
+
+                {/* Comisión Dev */}
+                <div className="flex items-center gap-3 bg-purple-50 border border-purple-100 rounded-sm px-4 py-3">
+                  <div className="p-1.5 bg-purple-100 rounded-sm shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8m0 0v1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-purple-800 uppercase tracking-wide">Comisión Dev ({developerCommissionRate}%)</p>
+                    <p className="text-xl font-bold text-purple-700 leading-tight">{monthlyData ? formatCurrency(monthlyData.developerCommission) : "..."}</p>
+                    <p className="text-[11px] text-purple-600">
+                      Web: {monthlyData ? formatCurrency(monthlyData.onlineCommission) : "..."} + Externas: {monthlyData ? formatCurrency(monthlyData.externalCommission) : "..."}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Producto más vendido */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-gray-200 rounded-sm p-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-4">
                     Producto Más Vendido
                   </h4>
 
                   {monthlyData?.topProduct ? (
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 mr-4">
+                      <div className="flex-shrink-0 bg-gray-100 rounded-sm p-3 mr-4">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-8 w-8 text-gray-500"
@@ -298,14 +408,14 @@ export default function SalesReport() {
                   )}
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-gray-200 rounded-sm p-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-4">
                     Producto con Mayores Ingresos
                   </h4>
 
                   {monthlyData?.topRevenueProduct ? (
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 bg-gray-100 rounded-md p-3 mr-4">
+                      <div className="flex-shrink-0 bg-gray-100 rounded-sm p-3 mr-4">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-8 w-8 text-gray-500"
@@ -351,7 +461,7 @@ export default function SalesReport() {
               </div>
 
               {/* Top 5 productos */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+              <div className="bg-white border border-gray-200 rounded-sm p-4 mb-6">
                 <h4 className="text-sm font-medium text-gray-700 mb-4">
                   Top Productos por Ventas
                 </h4>
@@ -405,9 +515,49 @@ export default function SalesReport() {
 
             {/* PANEL 2: DETALLE DE VENTAS */}
             <Tab.Panel className="p-4">
-              <h3 className="text-lg font-semibold mb-4">
-                Detalle de Ventas - {months[selectedMonth]} {selectedYear}
-              </h3>
+              <div className="flex flex-wrap justify-between items-end gap-3 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Detalle de Ventas - {months[selectedMonth]} {selectedYear}
+                </h3>
+
+                <div className="flex items-end gap-2">
+                  <div>
+                    <label htmlFor="detailMonth" className="block text-xs font-medium text-gray-600 mb-1">
+                      Mes
+                    </label>
+                    <select
+                      id="detailMonth"
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      {availableSummaryMonthsForYear.map((month) => (
+                        <option key={month.value} value={month.value}>
+                          {month.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="detailYear" className="block text-xs font-medium text-gray-600 mb-1">
+                      Año
+                    </label>
+                    <select
+                      id="detailYear"
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      {availableSummaryYears.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
               <Tab.Group>
                 <Tab.List className="flex border-b border-gray-200 mb-4">
@@ -501,7 +651,7 @@ export default function SalesReport() {
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap">
                                   <span
-                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-sm 
                                     ${
                                       order.status === "FINALIZADO"
                                         ? "bg-green-100 text-green-800"
@@ -579,6 +729,12 @@ export default function SalesReport() {
                               </th>
                               <th
                                 scope="col"
+                                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                              >
+                                Comisión
+                              </th>
+                              <th
+                                scope="col"
                                 className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                               >
                                 Monto
@@ -600,6 +756,17 @@ export default function SalesReport() {
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 capitalize">
                                   {sale.paymentMethod}
                                 </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-sm ${
+                                      sale.hasCommission
+                                        ? "bg-purple-100 text-purple-800"
+                                        : "bg-gray-100 text-gray-600"
+                                    }`}
+                                  >
+                                    {sale.hasCommission ? "Con comisión" : "Sin comisión"}
+                                  </span>
+                                </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-medium text-gray-900">
                                   {formatCurrency(sale.total)}
                                 </td>
@@ -616,11 +783,56 @@ export default function SalesReport() {
 
             {/* PANEL 3: HISTÓRICO GENERAL */}
             <Tab.Panel className="p-4">
-              <h3 className="text-lg font-semibold mb-4">Histórico de Ventas</h3>
+              <div className="flex flex-wrap justify-between items-end gap-3 mb-4">
+                <h3 className="text-lg font-semibold">Histórico de Ventas</h3>
+
+                <div className="flex items-end gap-2">
+                  <div>
+                    <label htmlFor="historicalYear" className="block text-xs font-medium text-gray-600 mb-1">
+                      Año
+                    </label>
+                    <select
+                      id="historicalYear"
+                      value={historicalYearFilter}
+                      onChange={(e) => {
+                        setHistoricalYearFilter(e.target.value);
+                        setHistoricalMonthFilter("all");
+                      }}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      <option value="all">Todos</option>
+                      {historicalYears.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="historicalMonth" className="block text-xs font-medium text-gray-600 mb-1">
+                      Mes
+                    </label>
+                    <select
+                      id="historicalMonth"
+                      value={historicalMonthFilter}
+                      onChange={(e) => setHistoricalMonthFilter(e.target.value)}
+                      className="h-9 px-3 border border-gray-300 rounded-sm text-sm"
+                    >
+                      <option value="all">Todos</option>
+                      {historicalMonthsForYear.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
               {/* Tarjetas de estadísticas generales */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                <div className="bg-purple-50 border border-purple-100 rounded-sm p-4">
                   <h4 className="text-sm font-medium text-purple-800 mb-1">
                     Ventas Totales Históricas
                   </h4>
@@ -632,49 +844,53 @@ export default function SalesReport() {
                   </p>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div className="bg-blue-50 border border-blue-100 rounded-sm p-4">
                   <h4 className="text-sm font-medium text-blue-800 mb-1">
                     Pedidos Online
                   </h4>
                   <p className="text-2xl font-bold text-blue-700">
-                    {allTimeData?.onlineCount || 0}
+                    {allTimeData ? formatCurrency(allTimeData.onlineSales) : "-"}
                   </p>
                   <p className="text-xs text-blue-600 mt-1">
-                    Ventas realizadas a través de la tienda
+                    {allTimeData?.onlineCount || 0} pedidos online registrados
                   </p>
                 </div>
 
-                <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                <div className="bg-amber-50 border border-amber-100 rounded-sm p-4">
                   <h4 className="text-sm font-medium text-amber-800 mb-1">
                     Ventas Externas
                   </h4>
                   <p className="text-2xl font-bold text-amber-700">
-                    {allTimeData?.externalCount || 0}
+                    {allTimeData ? formatCurrency(allTimeData.externalSalesTotal) : "-"}
                   </p>
                   <p className="text-xs text-amber-600 mt-1">
-                    Ventas registradas manualmente
+                    {allTimeData?.externalCount || 0} ventas externas registradas
                   </p>
                 </div>
               </div>
 
               {/* Gráfico de ventas por mes */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-8">
+              <div className="bg-white border border-gray-200 rounded-sm p-4 mb-8">
                 <h4 className="text-sm font-medium text-gray-700 mb-4">
                   Evolución de Ventas
                 </h4>
 
-                {allTimeData?.chartData && allTimeData.chartData.length > 0 ? (
+                {filteredHistoricalBreakdown && filteredHistoricalBreakdown.length > 0 ? (
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
-                        data={allTimeData.chartData}
+                        data={filteredHistoricalBreakdown}
                         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
-                          dataKey="monthName"
+                          dataKey="yearMonth"
                           tick={{ fontSize: 12 }}
-                          tickFormatter={(value) => value.substring(0, 3)}
+                          tickFormatter={(value) => {
+                            const [year, month] = String(value).split("-");
+                            const monthLabel = months[Number(month) - 1] || value;
+                            return `${monthLabel.substring(0, 3)}-${year?.slice?.(2) || ""}`;
+                          }}
                         />
                         <YAxis
                           tickFormatter={(value) =>
@@ -686,11 +902,11 @@ export default function SalesReport() {
                         />
                         <Tooltip
                           formatter={(value) => [formatCurrency(value), "Ventas"]}
-                          labelFormatter={(value) =>
-                            `${value} ${
-                              allTimeData.chartData.find((d) => d.monthName === value)?.year
-                            }`
-                          }
+                          labelFormatter={(value) => {
+                            const [year, month] = String(value).split("-");
+                            const monthLabel = months[Number(month) - 1] || value;
+                            return `${monthLabel} ${year}`;
+                          }}
                         />
                         <Legend />
                         <Line
@@ -712,16 +928,16 @@ export default function SalesReport() {
               </div>
 
               {/* Gráfico de productos más vendidos */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-8">
+              <div className="bg-white border border-gray-200 rounded-sm p-4 mb-8">
                 <h4 className="text-sm font-medium text-gray-700 mb-4">
                   Top 10 Productos por Ventas
                 </h4>
 
-                {allTimeData?.topProducts && allTimeData.topProducts.length > 0 ? (
+                {historicalTopByQuantity.length > 0 ? (
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={allTimeData.topProducts.slice(0, 10)}
+                        data={historicalTopByQuantity}
                         layout="vertical"
                         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                       >
@@ -750,13 +966,12 @@ export default function SalesReport() {
               </div>
 
               {/* Tabla de productos más vendidos por ingresos */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="bg-white border border-gray-200 rounded-sm p-4">
                 <h4 className="text-sm font-medium text-gray-700 mb-4">
                   Top Productos por Ingresos
                 </h4>
 
-                {allTimeData?.topRevenueProducts &&
-                allTimeData.topRevenueProducts.length > 0 ? (
+                {historicalTopByRevenue.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
@@ -788,7 +1003,7 @@ export default function SalesReport() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {allTimeData.topRevenueProducts.slice(0, 10).map((product) => (
+                        {historicalTopByRevenue.map((product) => (
                           <tr key={product.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3 text-sm text-gray-900">
                               {product.name}

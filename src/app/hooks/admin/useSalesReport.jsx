@@ -61,12 +61,16 @@ function resolveTotal(data, items) {
 }
 
 export default function useSalesReport() {
+  const DEVELOPER_COMMISSION_RATE = 10;
+  const developerCommissionRate = DEVELOPER_COMMISSION_RATE;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [monthlyData, setMonthlyData] = useState(null);
   const [allTimeData, setAllTimeData] = useState(null);
   const [orders, setOrders] = useState([]);
   const [externalSales, setExternalSales] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [allExternalSales, setAllExternalSales] = useState([]);
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -75,6 +79,20 @@ export default function useSalesReport() {
     fetchSalesData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (!orders.length && !externalSales.length && !allOrders.length && !allExternalSales.length) {
+      return;
+    }
+
+    setMonthlyData(
+      calculateMonthlyStats(orders, externalSales, DEVELOPER_COMMISSION_RATE)
+    );
+    setAllTimeData(
+      calculateAllTimeStats(allOrders, allExternalSales, DEVELOPER_COMMISSION_RATE)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders, externalSales, allOrders, allExternalSales]);
 
   const fetchSalesData = async () => {
     try {
@@ -137,6 +155,7 @@ export default function useSalesReport() {
           description: d?.description || "",
           paymentMethod: d?.paymentMethod || "efectivo",
           notes: d?.notes || "",
+          hasCommission: Boolean(d?.hasCommission),
         };
       };
 
@@ -157,9 +176,15 @@ export default function useSalesReport() {
 
       setOrders(monthlyOrders);
       setExternalSales(monthlyExternal);
+      setAllOrders(allOrders);
+      setAllExternalSales(allExternal);
 
-      setMonthlyData(calculateMonthlyStats(monthlyOrders, monthlyExternal));
-      setAllTimeData(calculateAllTimeStats(allOrders, allExternal));
+      setMonthlyData(
+        calculateMonthlyStats(monthlyOrders, monthlyExternal, DEVELOPER_COMMISSION_RATE)
+      );
+      setAllTimeData(
+        calculateAllTimeStats(allOrders, allExternal, DEVELOPER_COMMISSION_RATE)
+      );
     } catch (err) {
       console.error("Error al cargar datos de ventas:", err);
       setError(
@@ -171,7 +196,7 @@ export default function useSalesReport() {
     }
   };
 
-  const calculateMonthlyStats = (orders, externalSales) => {
+  const calculateMonthlyStats = (orders, externalSales, commissionRate = 10) => {
     const validOrders = Array.isArray(orders) ? orders : [];
     const validExternal = Array.isArray(externalSales) ? externalSales : [];
 
@@ -180,6 +205,16 @@ export default function useSalesReport() {
       (sum, s) => sum + (Number(s.total) || 0),
       0
     );
+    const externalSalesWithCommission = validExternal.filter((s) => s.hasCommission);
+    const externalSalesCommissionableTotal = externalSalesWithCommission.reduce(
+      (sum, s) => sum + (Number(s.total) || 0),
+      0
+    );
+    const normalizedRate = Math.max(0, Number(commissionRate) || 0);
+    const commissionFactor = normalizedRate / 100;
+    const onlineCommission = onlineSales * commissionFactor;
+    const externalCommission = externalSalesCommissionableTotal * commissionFactor;
+    const developerCommission = onlineCommission + externalCommission;
 
     const productMap = new Map();
     validOrders.forEach((order) => {
@@ -213,9 +248,15 @@ export default function useSalesReport() {
       totalSales: onlineSales + externalSalesTotal,
       onlineSales,
       externalSalesTotal,
+      externalSalesCommissionableTotal,
       salesCount: validOrders.length + validExternal.length,
       onlineCount: validOrders.length,
       externalCount: validExternal.length,
+      externalWithCommissionCount: externalSalesWithCommission.length,
+      developerCommissionRate: normalizedRate,
+      onlineCommission,
+      externalCommission,
+      developerCommission,
       topProducts: productsByQuantity.slice(0, 10),
       topRevenueProducts: productsByRevenue.slice(0, 10),
       topProduct: productsByQuantity[0] || null,
@@ -223,12 +264,24 @@ export default function useSalesReport() {
     };
   };
 
-  const calculateAllTimeStats = (orders, externalSales) => {
+  const calculateAllTimeStats = (orders, externalSales, commissionRate = 10) => {
     const vOrders = Array.isArray(orders) ? orders : [];
     const vExternal = Array.isArray(externalSales) ? externalSales : [];
     const all = [...vOrders, ...vExternal];
 
-    const totalSales = all.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const onlineSales = vOrders.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const externalSalesTotal = vExternal.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+    const externalSalesWithCommission = vExternal.filter((s) => s.hasCommission);
+    const externalSalesCommissionableTotal = externalSalesWithCommission.reduce(
+      (sum, s) => sum + (Number(s.total) || 0),
+      0
+    );
+    const normalizedRate = Math.max(0, Number(commissionRate) || 0);
+    const commissionFactor = normalizedRate / 100;
+    const onlineCommission = onlineSales * commissionFactor;
+    const externalCommission = externalSalesCommissionableTotal * commissionFactor;
+    const developerCommission = onlineCommission + externalCommission;
+    const totalSales = onlineSales + externalSalesTotal;
 
     const productMap = new Map();
     vOrders.forEach((order) => {
@@ -258,36 +311,132 @@ export default function useSalesReport() {
     );
 
     const monthly = new Map();
-    all.forEach((s) => {
-      const d = s.date instanceof Date ? s.date : new Date(s.date);
-      if (!d || isNaN(d.getTime())) return;
-      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const curr = monthly.get(ym) || { total: 0, count: 0 };
-      monthly.set(ym, { total: curr.total + (Number(s.total) || 0), count: curr.count + 1 });
+    const getMonthKey = (dateValue) => {
+      const d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      if (!d || isNaN(d.getTime())) return null;
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const yearMonth = `${year}-${String(month).padStart(2, "0")}`;
+      return { d, year, month, yearMonth };
+    };
+
+    const ensureMonthlyBucket = (dateValue) => {
+      const keyData = getMonthKey(dateValue);
+      if (!keyData) return null;
+
+      const { year, month, yearMonth } = keyData;
+      if (!monthly.has(yearMonth)) {
+        monthly.set(yearMonth, {
+          year,
+          month,
+          yearMonth,
+          monthName: new Date(year, month - 1).toLocaleString("es", { month: "long" }),
+          total: 0,
+          count: 0,
+          onlineSales: 0,
+          externalSalesTotal: 0,
+          onlineCount: 0,
+          externalCount: 0,
+          productMap: new Map(),
+        });
+      }
+
+      return monthly.get(yearMonth);
+    };
+
+    vOrders.forEach((order) => {
+      const bucket = ensureMonthlyBucket(order.date);
+      if (!bucket) return;
+
+      const orderTotal = Number(order.total) || 0;
+      bucket.total += orderTotal;
+      bucket.count += 1;
+      bucket.onlineSales += orderTotal;
+      bucket.onlineCount += 1;
+
+      (order.items || []).forEach((it) => {
+        const id = it.id || it.productId || it.sku || `unknown-${Math.random()}`;
+        const curr = bucket.productMap.get(id) || {
+          id,
+          quantity: 0,
+          revenue: 0,
+          name: it.title || it.name || "Producto sin nombre",
+          price: Number(it.price) || 0,
+        };
+        const q = Number(it.quantity) || 1;
+        const p = Number(it.price) || 0;
+
+        bucket.productMap.set(id, {
+          ...curr,
+          quantity: curr.quantity + q,
+          revenue: curr.revenue + p * q,
+        });
+      });
     });
 
-    const chartData = Array.from(monthly.entries())
-      .map(([ym, data]) => {
-        const [y, m] = ym.split("-").map((n) => parseInt(n));
+    vExternal.forEach((sale) => {
+      const bucket = ensureMonthlyBucket(sale.date);
+      if (!bucket) return;
+
+      const saleTotal = Number(sale.total) || 0;
+      bucket.total += saleTotal;
+      bucket.count += 1;
+      bucket.externalSalesTotal += saleTotal;
+      bucket.externalCount += 1;
+    });
+
+    const monthlyBreakdown = Array.from(monthly.values())
+      .map((bucket) => {
+        const productsByQuantity = Array.from(bucket.productMap.values()).sort(
+          (a, b) => b.quantity - a.quantity
+        );
+        const productsByRevenue = [...productsByQuantity].sort(
+          (a, b) => b.revenue - a.revenue
+        );
+
         return {
-          yearMonth: ym,
-          year: y,
-          month: m,
-          monthName: new Date(y, m - 1).toLocaleString("es", { month: "long" }),
-          total: data.total,
-          count: data.count,
+          year: bucket.year,
+          month: bucket.month,
+          yearMonth: bucket.yearMonth,
+          monthName: bucket.monthName,
+          total: bucket.total,
+          count: bucket.count,
+          onlineSales: bucket.onlineSales,
+          externalSalesTotal: bucket.externalSalesTotal,
+          onlineCount: bucket.onlineCount,
+          externalCount: bucket.externalCount,
+          topProducts: productsByQuantity.slice(0, 20),
+          topRevenueProducts: productsByRevenue.slice(0, 20),
         };
       })
       .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.month - b.month));
 
+    const chartData = monthlyBreakdown.map((entry) => ({
+      yearMonth: entry.yearMonth,
+      year: entry.year,
+      month: entry.month,
+      monthName: entry.monthName,
+      total: entry.total,
+      count: entry.count,
+    }));
+
     return {
       totalSales,
+      onlineSales,
+      externalSalesTotal,
+      externalSalesCommissionableTotal,
       salesCount: all.length,
       onlineCount: vOrders.length,
       externalCount: vExternal.length,
+      externalWithCommissionCount: externalSalesWithCommission.length,
+      developerCommissionRate: normalizedRate,
+      onlineCommission,
+      externalCommission,
+      developerCommission,
       topProducts: productsByQuantity.slice(0, 20),
       topRevenueProducts: productsByRevenue.slice(0, 20),
       chartData,
+      monthlyBreakdown,
     };
   };
 
@@ -304,6 +453,7 @@ export default function useSalesReport() {
 
       const newSale = {
         ...saleData,
+        hasCommission: Boolean(saleData?.hasCommission),
         date,
         amount,
         createdAt: serverTimestamp(),
@@ -353,6 +503,7 @@ export default function useSalesReport() {
     months,
     years,
     addExternalSale,
+    developerCommissionRate,
     formatCurrency,
     fetchSalesData,
   };

@@ -153,7 +153,7 @@ const ProductCard = ({
             Agotado
           </span>
         )}
-      </div>
+      </div>  
 
       {/* Destacado: solo visible en el panel de administración */}
       {isAdmin && featured && (

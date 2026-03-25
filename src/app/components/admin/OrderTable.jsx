@@ -14,6 +14,7 @@ const OrderTable = ({
   formatDate,
   updateOrderStatus,
   assignOrderNumber,
+  updateExternalOrderDetails,
 }) => {
   const [copiedText, setCopiedText] = useState(null);
   const [editingStatus, setEditingStatus] = useState(null);
@@ -92,7 +93,8 @@ const OrderTable = ({
   const uniqueOrders = orders.reduce((acc, order) => {
     if (
       !acc.some((o) => o.id === order.id) &&
-      (order.paymentStatus === "completed" ||
+      (order.sourceType === "external" ||
+        order.paymentStatus === "completed" ||
         order.paymentStatus === "failed" ||
         order.paymentStatus === "aborted")
     ) {
@@ -172,13 +174,21 @@ const OrderTable = ({
               <React.Fragment key={`order-row-${order.id || index}`}>
                 <tr
                   className={
-                    expandedOrderId === order.id ? "bg-blue-50" : "hover:bg-gray-50"
+                    expandedOrderId === order.id
+                      ? "bg-blue-50"
+                      : order.sourceType === "external"
+                      ? "bg-amber-50/50 hover:bg-amber-50"
+                      : "hover:bg-gray-50"
                   }
                 >
                   {/* Código pedido (auto, consistente con success) */}
                   <td className="px-3 py-2 whitespace-nowrap text-center">
                     <span
-                      className="bg-stone-100 text-stone-800 px-2 py-1 rounded-full text-xs font-medium cursor-pointer"
+                      className={`px-2 py-1 rounded-sm text-xs font-medium cursor-pointer ${
+                        order.sourceType === "external"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-stone-100 text-stone-800"
+                      }`}
                       title="Copiar código"
                       onClick={() =>
                         copyToClipboard(`#${getShortCode(order)}`, `short-${order.id}`)
@@ -186,6 +196,11 @@ const OrderTable = ({
                     >
                       #{getShortCode(order)}
                     </span>
+                    {order.sourceType === "external" && (
+                      <span className="ml-1 inline-flex px-1.5 py-0.5 rounded-sm bg-amber-200 text-amber-900 text-[10px] font-semibold align-middle">
+                        EXT
+                      </span>
+                    )}
                     {copiedText === `short-${order.id}` && (
                       <span className="ml-1 text-green-600 text-[10px] align-middle">✓</span>
                     )}
@@ -199,7 +214,7 @@ const OrderTable = ({
                           type="text"
                           value={orderNumberInput}
                           onChange={(e) => setOrderNumberInput(e.target.value)}
-                          className="w-28 px-2 py-1 text-xs border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-amber-500"
+                          className="w-28 px-2 py-1 text-xs border border-gray-400 rounded-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
                           placeholder="P001MMAA"
                           autoFocus
                           onKeyDown={(e) => {
@@ -213,7 +228,7 @@ const OrderTable = ({
                         />
                         <button
                           onClick={() => handleAssignOrderNumber(order.id)}
-                          className="p-1 bg-amber-500 text-white rounded hover:bg-amber-600"
+                          className="p-1 bg-amber-500 text-white rounded-sm hover:bg-amber-600"
                           title="Guardar"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -225,7 +240,7 @@ const OrderTable = ({
                             setEditingOrderNumber(null);
                             setOrderNumberInput("");
                           }}
-                          className="p-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                          className="p-1 bg-gray-300 text-gray-700 rounded-sm hover:bg-gray-400"
                           title="Cancelar"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -235,7 +250,7 @@ const OrderTable = ({
                       </div>
                     ) : order.orderNumber ? (
                       <div className="flex items-center justify-center gap-2">
-                        <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">
+                        <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-sm text-xs font-medium">
                           {order.orderNumber}
                         </span>
                         <button
@@ -255,7 +270,7 @@ const OrderTable = ({
                           setEditingOrderNumber(order.id);
                           setOrderNumberInput("");
                         }}
-                        className="px-2 py-1 text-xs border border-amber-300 text-amber-700 rounded-full hover:bg-amber-50"
+                        className="px-2 py-1 text-xs border border-amber-300 text-amber-700 rounded-sm hover:bg-amber-50"
                       >
                         Asignar NºOrden
                       </button>
@@ -296,7 +311,7 @@ const OrderTable = ({
                   {/* Pago */}
                   <td className="px-3 py-2 whitespace-nowrap text-center">
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full ${getPaymentStatusClass(
+                      className={`text-xs font-medium px-2 py-1 rounded-sm ${getPaymentStatusClass(
                         order.paymentStatus
                       )}`}
                     >
@@ -307,7 +322,7 @@ const OrderTable = ({
                   {/* Estado procesamiento */}
                   <td className="px-3 py-2 whitespace-nowrap text-center relative">
                     {editingStatus === order.id ? (
-                      <div className="absolute z-10 left-0 right-0 top-0 p-2 bg-white shadow-lg border border-gray-200 rounded">
+                      <div className="absolute z-10 left-0 right-0 top-0 p-2 bg-white shadow-lg border border-gray-200 rounded-sm">
                         <select
                           value={order.status || "PENDIENTE"}
                           onChange={async (e) => {
@@ -319,7 +334,7 @@ const OrderTable = ({
                             }
                           }}
                           autoFocus
-                          className="w-full py-1 px-2 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full py-1 px-2 text-xs border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           {orderStatuses.map((status) => (
                             <option key={status} value={status}>
@@ -331,7 +346,7 @@ const OrderTable = ({
                     ) : (
                       <button
                         onClick={() => setEditingStatus(order.id)}
-                        className={`text-xs font-medium px-2 py-1 rounded-full w-full flex items-center justify-center ${getStatusClass(
+                        className={`text-xs font-medium px-2 py-1 rounded-sm w-full flex items-center justify-center ${getStatusClass(
                           order.status
                         )}`}
                         title="Haz clic para cambiar el estado"
@@ -362,7 +377,7 @@ const OrderTable = ({
                             expandedOrderId === order.id ? null : order.id
                           )
                         }
-                        className="py-1 px-3 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50 flex items-center transition-colors"
+                        className="py-1 px-3 text-xs border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 flex items-center transition-colors"
                       >
                         {expandedOrderId === order.id ? (
                           <>
@@ -414,6 +429,7 @@ const OrderTable = ({
                     formatAddress={formatAddress}
                     orderStatuses={orderStatuses}
                     assignOrderNumber={assignOrderNumber}
+                    updateExternalOrderDetails={updateExternalOrderDetails}
                   />
                 )}
               </React.Fragment>

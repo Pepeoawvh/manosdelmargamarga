@@ -82,7 +82,7 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
         className="flex items-center space-x-3 flex-1 cursor-grab active:cursor-grabbing"
         {...listeners}
       >
-        <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-300">
+        <div className="w-16 h-12 rounded-sm overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-300">
           {slide.imageUrl ? (
             <img
               src={slide.imageUrl}
@@ -108,7 +108,7 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
             onEdit(slide);
           }}
           title="Editar slide"
-          className="p-1 rounded hover:bg-blue-100 text-blue-700 cursor-pointer transition-colors"
+          className="p-1 rounded-sm hover:bg-blue-100 text-blue-700 cursor-pointer transition-colors"
           type="button"
         >
           <IconEdit />
@@ -121,7 +121,7 @@ function SortableItem({ id, slide, onEdit, onDelete, isDeleting }) {
           }}
           title={isDeleting ? "Eliminando..." : "Eliminar slide"}
           disabled={isDeleting}
-          className={`p-1 rounded hover:bg-red-100 text-red-700 transition-colors ${
+          className={`p-1 rounded-sm hover:bg-red-100 text-red-700 transition-colors ${
             isDeleting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
           type="button"
@@ -234,7 +234,7 @@ export default function CarouselManager() {
       {/* Toast de notificación */}
       {toast && (
         <div
-          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all ${
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-sm shadow-lg text-white text-sm font-medium transition-all ${
             toast.type === "success" ? "bg-green-600" : "bg-red-600"
           }`}
         >
@@ -244,7 +244,7 @@ export default function CarouselManager() {
 
       <button
         onClick={() => openForm()}
-        className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        className="mb-4 bg-green-600 text-white px-4 py-2 rounded-sm hover:bg-green-700"
         type="button"
       >
         Añadir Slide

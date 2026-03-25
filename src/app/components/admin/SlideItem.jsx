@@ -18,9 +18,9 @@ export default function SlideItem({
   isLast,
 }) {
   return (
-    <div className="bg-white p-4 mb-2 rounded-lg shadow flex items-center justify-between">
+    <div className="bg-white p-4 mb-2 rounded-sm shadow flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded overflow-hidden">
+        <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-sm overflow-hidden">
           {slide.imageUrl ? (
             <img
               src={slide.imageUrl}
@@ -49,7 +49,7 @@ export default function SlideItem({
         <button
           onClick={moveUp}
           disabled={isFirst}
-          className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+          className="px-2 py-1 bg-gray-300 rounded-sm hover:bg-gray-400 disabled:opacity-50"
           aria-label="Mover arriba"
         >
           ↑
@@ -57,7 +57,7 @@ export default function SlideItem({
         <button
           onClick={moveDown}
           disabled={isLast}
-          className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+          className="px-2 py-1 bg-gray-300 rounded-sm hover:bg-gray-400 disabled:opacity-50"
           aria-label="Mover abajo"
         >
           ↓
@@ -65,7 +65,7 @@ export default function SlideItem({
 
         <button
           onClick={() => onEdit(slide)}
-          className="px-3 py-1 bg-blue-900 text-white rounded hover:bg-blue-800"
+          className="px-3 py-1 bg-blue-900 text-white rounded-sm hover:bg-blue-800"
           aria-label="Editar slide"
         >
           Editar
@@ -73,7 +73,7 @@ export default function SlideItem({
 
         <button
           onClick={() => toggleVisibility(slide)}
-          className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
+          className="px-3 py-1 bg-gray-600 text-white rounded-sm hover:bg-gray-700"
           aria-label={slide.visible ? "Ocultar slide" : "Mostrar slide"}
         >
           {slide.visible ? "Ocultar" : "Mostrar"}
@@ -81,7 +81,7 @@ export default function SlideItem({
 
         <button
           onClick={onDelete}
-          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-500"
+          className="px-3 py-1 bg-red-600 text-white rounded-sm hover:bg-red-500"
           aria-label="Eliminar slide"
         >
           Eliminar

@@ -16,6 +16,7 @@ const OrderDetails = ({
   formatAddress,
   orderStatuses,
   assignOrderNumber,
+  updateExternalOrderDetails,
 }) => {
   const [copiedText, setCopiedText] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -27,6 +28,30 @@ const OrderDetails = ({
   
   // Estado para controlar el error de la función no disponible
   const [assignOrderNumberAvailable, setAssignOrderNumberAvailable] = useState(false);
+  const isExternalOrder = order?.sourceType === "external";
+
+  const getOrderItems = (orderData) => {
+    if (Array.isArray(orderData?.items) && orderData.items.length) return orderData.items;
+    if (Array.isArray(orderData?.cart) && orderData.cart.length) return orderData.cart;
+    if (Array.isArray(orderData?.products) && orderData.products.length) return orderData.products;
+    return [];
+  };
+
+  const [isEditingExternalDetails, setIsEditingExternalDetails] = useState(false);
+  const [externalDetailForm, setExternalDetailForm] = useState({
+    customerName: order?.customerName || "",
+    customerEmail: order?.customerEmail || "",
+    customerPhone: order?.customer?.phone || "",
+    paymentMethod: order?.paymentMethod || "efectivo",
+    description: order?.description || "",
+    notes: order?.customer?.notes || order?.notes || "",
+    amount: order?.total || 0,
+    items: getOrderItems(order).map((item) => ({
+      title: item?.title || item?.name || "",
+      quantity: String(Number(item?.quantity) || 1),
+      price: String(Number(item?.price) || 0),
+    })),
+  });
 
   // Verificar si la prop assignOrderNumber está disponible
   useEffect(() => {
@@ -38,6 +63,24 @@ const OrderDetails = ({
       setAssignOrderNumberAvailable(true);
     }
   }, [assignOrderNumber]);
+
+  useEffect(() => {
+    setExternalDetailForm({
+      customerName: order?.customerName || "",
+      customerEmail: order?.customerEmail || "",
+      customerPhone: order?.customer?.phone || "",
+      paymentMethod: order?.paymentMethod || "efectivo",
+      description: order?.description || "",
+      notes: order?.customer?.notes || order?.notes || "",
+      amount: order?.total || 0,
+      items: getOrderItems(order).map((item) => ({
+        title: item?.title || item?.name || "",
+        quantity: String(Number(item?.quantity) || 1),
+        price: String(Number(item?.price) || 0),
+      })),
+    });
+    setIsEditingExternalDetails(false);
+  }, [order?.id]);
 
   const handleCopy = (text, field) => {
     navigator.clipboard.writeText(text);
@@ -99,6 +142,87 @@ const OrderDetails = ({
     return price ? `$${price.toLocaleString("es-CL")}` : "$0";
   };
 
+  const orderItems = getOrderItems(order);
+
+  const computedExternalTotal = externalDetailForm.items.reduce((sum, item) => {
+    const quantity = Number(item.quantity) || 0;
+    const price = Number(item.price) || 0;
+    return sum + quantity * price;
+  }, 0);
+
+  const handleExternalFieldChange = (name, value) => {
+    setExternalDetailForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleExternalItemChange = (index, field, value) => {
+    setExternalDetailForm((prev) => {
+      const items = [...prev.items];
+      if (field === "quantity" || field === "price") {
+        const validated = value.replace(/[^\d.]/g, "");
+        const parts = validated.split(".");
+        items[index] = {
+          ...items[index],
+          [field]: parts.length > 2 ? `${parts[0]}.${parts.slice(1).join("")}` : validated,
+        };
+      } else {
+        items[index] = { ...items[index], [field]: value };
+      }
+      return { ...prev, items };
+    });
+  };
+
+  const addExternalItemRow = () => {
+    setExternalDetailForm((prev) => ({
+      ...prev,
+      items: [...prev.items, { title: "", quantity: "1", price: "" }],
+    }));
+  };
+
+  const removeExternalItemRow = (index) => {
+    setExternalDetailForm((prev) => ({
+      ...prev,
+      items:
+        prev.items.length === 1
+          ? [{ title: "", quantity: "1", price: "" }]
+          : prev.items.filter((_, idx) => idx !== index),
+    }));
+  };
+
+  const handleSaveExternalDetails = async () => {
+    if (typeof updateExternalOrderDetails !== "function") {
+      alert("No está disponible la actualización de ventas externas");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const payload = {
+        customerName: externalDetailForm.customerName,
+        customerEmail: externalDetailForm.customerEmail,
+        customerPhone: externalDetailForm.customerPhone,
+        paymentMethod: externalDetailForm.paymentMethod,
+        description: externalDetailForm.description,
+        notes: externalDetailForm.notes,
+        amount: computedExternalTotal > 0 ? computedExternalTotal : Number(externalDetailForm.amount),
+        items: externalDetailForm.items,
+      };
+
+      const success = await updateExternalOrderDetails(order.id, payload);
+      if (!success) {
+        alert("No se pudo actualizar la venta externa");
+        return;
+      }
+
+      setIsEditingExternalDetails(false);
+      alert("Venta externa actualizada correctamente");
+    } catch (error) {
+      console.error("Error actualizando venta externa:", error);
+      alert("Ocurrió un error al guardar la venta externa");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Función para verificar si existe información de facturación
   const hasInvoiceData = () => {
     return (
@@ -145,7 +269,7 @@ const OrderDetails = ({
           {/* Información del cliente y datos de facturación - 2 columnas en desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* COLUMNA 1: Información del cliente */}
-            <div className="bg-white rounded border border-gray-200 p-3">
+            <div className="bg-white rounded-sm border border-gray-200 p-3">
               <h3 className="text-sm font-medium mb-2 flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +375,7 @@ const OrderDetails = ({
             {/* COLUMNA 2: Información del pedido y facturación */}
             <div className="space-y-3">
               {/* Información general del pedido */}
-              <div className="bg-white rounded border border-gray-200 p-3">
+              <div className="bg-white rounded-sm border border-gray-200 p-3">
                 <h3 className="text-sm font-medium mb-2 flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -300,7 +424,7 @@ const OrderDetails = ({
                             type="text"
                             value={newOrderNumber}
                             onChange={(e) => setNewOrderNumber(e.target.value)}
-                            className="border border-gray-300 rounded-md px-2 py-1 text-xs mr-2 w-24"
+                            className="border border-gray-300 rounded-sm px-2 py-1 text-xs mr-2 w-24"
                             placeholder="Ej: A001"
                             disabled={isProcessing}
                           />
@@ -332,7 +456,7 @@ const OrderDetails = ({
                         // Modo visualización
                         <>
                           {order.orderNumber ? (
-                            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-medium mr-2">
+                            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-sm text-xs font-medium mr-2">
                               #{order.orderNumber}
                             </span>
                           ) : (
@@ -374,7 +498,7 @@ const OrderDetails = ({
                           <select
                             value={newStatus}
                             onChange={(e) => setNewStatus(e.target.value)}
-                            className="text-xs rounded border-gray-300 mr-2 py-1"
+                            className="text-xs rounded-sm border-gray-300 mr-2 py-1"
                             disabled={isProcessing}
                           >
                             {orderStatuses?.map((status) => (
@@ -386,7 +510,7 @@ const OrderDetails = ({
                           {newStatus !== order.status && (
                             <button
                               onClick={handleStatusUpdate}
-                              className="bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs"
+                              className="bg-blue-500 hover:bg-blue-600 text-white rounded-sm px-2 py-1 text-xs"
                               disabled={isProcessing}
                             >
                               {isProcessing ? (
@@ -399,7 +523,7 @@ const OrderDetails = ({
                         </div>
                       ) : (
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusClass(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium ${getStatusClass(
                             order.status
                           )}`}
                         >
@@ -413,7 +537,7 @@ const OrderDetails = ({
                     <span className="text-gray-500">Pago:</span>
                     <span className="col-span-2">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium ${
                           order.paymentStatus === "completed"
                             ? "bg-green-100 text-green-800"
                             : order.paymentStatus === "pending"
@@ -441,7 +565,7 @@ const OrderDetails = ({
 
               {/* Información de facturación (condicional) */}
               {hasInvoiceData() && (
-                <div className="bg-white rounded border border-gray-200 p-3">
+                <div className="bg-white rounded-sm border border-gray-200 p-3">
                   <h3 className="text-sm font-medium mb-2 flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -543,116 +667,231 @@ const OrderDetails = ({
             </div>
           </div>
 
-          {/* Productos del pedido */}
-          <div className="bg-white rounded border border-gray-200">
-            <h3 className="text-sm font-medium p-3 border-b">
-              Productos ({order.cart?.length || 0})
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Producto
-                    </th>
-                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Precio
-                    </th>
-                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                      Cantidad
-                    </th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                      Subtotal
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {order.cart && order.cart.length > 0 ? (
-                    order.cart.map((item, index) => (
-                      <tr key={`item-${index}`} className="hover:bg-gray-50">
-                        <td className="px-3 py-2 whitespace-normal">
-                          <div className="flex items-start">
-                            {item.image && (
-                              <img
-                                src={item.image}
-                                alt={item.title || item.name}
-                                className="w-10 h-10 object-cover rounded mr-2"
-                                onError={(e) => {
-                                  e.target.src = "/placeholder.png";
-                                }}
-                              />
-                            )}
-                            <div>
-                              <div className="text-xs font-medium">
-                                {item.title || item.name || "Producto"}
-                              </div>
-                              {item.sku && (
-                                <div className="text-xs text-gray-500">
-                                  SKU: {item.sku}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 text-xs text-center">
-                          {formatPrice(item.price)}
-                        </td>
-                        <td className="px-3 py-2 text-xs text-center">
-                          {item.quantity}
-                        </td>
-                        <td className="px-3 py-2 text-xs text-right font-medium">
-                          {formatPrice(item.price * item.quantity)}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-3 py-2 text-center text-sm text-gray-500"
-                      >
-                        No hay productos registrados
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-                <tfoot className="bg-gray-50">
-                  <tr>
-                    <td
-                      colSpan="3"
-                      className="px-3 py-2 text-right text-xs font-medium text-gray-500"
+          {isExternalOrder && (
+            <div className="bg-white rounded-sm border border-gray-200 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Edición de Venta Externa</h3>
+                {!isEditingExternalDetails ? (
+                  <button
+                    onClick={() => setIsEditingExternalDetails(true)}
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 border border-gray-300 rounded-sm hover:bg-gray-50"
+                  >
+                    <FaEdit size={11} />
+                    Editar
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setIsEditingExternalDetails(false);
+                        setExternalDetailForm({
+                          customerName: order?.customerName || "",
+                          customerEmail: order?.customerEmail || "",
+                          customerPhone: order?.customer?.phone || "",
+                          paymentMethod: order?.paymentMethod || "efectivo",
+                          description: order?.description || "",
+                          notes: order?.customer?.notes || order?.notes || "",
+                          amount: order?.total || 0,
+                          items: getOrderItems(order).map((item) => ({
+                            title: item?.title || item?.name || "",
+                            quantity: String(Number(item?.quantity) || 1),
+                            price: String(Number(item?.price) || 0),
+                          })),
+                        });
+                      }}
+                      className="inline-flex items-center gap-1 text-xs px-2 py-1 border border-gray-300 rounded-sm hover:bg-gray-50"
+                      disabled={isProcessing}
                     >
-                      Subtotal:
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs font-medium">
-                      {formatPrice(order.summary?.subtotal)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      colSpan="3"
-                      className="px-3 py-2 text-right text-xs font-medium text-gray-500"
+                      <FaTimes size={11} />
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSaveExternalDetails}
+                      className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-600 text-white rounded-sm hover:bg-blue-700"
+                      disabled={isProcessing}
                     >
-                      Envío:
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs font-medium">
-                      {formatPrice(order.summary?.shipping)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      colSpan="3"
-                      className="px-3 py-2 text-right text-xs font-medium text-gray-700"
+                      <FaSave size={11} />
+                      Guardar cambios
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {isEditingExternalDetails && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={externalDetailForm.customerName}
+                      onChange={(e) => handleExternalFieldChange("customerName", e.target.value)}
+                      placeholder="Nombre cliente"
+                      className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs"
+                    />
+                    <input
+                      type="email"
+                      value={externalDetailForm.customerEmail}
+                      onChange={(e) => handleExternalFieldChange("customerEmail", e.target.value)}
+                      placeholder="Correo"
+                      className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={externalDetailForm.customerPhone}
+                      onChange={(e) => handleExternalFieldChange("customerPhone", e.target.value)}
+                      placeholder="Teléfono"
+                      className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs"
+                    />
+                    <select
+                      value={externalDetailForm.paymentMethod}
+                      onChange={(e) => handleExternalFieldChange("paymentMethod", e.target.value)}
+                      className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs capitalize"
                     >
-                      Total:
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs font-bold">
-                      {formatPrice(order.total)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
+                      <option value="efectivo">Efectivo</option>
+                      <option value="transferencia">Transferencia</option>
+                      <option value="webpay">Webpay</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={externalDetailForm.description}
+                    onChange={(e) => handleExternalFieldChange("description", e.target.value)}
+                    placeholder="Descripción de la venta"
+                    className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs"
+                  />
+
+                  <textarea
+                    value={externalDetailForm.notes}
+                    onChange={(e) => handleExternalFieldChange("notes", e.target.value)}
+                    rows={2}
+                    placeholder="Notas"
+                    className="w-full rounded-sm border border-gray-300 px-2 py-1.5 text-xs"
+                  />
+
+                  <div className="overflow-x-auto border border-gray-200 rounded-sm">
+                    <table className="min-w-full text-xs">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-2 py-1 text-left">Producto</th>
+                          <th className="px-2 py-1 text-right">Cant.</th>
+                          <th className="px-2 py-1 text-right">Precio</th>
+                          <th className="px-2 py-1 text-right">Subtotal</th>
+                          <th className="px-2 py-1 text-center">Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {externalDetailForm.items.map((item, index) => {
+                          const quantity = Number(item.quantity) || 0;
+                          const price = Number(item.price) || 0;
+                          return (
+                            <tr key={`editable-ext-item-${index}`} className="border-b border-gray-100">
+                              <td className="px-2 py-1">
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) => handleExternalItemChange(index, "title", e.target.value)}
+                                  placeholder="Nombre del producto"
+                                  className="w-full rounded-sm border border-gray-300 px-2 py-1"
+                                />
+                              </td>
+                              <td className="px-2 py-1">
+                                <input
+                                  type="text"
+                                  value={item.quantity}
+                                  onChange={(e) => handleExternalItemChange(index, "quantity", e.target.value)}
+                                  className="w-16 ml-auto rounded-sm border border-gray-300 px-2 py-1 text-right"
+                                />
+                              </td>
+                              <td className="px-2 py-1">
+                                <input
+                                  type="text"
+                                  value={item.price}
+                                  onChange={(e) => handleExternalItemChange(index, "price", e.target.value)}
+                                  className="w-24 ml-auto rounded-sm border border-gray-300 px-2 py-1 text-right"
+                                />
+                              </td>
+                              <td className="px-2 py-1 text-right font-medium text-gray-700">
+                                {formatPrice(quantity * price)}
+                              </td>
+                              <td className="px-2 py-1 text-center">
+                                <button
+                                  onClick={() => removeExternalItemRow(index)}
+                                  className="text-red-500 hover:text-red-700"
+                                  type="button"
+                                >
+                                  <FaTimes size={12} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={addExternalItemRow}
+                      className="text-xs px-2 py-1 border border-gray-300 rounded-sm hover:bg-gray-50"
+                    >
+                      Agregar producto
+                    </button>
+                    <div className="text-xs text-gray-700">
+                      Total calculado: <span className="font-semibold">{formatPrice(computedExternalTotal)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+
+          <div className="bg-white rounded-sm border border-gray-200 p-3">
+            <h3 className="text-sm font-medium mb-2 flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1 text-gray-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M3 3h2l.4 2M7 13h8l3-6H6.4M7 13L6.4 5M7 13l-1.2 3.6a1 1 0 00.95 1.32H15" />
+              </svg>
+              Productos del Pedido ({orderItems.length})
+            </h3>
+
+            {orderItems.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-xs divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-2 py-1 text-left font-medium text-gray-500">Producto</th>
+                      <th className="px-2 py-1 text-right font-medium text-gray-500">Cantidad</th>
+                      <th className="px-2 py-1 text-right font-medium text-gray-500">Precio</th>
+                      <th className="px-2 py-1 text-right font-medium text-gray-500">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {orderItems.map((item, index) => {
+                      const title = item?.title || item?.name || item?.productTitle || `Producto ${index + 1}`;
+                      const quantity = Number(item?.quantity) || 1;
+                      const price = Number(item?.price) || 0;
+                      const subtotal = quantity * price;
+                      return (
+                        <tr key={`order-item-${index}`}>
+                          <td className="px-2 py-1 text-gray-800">{title}</td>
+                          <td className="px-2 py-1 text-right text-gray-700">{quantity}</td>
+                          <td className="px-2 py-1 text-right text-gray-700">{formatPrice(price)}</td>
+                          <td className="px-2 py-1 text-right font-medium text-gray-900">{formatPrice(subtotal)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500">No hay productos registrados para este pedido.</p>
+            )}
           </div>
         </div>
       </td>

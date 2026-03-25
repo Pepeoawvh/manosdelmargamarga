@@ -103,15 +103,15 @@ const InventoryManager = () => {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-sm shadow-sm">
           <div className="border-b px-3 py-2.5 bg-gray-50 flex flex-wrap justify-between items-center">
           <div className="flex items-center mb-2 md:mb-0 gap-2">
-            <span className="w-0.5 h-4 bg-emerald-500 rounded-full shrink-0"></span>
+            <span className="w-0.5 h-4 bg-emerald-500 rounded-sm shrink-0"></span>
             <h3 className="text-sm font-medium text-gray-700">Gestión de Inventario</h3>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className={`ml-2 p-1.5 rounded text-xs ${
+              className={`ml-2 p-1.5 rounded-sm text-xs ${
                 isRefreshing 
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                   : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
@@ -142,11 +142,11 @@ const InventoryManager = () => {
               placeholder="Buscar producto..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              className="py-1 px-2 text-xs border border-gray-300 rounded"
+              className="py-1 px-2 text-xs border border-gray-300 rounded-sm"
             />
             <button
               onClick={() => setShowAddForm(true)}
-              className="py-1 px-3 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700"
+              className="py-1 px-3 text-xs bg-emerald-600 text-white rounded-sm hover:bg-emerald-700"
               title="Agregar nuevo producto"
             >
               + Nuevo Producto
@@ -179,7 +179,7 @@ const InventoryManager = () => {
                           <img 
                             src={product.image} 
                             alt={product.title}
-                            className="h-8 w-8 rounded object-cover mr-2"
+                            className="h-8 w-8 rounded-sm object-cover mr-2"
                           />
                         )}
                         <div className="flex items-center">
@@ -197,7 +197,7 @@ const InventoryManager = () => {
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span 
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        className={`text-xs font-medium px-2 py-1 rounded-sm ${
                           product.stock > 10 
                             ? 'bg-green-100 text-green-800' 
                             : product.stock > 0 
@@ -213,7 +213,7 @@ const InventoryManager = () => {
                       {product.categories && product.categories.map((category, index) => (
                         <span 
                           key={index}
-                          className="inline-block px-2 py-0.5 rounded-full mr-1 mb-1 bg-gray-100 text-gray-700"
+                          className="inline-block px-2 py-0.5 rounded-sm mr-1 mb-1 bg-gray-100 text-gray-700"
                         >
                           {category}
                         </span>
@@ -232,12 +232,12 @@ const InventoryManager = () => {
                             type="number"
                             value={quantityChange}
                             onChange={(e) => setQuantityChange(e.target.value)}
-                            className="w-16 py-1 px-2 text-xs border border-gray-300 rounded"
+                            className="w-16 py-1 px-2 text-xs border border-gray-300 rounded-sm"
                             placeholder="±"
                           />
                           <button
                             onClick={() => handleUpdateStock(product.id)}
-                            className="py-1 px-2 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                            className="py-1 px-2 text-xs bg-emerald-600 text-white rounded-sm hover:bg-emerald-700"
                           >
                             ✓
                           </button>
@@ -246,7 +246,7 @@ const InventoryManager = () => {
                               setSelectedProduct(null);
                               setQuantityChange('');
                             }}
-                            className="py-1 px-2 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                            className="py-1 px-2 text-xs border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50"
                           >
                             ✕
                           </button>
@@ -255,7 +255,7 @@ const InventoryManager = () => {
                         <div className="flex items-center justify-end space-x-1">
                           <button
                             onClick={() => setSelectedProduct(product.id)}
-                            className="py-1 px-2 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                            className="py-1 px-2 text-xs border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50"
                             title="Ajustar stock"
                           >
                             Stock
@@ -265,14 +265,14 @@ const InventoryManager = () => {
                               setEditingProduct(product);
                               setShowEditForm(true);
                             }}
-                            className="py-1 px-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                            className="py-1 px-2 text-xs bg-blue-600 text-white rounded-sm hover:bg-blue-700"
                             title="Editar producto"
                           >
                             Editar
                           </button>
                           <button
                             onClick={() => handleDeleteWithConfirmation(product.id, product.title)}
-                            className="py-1 px-2 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                            className="py-1 px-2 text-xs bg-red-600 text-white rounded-sm hover:bg-red-700"
                             title="Eliminar producto"
                           >
                             Eliminar
@@ -311,7 +311,7 @@ const InventoryManager = () => {
       {/* Formulario para agregar producto */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-sm shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Agregar Nuevo Producto</h3>
               <button 
@@ -331,7 +331,7 @@ const InventoryManager = () => {
       {/* Formulario para editar producto */}
       {showEditForm && editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-sm shadow-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Editar Producto</h3>
               <button 

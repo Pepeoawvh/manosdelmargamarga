@@ -102,7 +102,7 @@ const ReservationTable = ({ reservations: initialReservations = [], formatDate =
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="TODOS">Todas</option>
             {reservationStatuses.map((status) => (
@@ -214,7 +214,7 @@ const ReservationTable = ({ reservations: initialReservations = [], formatDate =
                     {/* Estado */}
                     <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span
-                        className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusClass(
+                        className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${getStatusClass(
                           reservation.status
                         )}`}
                       >
@@ -271,7 +271,7 @@ const ReservationTable = ({ reservations: initialReservations = [], formatDate =
                               onClick={() =>
                                 handleDelete(reservation.id)
                               }
-                              className="py-1 px-3 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                              className="py-1 px-3 text-xs bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors"
                             >
                               Confirmar eliminación
                             </button>
@@ -279,7 +279,7 @@ const ReservationTable = ({ reservations: initialReservations = [], formatDate =
                               onClick={() =>
                                 setDeleteConfirmation(null)
                               }
-                              className="py-1 px-3 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+                              className="py-1 px-3 text-xs bg-gray-300 text-gray-700 rounded-sm hover:bg-gray-400 transition-colors"
                             >
                               Cancelar
                             </button>
