@@ -54,6 +54,39 @@ const MAX_W = { sm:"max-w-sm", md:"max-w-md", lg:"max-w-lg", xl:"max-w-xl", "2xl
 const TITLE_SIZES = { small:"text-xl sm:text-2xl md:text-3xl", medium:"text-2xl sm:text-3xl md:text-4xl", large:"text-2xl sm:text-3xl md:text-5xl", xlarge:"text-3xl sm:text-4xl md:text-6xl" };
 const OVERLAY_COLORS = { black:"#000000", white:"#ffffff", green:"#798f38" };
 
+// Función para generar clases de botón dinámicamente
+function getButtonClasses(style = "solid", size = "md", radius = "md") {
+  const sizeMap = {
+    sm: "px-3 py-1.5 text-xs md:text-sm",
+    md: "px-5 py-2.5 text-sm md:text-base",
+    lg: "px-6 py-3 text-base md:text-lg",
+  };
+  const radiusMap = {
+    sm: "rounded-sm",
+    md: "rounded-md",
+    lg: "rounded-lg",
+    full: "rounded-full",
+  };
+  const base = `${sizeMap[size] || sizeMap.md} ${radiusMap[radius] || radiusMap.md} font-medium transition-all border-2`;
+  if (style === "solid") return `${base} hover:opacity-90`;
+  if (style === "outline") return `${base} hover:opacity-90`;
+  if (style === "ghost") return `${base} border-transparent hover:opacity-75`;
+  return base;
+}
+
+function getButtonStyle(button = {}) {
+  const style = button?.style || "solid";
+  const bgColor = button?.color || "#798f38";
+  const textColor = button?.textColor || (style === "solid" ? "#ffffff" : bgColor);
+  const borderColor = button?.borderColor || bgColor;
+
+  return {
+    backgroundColor: style === "solid" ? bgColor : "transparent",
+    color: textColor,
+    borderColor: style === "outline" ? borderColor : "transparent",
+  };
+}
+
 function useSlideProps(slide, defaultOpacity) {
   const layout  = slide.layout  || { horizontalAlign:"left", verticalAlign:"center", textAlign:"left", maxWidth:"2xl" };
   const styling = slide.styling || { titleSize:"large", titleColor:"#ffffff", descriptionColor:"#ffffff", overlayOpacity:defaultOpacity, overlayColor:"black" };
@@ -82,12 +115,30 @@ const FullSlide = ({ slide, priority = false }) => {
           )}
           <div className={`flex flex-wrap gap-3 md:gap-4 ${layout.textAlign === "center" ? "justify-center" : ""}`}>
             {slide.primaryButton?.show && (
-              <a href={slide.primaryButton.url} className="px-5 py-2.5 bg-white text-black font-medium rounded-md hover:bg-opacity-90 text-sm md:text-base transition-all" aria-label={slide.primaryButton.text || "Ver mas"}>
+              <a
+                href={slide.primaryButton.url}
+                className={getButtonClasses(
+                  slide.primaryButton?.style,
+                  slide.primaryButton?.size,
+                  slide.primaryButton?.radius
+                )}
+                style={getButtonStyle(slide.primaryButton)}
+                aria-label={slide.primaryButton.text || "Ver mas"}
+              >
                 {slide.primaryButton.text}
               </a>
             )}
             {slide.secondaryButton?.show && (
-              <a href={slide.secondaryButton.url} className="px-5 py-2.5 border-2 border-white text-white font-medium rounded-md hover:bg-white/10 text-sm md:text-base transition-all" aria-label={slide.secondaryButton.text || "Ver detalles"}>
+              <a
+                href={slide.secondaryButton.url}
+                className={getButtonClasses(
+                  slide.secondaryButton?.style,
+                  slide.secondaryButton?.size,
+                  slide.secondaryButton?.radius
+                )}
+                style={getButtonStyle(slide.secondaryButton)}
+                aria-label={slide.secondaryButton.text || "Ver detalles"}
+              >
                 {slide.secondaryButton.text}
               </a>
             )}
@@ -142,8 +193,30 @@ export default function HeroCarousel() {
           return {
             id: doc.id, ...d,
             type: d.type || "image",
-            primaryButton:   d.primaryButton   || { show: false, text: "", url: "" },
-            secondaryButton: d.secondaryButton || { show: false, text: "", url: "" },
+            primaryButton: {
+              show: false,
+              text: "",
+              url: "",
+              color: "#798f38",
+              textColor: "#ffffff",
+              borderColor: "#798f38",
+              style: "solid",
+              size: "md",
+              radius: "md",
+              ...(d.primaryButton || {}),
+            },
+            secondaryButton: {
+              show: false,
+              text: "",
+              url: "",
+              color: "#ffffff",
+              textColor: "#ffffff",
+              borderColor: "#ffffff",
+              style: "outline",
+              size: "md",
+              radius: "md",
+              ...(d.secondaryButton || {}),
+            },
             visible: d.visible ?? true,
             layout:  d.layout  || { horizontalAlign:"left", verticalAlign:"center", textAlign:"left", maxWidth:"2xl" },
             styling: d.styling || { titleSize:"large", titleColor:"#ffffff", descriptionColor:"#ffffff", overlayOpacity:40, overlayColor:"black" },
@@ -169,7 +242,7 @@ export default function HeroCarousel() {
   return (
     <Swiper
       modules={modules} spaceBetween={0} slidesPerView={1}
-      autoplay={{ delay: 6000, disableOnInteraction: true, pauseOnMouseEnter: true }}
+      autoplay={{ delay: (slides[0]?.autoplaySpeed || 6) * 1000, disableOnInteraction: true, pauseOnMouseEnter: true }}
       pagination={{ clickable: true }} navigation
       aria-label="Carrusel de papel artesanal y reciclado"
       className={`hero-carousel w-full ${heights}`}

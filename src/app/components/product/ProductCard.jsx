@@ -94,7 +94,6 @@ const ProductCard = ({
             itemProp="image"
             onError={handleImgError}
           />
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/15 transition-all duration-300" aria-hidden="true" />
         </div>
 
         {/* Segunda imagen al hover (sin video) */}
@@ -111,7 +110,6 @@ const ProductCard = ({
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
           </div>
         )}
 
