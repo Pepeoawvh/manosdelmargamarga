@@ -11,7 +11,7 @@ export default function Dashboard({
 }) {
   const { allTimeData, monthlyData, formatCurrency } = useSalesReport();
 
-  // Pedidos operativos: status definido y distinto de FINALIZADO/CANCELADO (no mira pago)
+  // Pedidos activos: todos excepto FINALIZADO y CANCELADO
   const operationalOrders = useMemo(() => {
     if (!Array.isArray(orders)) return [];
 
@@ -30,45 +30,19 @@ export default function Dashboard({
     }
 
 const result = unique.filter((o) => {
-  const raw = o?.status;
-  const s = String(raw ?? "").trim();         // puede ser "pendiente" del fallback
-  const S = s.toUpperCase();
+  const rawStatus = o?.status;
+  const S = String(rawStatus ?? "").trim().toUpperCase();
 
-  const hasExplicitStatus = s.length > 0;
+  // Excluir finalizados y cancelados
+  if (S === "FINALIZADO" || S === "CANCELADO") return false;
 
-  // Señales de intento no autorizado (ruido)
-  const pay = String(o?.paymentStatus || "").toLowerCase();
-  const resp = o?.transactionDetails?.response_code;
-  const trStatus = o?.transactionDetails?.status;
+  // Excluir pedidos de WebPay sin pago aprobado y sin status admin asignado:
+  // son intentos fallidos o abandonados que no tienen status explícito en Firestore
+  // (el hook les pone "pendiente" como fallback)
+  const hasAdminStatus = rawStatus && String(rawStatus).trim() !== "" && String(rawStatus).trim().toLowerCase() !== "pendiente";
+  if (!hasAdminStatus && !o?.isApproved) return false;
 
-  const isUnauthorizedPending =
-    pay === "pending" &&
-    !(typeof resp === "number" && resp === 0) &&
-    trStatus !== "AUTHORIZED";
-
-  // Regla final: status definido, no FINALIZADO ni CANCELADO,
-  // y excluir el fallback "pendiente" del hook o intentos no autorizados.
-  const keep =
-    hasExplicitStatus &&
-    S !== "FINALIZADO" &&
-    S !== "CANCELADO" &&
-    s !== "pendiente" &&
-    !isUnauthorizedPending;
-
-  console.log("OPER_EVAL", {
-    id: o?.id,
-    orderNumber: o?.orderNumber,
-    rawStatus: raw,
-    normalized: S,
-    hasExplicitStatus,
-    pay,
-    resp,
-    trStatus,
-    isUnauthorizedPending,
-    keep,
-  });
-
-  return keep;
+  return true;
 });
 
 
