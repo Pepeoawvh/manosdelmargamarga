@@ -31,6 +31,8 @@ const ProductCard = ({
     featured = false,
     videoUrl,
     cotizable = false,
+    hidePrice = false,
+    personalizable = false,
   } = product;
 
   const secondImage = additionalImages[0] || null;
@@ -141,7 +143,12 @@ const ProductCard = ({
 
       {/* Badges */}
       <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
-        {cotizable && (
+        {personalizable && (
+          <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-full" aria-label="Producto personalizable">
+            Personalizable
+          </span>
+        )}
+        {!personalizable && cotizable && (
           <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-full" aria-label="Producto cotizable">
             Cotizable
           </span>
@@ -175,7 +182,7 @@ const ProductCard = ({
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
             <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              {cotizable ? (
+              {personalizable ? null : (cotizable && hidePrice) ? (
                 <span className="text-[#f5d6c8] text-sm">Precio a cotizar</span>
               ) : priceInt > 0 ? (
                 <div className="flex flex-col items-start gap-0.5">
@@ -230,10 +237,11 @@ const ProductCard = ({
               >
                 Ver detalle
               </Link>
-              {cotizable ? (
+              {cotizable || personalizable ? (
                 <QuoteButton
                   product={product}
                   compact={true}
+                  personalizable={personalizable}
                   aria-label={`Cotizar ${titleText}`}
                 />
               ) : (

@@ -303,7 +303,7 @@ const CheckOut = () => {
           <p className="text-gray-600 mb-8">
             Nos contactaremos pronto a través del email <span className="font-semibold">{shippingInfo.email}</span> o por Whatsapp al <span className="font-semibold">{shippingInfo.phone}</span> para confirmar tu reserva.
           </p>
-          <Link href="/catalogo" className="inline-block px-6 py-2 bg-[#8f5f49] text-white rounded hover:bg-[#7ecd07] transition-all">
+          <Link href="/catalogo" className="inline-block px-6 py-2 bg-[#5e8c30] text-white rounded hover:bg-[#4a7326] transition-all">
             Volver al catálogo
           </Link>
         </div>
@@ -361,7 +361,7 @@ const CheckOut = () => {
                 ) : (
                   <Button
                     type="button"
-                    className="w-full bg-[#8f5f49] hover:bg-[#7ecd07] py-3 items-center justify-center text-white rounded"
+                    className="w-full bg-[#5e8c30] hover:bg-[#4a7326] py-3 items-center justify-center text-white rounded"
                     disabled={loading || cart.length === 0}
                     onClick={handleReserveCart}
                   >

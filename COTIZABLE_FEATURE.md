@@ -51,7 +51,7 @@ Se guarda junto al resto de las propiedades del producto en la colección `produ
 | Elemento           | Producto normal               | Producto cotizable                          |
 |--------------------|-------------------------------|---------------------------------------------|
 | Precio             | `$X.XXX`                      | `Precio a cotizar`                          |
-| Subtexto precio    | IVA incluido                  | Precio según requerimiento                  |
+| Subtexto precio    | IVA incluido                  | según requerimiento                  |
 | Badge de stock     | En stock / ¡Solo quedan X!    | **Producto a pedido** (fondo terracota suave) |
 | Botones de acción  | Agregar al carrito + Reservar | Nota informativa + **Cotizar por WhatsApp** |
 

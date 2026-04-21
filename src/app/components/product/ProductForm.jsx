@@ -21,6 +21,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     featured: product?.featured || false,
     reservable: product?.reservable || false,
     cotizable: product?.cotizable || false,
+    hidePrice: product?.hidePrice || false,
+    personalizable: product?.personalizable || false,
     // Si ya existe slug en el doc, úsalo; permite editarlo manualmente si quieres
     slug: product?.slug || "",
   });
@@ -95,6 +97,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       ...formData,
       reservable: !!formData.reservable,
       cotizable: !!formData.cotizable,
+      hidePrice: !!formData.hidePrice,
+      personalizable: !!formData.personalizable,
       slug: finalSlug, // asegura que exista y esté normalizado
       price: formData.price === "" ? 0 : Number(formData.price),
       oldPrice: formData.oldPrice === "" ? 0 : Number(formData.oldPrice),
@@ -314,13 +318,56 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               <label className="flex items-center space-x-1 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={formData.personalizable}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setFormData((prev) => ({
+                      ...prev,
+                      personalizable: checked,
+                      cotizable: checked ? true : prev.cotizable,
+                      hidePrice: checked ? true : prev.hidePrice,
+                    }));
+                  }}
+                  className="rounded text-[#8f5f49] focus:ring-[#8f5f49] h-3 w-3"
+                />
+                <span className="text-xs font-medium text-gray-700">Producto personalizable</span>
+              </label>
+              <p className="text-xs text-gray-400 ml-4">Producto creado a pedido con diseño del cliente. Activa automáticamente «Cotizable» y «No mostrar precio».</p>
+
+              <label className="flex items-center space-x-1 cursor-pointer">
+                <input
+                  type="checkbox"
                   checked={formData.cotizable}
-                  onChange={(e) => setFormData({ ...formData, cotizable: e.target.checked })}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setFormData((prev) => ({
+                      ...prev,
+                      cotizable: checked,
+                      // Si se desmarca cotizable, también se desmarca hidePrice y personalizable
+                      hidePrice: checked ? prev.hidePrice : false,
+                      personalizable: checked ? prev.personalizable : false,
+                    }));
+                  }}
                   className="rounded text-[#8f5f49] focus:ring-[#8f5f49] h-3 w-3"
                 />
                 <span className="text-xs font-medium text-gray-700">Producto cotizable</span>
               </label>
               <p className="text-xs text-gray-400 ml-4">Muestra botón «Cotizar por WhatsApp» en vez de comprar/reservar. Ideal para servicios o productos a pedido.</p>
+
+              {formData.cotizable && (
+                <>
+                  <label className="flex items-center space-x-1 cursor-pointer ml-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.hidePrice}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, hidePrice: e.target.checked }))}
+                      className="rounded text-[#8f5f49] focus:ring-[#8f5f49] h-3 w-3"
+                    />
+                    <span className="text-xs font-medium text-gray-600">No mostrar precio</span>
+                  </label>
+                  <p className="text-xs text-gray-400 ml-7">El precio no se muestra en ningún lugar; solo se indica «Precio a cotizar».</p>
+                </>
+              )}
             </div>
           </div>
         </div>

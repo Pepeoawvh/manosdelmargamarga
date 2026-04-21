@@ -301,26 +301,32 @@ const ProductDetails = ({ productSlug }) => {
 
           {/* Precio */}
           <div className="mb-6">
-            {product.oldPrice > 0 && !product.cotizable && (
+            {product.oldPrice > 0 && !product.cotizable && !product.personalizable && !product.hidePrice && (
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm text-gray-400 line-through">
                   ${Number.parseInt(product.oldPrice)}
                 </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full  text-green-600">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#eef6d6] text-[#5e8c30]">
                   Oferta
                 </span>
               </div>
             )}
             <div className="flex items-center gap-3">
               <span className="text-4xl font-extrabold text-[#798f38]">
-                {product.cotizable
+                {product.personalizable || (product.cotizable && product.hidePrice)
                   ? 'Precio a cotizar'
+                  : product.cotizable
+                  ? priceInt > 0
+                    ? `$${priceInt}`
+                    : 'Precio a cotizar'
                   : priceInt > 0
                   ? `$${priceInt}`
                   : 'Consultar precio'}
               </span>
             </div>
-            <div className="text-sm text-gray-500 mt-1">{product.cotizable ? 'Precio según requerimiento' : 'IVA incluido'}</div>
+            <div className="text-sm text-gray-500 mt-1">
+              {product.personalizable || product.cotizable ? 'Según requerimiento' : 'IVA incluido'}
+            </div>
           </div>
 
           {/* Descripción */}
@@ -337,7 +343,11 @@ const ProductDetails = ({ productSlug }) => {
 
           {/* Stock */}
           <div className="text-sm">
-            {product.cotizable ? (
+            {product.personalizable ? (
+              <span className="inline-block text-xs text-[#5e8c30] border border-[#cde582] bg-[#eef6d6] rounded px-2 py-0.5">
+                Producto personalizable a pedido
+              </span>
+            ) : product.cotizable ? (
               <span className="inline-block text-xs text-gray-400 border border-gray-200 rounded px-2 py-0.5">
                 Producto a pedido
               </span>
@@ -368,7 +378,11 @@ const ProductDetails = ({ productSlug }) => {
 
           {/* Añadir al carrito, Reservar o Cotizar */}
           <div className="mt-auto space-y-3">
-            {product.cotizable ? (
+            {product.personalizable ? (
+              <>
+                <QuoteButton product={product} personalizable={true} />
+              </>
+            ) : product.cotizable ? (
               <>
                 <p className="text-sm text-gray-500 italic">
                   Este producto es a pedido / servicio personalizado. Contáctanos para cotizar.
