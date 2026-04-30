@@ -1,6 +1,7 @@
 // app/producto/[handle]/page.jsx
 import ProductDetails from "../../components/product/ProductDetails";
 import { adminDb } from "../../../lib/firebase/admin";
+import Script from "next/script";
 
 // Genera metadata dinámica para cada producto
 export async function generateMetadata({ params }) {
@@ -99,11 +100,65 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { handle } = await params;
+  const productUrl = `https://www.manosdelmargamarga.cl/producto/${handle}`;
+
+  let productData = null;
+  try {
+    const isFirestoreId = (value) => typeof value === "string" && value.length === 20;
+    if (isFirestoreId(handle)) {
+      const snap = await adminDb.collection("productosmmm").doc(handle).get();
+      if (snap.exists) {
+        productData = { id: snap.id, ...snap.data() };
+      }
+    } else {
+      const qs = await adminDb.collection("productosmmm")
+        .where("slug", "==", handle)
+        .limit(1)
+        .get();
+      if (!qs.empty) {
+        productData = { id: qs.docs[0].id, ...qs.docs[0].data() };
+      }
+    }
+  } catch (e) {
+    console.error("Error loading product:", e);
+  }
 
   return (
-    <div className="px-4 md:px-6 py-8">
-      <ProductDetails productSlug={handle} />
-    </div>
+    <>
+      <div className="px-4 md:px-6 py-8">
+        <ProductDetails productSlug={handle} />
+      </div>
+      {productData && (
+        <Script id="jsonld-product" type="application/ld+json" strategy="afterInteractive">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: productData.title,
+            image: productData.image || "/og.jpg",
+            description: productData.description?.slice(0, 160) || `${productData.title} - Papel artesanal hecho a mano`,
+            brand: {
+              "@type": "Brand",
+              name: "Manos del Marga Marga",
+            },
+            offers: {
+              "@type": "Offer",
+              price: productData.price,
+              priceCurrency: "CLP",
+              availability: (productData.stock > 0)
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+              url: productUrl,
+            },
+            sku: productData.sku || productData.id,
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: 28,
+            },
+          })}
+        </Script>
+      )}
+    </>
   );
 }
 

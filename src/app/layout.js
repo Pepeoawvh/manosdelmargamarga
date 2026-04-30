@@ -149,6 +149,56 @@ export default function RootLayout({ children }) {
             },
           })}
         </Script>
+
+        {/* JSON-LD FAQPage */}
+        <Script id="ld-faq" type="application/ld+json" strategy="afterInteractive">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "¿Qué tipos de papel ofrecen?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Ofrecemos papel artesanal, papel reciclado, papel semilla (germinable), papel de fibra de bambú y papeles especiales para invitaciones y packaging sostenible.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "¿Hacen pedidos personalizados?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Sí, aceptamos pedidos personalizados. Contáctanos paradiscuss tu proyecto específico.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "¿Cuál es el tiempo de entrega?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Los tiempos de entrega varían según el producto y cantidad. Generalmente entre 5-15 días hábiles.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "¿Envían a todo Chile?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Sí, realizamos envíos a todo Chile través de Starken, Chilexpress o transporte propio.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "¿El papel semilla es biodegradable?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Sí, nuestro papel semilla es 100% biodegradable y puede plantarse para cultivar plantas.",
+                },
+              },
+            ],
+          })}
+        </Script>
       </body>
     </html>
   );
