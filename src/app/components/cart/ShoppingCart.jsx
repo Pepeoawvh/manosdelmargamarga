@@ -39,10 +39,10 @@
     const hasOutOfStockItems = cart.some(item => item.stock === 0);
     // Verificar si todos los productos son reservables
     const allReservable = cart.length > 0 && cart.every(item => item.reservable);
-    // Verificar si hay productos cotizables
-    const hasCotizableItems = cart.some(item => item.cotizable);
-    // Verificar si TODOS los productos son cotizables
-    const allCotizable = cart.length > 0 && cart.every(item => item.cotizable);
+    // Verificar si hay productos personalizables
+    const hasCotizableItems = cart.some(item => item.personalizable);
+    // Verificar si TODOS los productos son personalizables
+    const allCotizable = cart.length > 0 && cart.every(item => item.personalizable);
     
     // Función para ir a reservar carrito
     const handleReserveCart = () => {
@@ -148,10 +148,10 @@
                   </div>
                 )}
 
-                {/* Mensaje si hay productos cotizables */}
+                {/* Mensaje si hay productos personalizables */}
                 {hasCotizableItems && (
                   <div className="text-xs text-[#5e8c30] font-medium">
-                    * Tienes productos a pedido en tu carrito. Usa el botón de cotizar para consultarlos.
+                    * Tienes productos personalizables en tu carrito. Contáctanos para cotizar.
                   </div>
                 )}
                 
@@ -174,10 +174,10 @@
                     </button>
                   ) : null}
 
-                  {/* Botón cotizar: aparece si hay al menos un producto cotizable */}
+                  {/* Botón cotizar: aparece si hay al menos un producto personalizable */}
                   {hasCotizableItems && (
                     <a
-                      href={buildQuoteCartUrl(cart.filter(i => i.cotizable))}
+                      href={buildQuoteCartUrl(cart.filter(i => i.personalizable))}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={closeCart}

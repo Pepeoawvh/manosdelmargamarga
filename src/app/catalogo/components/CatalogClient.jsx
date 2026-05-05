@@ -24,6 +24,7 @@ function pickRandom(array, n) {
 export default function CatalogPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const vistaAll = searchParams.get("vista") === "todo";
 
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -51,12 +52,12 @@ export default function CatalogPageClient() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (filters.category || filters.subcategories.length > 0 || filters.featured || filters.inStock) {
+    if (filters.category || filters.subcategories.length > 0 || filters.featured || filters.inStock || vistaAll) {
       setShowCategories(false);
     } else {
       setShowCategories(true);
     }
-  }, [filters]);
+  }, [filters, vistaAll]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -180,8 +181,11 @@ export default function CatalogPageClient() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJson }} />
       {itemListJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: itemListJson }} />}
 
-      {!showCategories && (
-        <div className="flex justify-end mb-3">
+      {!showCategories && !vistaAll && (
+        <div className="flex justify-between items-center mb-3">
+          <h1 className="text-2xl font-bold text-gray-700">
+            {filters.featured ? "Productos destacados" : filters.category || "Catálogo"}
+          </h1>
           <Button onClick={handleBackToCategories} variant="solid" size="sm" className="bg-[#5e8c30] text-white hover:bg-[#4c7628]">
             Volver a Categorías
           </Button>
@@ -285,7 +289,7 @@ export default function CatalogPageClient() {
                       Otros productos
                     </h2>
                     <Button
-                      onClick={() => { clearFilters(); setShowCategories(false); router.push("/catalogo"); }}
+                      onClick={() => { router.push("/catalogo?vista=todo"); }}
                       variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
                       aria-label="Ver todo el catálogo" title="Ver todo el catálogo"
                     >
@@ -301,6 +305,42 @@ export default function CatalogPageClient() {
               )}
             </div>
           )}
+        </>
+      ) : vistaAll ? (
+        <>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-700">Todo el catálogo</h1>
+            <Button onClick={handleBackToCategories} variant="solid" size="sm" className="bg-[#5e8c30] text-white hover:bg-[#4c7628]">
+              Volver a Categorías
+            </Button>
+          </div>
+          {PRODUCT_CATEGORIES.map((category) => {
+            const categoryProducts = products.filter(
+              (p) => p.categories?.includes(category) && Number(p.stock) > 0
+            );
+            if (categoryProducts.length === 0) return null;
+            return (
+              <section key={category} className="mb-10">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-700">{category}</h2>
+                  <Button
+                    onClick={() => handleCategorySelect(category)}
+                    variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
+                    aria-label={`Ver solo ${category}`}
+                  >
+                    Ver solo {category}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  {categoryProducts.map((p) => (
+                    <div key={p.id} className="min-h-[360px]">
+                      <ProductCard product={p} showInfo />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </>
       ) : (
         <>

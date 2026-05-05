@@ -8,16 +8,16 @@ export const PRODUCT_CATEGORIES = [
   "Papeles",
   "Brandeables",
   "Celebraciones",
+  "Souvenirs",
   "Figuras",
   "Hazlo tu mismo",
   "Tarjetas",
-  "Ofertas",
 ];
 
 export const PRODUCT_SUBCATEGORIES = {
   Papeles: ["Con semilla", "Sin semilla", "Oficio", "Crudo", "Colores"],
   Brandeables: ["Etiquetas", "Credenciales", "Pulseras"],
-  Celebraciones: ["Agradecimientos", "Bodas", "Credenciales", "Invitaciones", "Saludos", "Souvenir-Regalos Corp."],
+  Celebraciones: ["Agradecimientos", "Bodas", "Credenciales", "Invitaciones", "Saludos"],
   Figuras: ["Troqueladas", "Origami"],
   "Hazlo tu mismo": ["Imprimir", "Pegar", "Timbrar"],
   Tarjetas: ["Tarjetas de Presentación", "Tarjetones"],

@@ -30,7 +30,6 @@ const ProductCard = ({
     stock = 0,
     featured = false,
     videoUrl,
-    cotizable = false,
     hidePrice = false,
     personalizable = false,
   } = product;
@@ -148,12 +147,7 @@ const ProductCard = ({
             Personalizable
           </span>
         )}
-        {!personalizable && cotizable && (
-          <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-full" aria-label="Producto cotizable">
-            Cotizable
-          </span>
-        )}
-        {isOutOfStock && !isAdmin && !cotizable && (
+        {isOutOfStock && !isAdmin && !personalizable && (
           <span className="text-xs font-medium px-2 py-1 bg-red-500 text-white rounded-full" aria-label="Sin stock">
             Agotado
           </span>
@@ -182,9 +176,9 @@ const ProductCard = ({
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
             <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              {personalizable ? null : (cotizable && hidePrice) ? (
-                <span className="text-[#f5d6c8] text-sm">Precio a cotizar</span>
-              ) : priceInt > 0 ? (
+              {personalizable && hidePrice ? (
+                <span className="text-white/50 text-xs">Precio a cotizar</span>
+              ) : personalizable ? null : priceInt > 0 ? (
                 <div className="flex flex-col items-start gap-0.5">
                   {oldPriceInt > 0 && (
                     <span className="text-xs text-white/60 line-through">
@@ -237,11 +231,10 @@ const ProductCard = ({
               >
                 Ver detalle
               </Link>
-              {cotizable || personalizable ? (
+              {personalizable ? (
                 <QuoteButton
                   product={product}
                   compact={true}
-                  personalizable={personalizable}
                   aria-label={`Cotizar ${titleText}`}
                 />
               ) : (

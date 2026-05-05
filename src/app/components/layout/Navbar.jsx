@@ -109,6 +109,7 @@ const Navbar = () => {
       ],
     },
     { name: "Contacto", path: "/contacto", color: "gray" },
+    { name: "Ofertas", path: "/catalogo?categoria=Ofertas", color: "orange" },
   ];
 
   const getActiveColorClass = (color) => {
@@ -118,6 +119,7 @@ const Navbar = () => {
       green: "bg-green-50 text-green-700",
       blue: "bg-sky-50 text-sky-700",
       gray: "bg-gray-50 text-gray-700",
+      orange: "bg-orange-50 text-orange-600",
     };
     return colorClasses[color] || colorClasses.gray;
   };
@@ -129,6 +131,7 @@ const Navbar = () => {
       green: "text-gray-700 hover:text-[#5e8c30] hover:bg-[#ecf7cd]",
       blue: "text-gray-700 hover:text-sky-600 hover:bg-sky-50",
       gray: "text-gray-700 hover:text-gray-600 hover:bg-gray-50",
+      orange: "text-orange-500 font-semibold hover:text-orange-600 hover:bg-orange-50",
     };
     return colorClasses[color] || colorClasses.gray;
   };
