@@ -6,7 +6,7 @@ import { firestoreDB } from "../../../lib/firebase/config";
 export const PRODUCT_CATEGORIES = [
   "Bolitas de Semilla",
   "Papeles",
-  "Brandeables",
+  "Corporativo",
   "Celebraciones",
   "Souvenirs",
   "Figuras",
@@ -14,9 +14,14 @@ export const PRODUCT_CATEGORIES = [
   "Tarjetas",
 ];
 
+// Aliases de categorías antiguas → nueva. Permite mostrar productos con valores legacy de Firestore.
+export const CATEGORY_ALIASES = {
+  Corporativo: ["Brandeables"],
+};
+
 export const PRODUCT_SUBCATEGORIES = {
   Papeles: ["Con semilla", "Sin semilla", "Oficio", "Crudo", "Colores"],
-  Brandeables: ["Etiquetas", "Credenciales", "Pulseras"],
+  Corporativo: ["Etiquetas", "Credenciales", "Pulseras"],
   Celebraciones: ["Agradecimientos", "Bodas", "Credenciales", "Invitaciones", "Saludos"],
   Figuras: ["Troqueladas", "Origami"],
   "Hazlo tu mismo": ["Imprimir", "Pegar", "Timbrar"],

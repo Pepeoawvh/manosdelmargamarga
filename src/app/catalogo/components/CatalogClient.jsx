@@ -5,7 +5,13 @@ import { collection, getDocs, query } from "firebase/firestore";
 import { firestoreDB } from "../../../lib/firebase/config";
 import ProductCard from "../../components/product/ProductCard";
 import Button from "../../components/ui/Button";
-import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from "../../hooks/shared/useProducts";
+import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES, CATEGORY_ALIASES } from "../../hooks/shared/useProducts";
+
+const matchesCategory = (product, category) => {
+  if (!category) return true;
+  const aliases = CATEGORY_ALIASES[category] || [];
+  return product.categories?.includes(category) || aliases.some((a) => product.categories?.includes(a));
+};
 
 const DESTACADOS_LIMIT = 6;
 const OFERTAS_LIMIT = 3;
@@ -113,7 +119,7 @@ export default function CatalogPageClient() {
   }, [othersPool]);
 
   const filteredProducts = products.filter((product) => {
-    const categoryMatch = !filters.category || product.categories?.includes(filters.category);
+    const categoryMatch = !filters.category || matchesCategory(product, filters.category);
     const subcategoryMatch =
       filters.subcategories.length === 0 ||
       filters.subcategories.every((sub) => product.subcategories?.includes(sub));
@@ -208,7 +214,7 @@ export default function CatalogPageClient() {
             aria-label="Listas de categorías"
           >
             {PRODUCT_CATEGORIES.map((category) => {
-              const count = products.filter((p) => p.categories?.includes(category) && Number(p.stock) > 0).length;
+              const count = products.filter((p) => matchesCategory(p, category) && Number(p.stock) > 0).length;
               const selected = filters.category === category;
               return (
                 <button
@@ -316,7 +322,7 @@ export default function CatalogPageClient() {
           </div>
           {PRODUCT_CATEGORIES.map((category) => {
             const categoryProducts = products.filter(
-              (p) => p.categories?.includes(category) && Number(p.stock) > 0
+              (p) => matchesCategory(p, category) && Number(p.stock) > 0
             );
             if (categoryProducts.length === 0) return null;
             return (
