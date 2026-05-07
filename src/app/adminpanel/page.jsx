@@ -8,6 +8,7 @@ import ReservationTable from "../components/admin/ReservationTable";
 import CarouselManager from "@/app/components/admin/CarouselManager";
 import SalesReport from "../components/admin/SalesReport";
 import Dashboard from "../components/admin/Dashboard";
+import CatalogSortManager from "../components/admin/CatalogSortManager";
 import ExternalSaleForm from "../components/admin/ExternalSalesForm";
 import { useState, useEffect, useMemo } from "react";
 
@@ -476,7 +477,11 @@ export default function AdminPanel() {
         </div>
       ),
     },
-     ];
+    {
+      label: "Orden Catálogo",
+      content: <CatalogSortManager products={Array.isArray(products) ? products : []} />,
+    },
+  ];
 
   return (
     <div className="p-4 md:p-6 bg-gradient-to-b from-emerald-50/60 to-white min-h-screen">

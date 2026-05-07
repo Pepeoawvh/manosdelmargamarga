@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, doc, getDoc } from "firebase/firestore";
 import { firestoreDB } from "../../../lib/firebase/config";
 import ProductCard from "../../components/product/ProductCard";
 import Button from "../../components/ui/Button";
@@ -13,7 +13,7 @@ const matchesCategory = (product, category) => {
   return product.categories?.includes(category) || aliases.some((a) => product.categories?.includes(a));
 };
 
-const DESTACADOS_LIMIT = 6;
+const DESTACADOS_LIMIT = 16;
 const OFERTAS_LIMIT = 3;
 const OTROS_LIMIT = 6;
 const OTROS_ROTATE_MS = 180000;
@@ -41,6 +41,7 @@ export default function CatalogPageClient() {
   const [loadingError, setLoadingError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const [showCategories, setShowCategories] = useState(true);
+  const [sortConfig, setSortConfig] = useState({});
 
   const [filters, setFilters] = useState({
     category: searchParams.get("categoria") || "",
@@ -50,6 +51,18 @@ export default function CatalogPageClient() {
   });
 
   useEffect(() => setIsMounted(true), []);
+
+  useEffect(() => {
+    const loadSortConfig = async () => {
+      try {
+        const snap = await getDoc(doc(firestoreDB, 'config', 'catalogSort'));
+        if (snap.exists()) setSortConfig(snap.data().sections || {});
+      } catch (e) {
+        console.error('Error cargando config de orden:', e);
+      }
+    };
+    loadSortConfig();
+  }, []);
 
   useEffect(() => {
     const categoria = searchParams.get("categoria") || "";
@@ -90,7 +103,13 @@ export default function CatalogPageClient() {
           return;
         }
 
-        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const data = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => {
+            const ta = a.createdAt?.toMillis?.() ?? a.createdAt?.getTime?.() ?? 0;
+            const tb = b.createdAt?.toMillis?.() ?? b.createdAt?.getTime?.() ?? 0;
+            return tb - ta;
+          });
         setProducts(data);
 
         const featured = data.filter((p) => p.featured && Number(p.stock) > 0).slice(0, DESTACADOS_LIMIT);
@@ -151,6 +170,101 @@ export default function CatalogPageClient() {
       const exists = prev.subcategories.includes(sub);
       return { ...prev, subcategories: exists ? prev.subcategories.filter((s) => s !== sub) : [...prev.subcategories, sub] };
     });
+  };
+
+  const applySort = (items, sectionKey) => {
+    const conf = sortConfig[sectionKey] || {};
+    const type = conf.type || 'fecha_desc';
+    const getTime = (p) => p.createdAt?.toMillis?.() ?? p.createdAt?.getTime?.() ?? 0;
+    if (type === 'fecha_asc') return [...items].sort((a, b) => getTime(a) - getTime(b));
+    if (type === 'precio_desc') return [...items].sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+    if (type === 'precio_asc') return [...items].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    if (type === 'masVendidos') {
+      const ranking = conf.salesRanking || [];
+      return [...items].sort((a, b) => {
+        const ia = ranking.indexOf(a.id), ib = ranking.indexOf(b.id);
+        if (ia === -1 && ib === -1) return getTime(b) - getTime(a);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+    }
+    if (type === 'manual') {
+      const order = conf.manualOrder || [];
+      return [...items].sort((a, b) => {
+        const ia = order.indexOf(a.id), ib = order.indexOf(b.id);
+        if (ia === -1 && ib === -1) return getTime(b) - getTime(a);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+    }
+    // fecha_desc (default)
+    return [...items].sort((a, b) => getTime(b) - getTime(a));
+  };
+
+  // "otros" section: if a custom sort is configured, derive from full pool instead of random
+  const sortedOtherProducts = (() => {
+    const conf = sortConfig['otros'] || {};
+    if (conf.type && conf.type !== 'fecha_desc') {
+      return applySort(othersPool.filter((p) => Number(p.stock) > 0), 'otros').slice(0, OTROS_LIMIT);
+    }
+    return otherProducts; // random rotation
+  })();
+
+  // Destacados: lógica columnar — cada columna sigue un criterio distinto
+  // Col 1: más vendidos  |  Col 2: más recientes  |  Col 3: categoría config  |  Col 4: categoría config
+  const getFeaturedColumnar = () => {
+    if (!featuredProducts.length) return [];
+    const conf = sortConfig['Destacados'] || {};
+    const pool = featuredProducts;
+    const ROWS = 4;
+    const getTime = (p) => p.createdAt?.toMillis?.() ?? p.createdAt?.getTime?.() ?? 0;
+    const exclude = (arr, used) => arr.filter((p) => !used.has(p.id));
+
+    const used = new Set();
+
+    // Columna 1 — más vendidos
+    const ranking = conf.salesRanking || [];
+    const col1 = [...pool].sort((a, b) => {
+      const ia = ranking.indexOf(a.id), ib = ranking.indexOf(b.id);
+      if (ia === -1 && ib === -1) return getTime(b) - getTime(a);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    }).slice(0, ROWS);
+    col1.forEach((p) => used.add(p.id));
+
+    // Columna 2 — más recientes (excluye col1)
+    const col2 = exclude([...pool].sort((a, b) => getTime(b) - getTime(a)), used).slice(0, ROWS);
+    col2.forEach((p) => used.add(p.id));
+
+    // Columna 3 — categoría elegida en admin (excluye col1+col2)
+    const col3Cat = conf.col3Category;
+    const col3 = exclude(
+      (col3Cat ? [...pool].filter((p) => matchesCategory(p, col3Cat)) : [...pool])
+        .sort((a, b) => getTime(b) - getTime(a)),
+      used
+    ).slice(0, ROWS);
+    col3.forEach((p) => used.add(p.id));
+
+    // Columna 4 — categoría elegida en admin (excluye col1+col2+col3)
+    const col4Cat = conf.col4Category;
+    const col4 = exclude(
+      (col4Cat ? [...pool].filter((p) => matchesCategory(p, col4Cat)) : [...pool])
+        .sort((a, b) => getTime(b) - getTime(a)),
+      used
+    ).slice(0, ROWS);
+
+    // Intercalar por filas: [c1[0], c2[0], c3[0], c4[0], c1[1], ...]
+    const result = [];
+    for (let i = 0; i < ROWS; i++) {
+      if (col1[i]) result.push(col1[i]);
+      if (col2[i]) result.push(col2[i]);
+      if (col3[i]) result.push(col3[i]);
+      if (col4[i]) result.push(col4[i]);
+    }
+    return result;
   };
 
   const breadcrumbJson = JSON.stringify({
@@ -259,7 +373,7 @@ export default function CatalogPageClient() {
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-                    {featuredProducts.map((p) => (
+                    {getFeaturedColumnar().map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
                   </div>
@@ -281,14 +395,14 @@ export default function CatalogPageClient() {
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-                    {offerProducts.map((p) => (
+                    {applySort(offerProducts, 'Ofertas').map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
                   </div>
                 </>
               )}
 
-              {otherProducts.length > 0 && (
+              {sortedOtherProducts.length > 0 && (
                 <>
                   <div className="flex justify-between items-center mb-4 mt-8">
                     <h2 className="text-2xl font-bold text-gray-700">
@@ -303,7 +417,7 @@ export default function CatalogPageClient() {
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {otherProducts.map((p) => (
+                    {sortedOtherProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
                   </div>
@@ -321,8 +435,9 @@ export default function CatalogPageClient() {
             </Button>
           </div>
           {PRODUCT_CATEGORIES.map((category) => {
-            const categoryProducts = products.filter(
-              (p) => matchesCategory(p, category) && Number(p.stock) > 0
+            const categoryProducts = applySort(
+              products.filter((p) => matchesCategory(p, category) && Number(p.stock) > 0),
+              category
             );
             if (categoryProducts.length === 0) return null;
             return (
@@ -368,7 +483,7 @@ export default function CatalogPageClient() {
           )}
 
           <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
-            {filteredProducts.map((product) => (
+            {applySort(filteredProducts, filters.featured ? 'Destacados' : filters.category || '').map((product) => (
               <div key={product.id} className="min-h-[360px]">
                 <ProductCard product={product} showInfo />
               </div>
