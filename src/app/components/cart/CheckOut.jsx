@@ -184,7 +184,6 @@ const CheckOut = () => {
         throw new Error("Respuesta inválida del servidor");
       }
     } catch (err) {
-      console.error("handleCheckout error:", err);
       setError(err.message || "Ocurrió un error durante el pago");
       try {
         cancelPaymentAttempt?.();
@@ -247,7 +246,6 @@ const CheckOut = () => {
       setMessage("");
       setError(null);
     } catch (err) {
-      console.error("handleReserveCart error:", err);
       setError(err.message || "Ocurrió un error al registrar la reserva");
     } finally {
       setLoading(false);

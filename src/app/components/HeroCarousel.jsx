@@ -226,7 +226,6 @@ export default function HeroCarousel() {
       setSlides(data);
       setLoading(false);
     }, (err) => {
-      console.error("Error fetching slides:", err);
       setError("No se pudieron cargar las imagenes del carrusel");
       setLoading(false);
     });

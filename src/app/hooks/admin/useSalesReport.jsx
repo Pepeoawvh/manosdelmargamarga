@@ -186,7 +186,6 @@ export default function useSalesReport() {
         calculateAllTimeStats(allOrders, allExternal, DEVELOPER_COMMISSION_RATE)
       );
     } catch (err) {
-      console.error("Error al cargar datos de ventas:", err);
       setError(
         err?.message ||
           "Error al cargar los datos de ventas. Por favor intenta nuevamente."
@@ -462,7 +461,6 @@ export default function useSalesReport() {
       await fetchSalesData();
       return { success: true };
     } catch (err) {
-      console.error("Error al guardar venta externa:", err);
       return { success: false, error: err.message };
     }
   };

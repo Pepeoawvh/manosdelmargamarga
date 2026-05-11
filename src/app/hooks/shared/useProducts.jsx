@@ -12,6 +12,7 @@ export const PRODUCT_CATEGORIES = [
   "Figuras",
   "Hazlo tu mismo",
   "Tarjetas",
+  "Ofertas",
 ];
 
 // Aliases de categorías antiguas → nueva. Permite mostrar productos con valores legacy de Firestore.

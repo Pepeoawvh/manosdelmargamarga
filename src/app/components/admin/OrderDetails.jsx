@@ -56,10 +56,8 @@ const OrderDetails = ({
   // Verificar si la prop assignOrderNumber está disponible
   useEffect(() => {
     if (typeof assignOrderNumber !== 'function') {
-      console.warn("La función assignOrderNumber no está disponible");
       setAssignOrderNumberAvailable(false);
     } else {
-      console.log("Función assignOrderNumber está disponible");
       setAssignOrderNumberAvailable(true);
     }
   }, [assignOrderNumber]);
@@ -95,9 +93,7 @@ const OrderDetails = ({
     setIsProcessing(true);
     try {
       await updateOrderStatus(order.id, newStatus);
-      console.log(`Estado actualizado a ${newStatus}`);
     } catch (error) {
-      console.error("Error al actualizar estado:", error);
       alert("No se pudo actualizar el estado del pedido");
     } finally {
       setIsProcessing(false);
@@ -106,7 +102,6 @@ const OrderDetails = ({
 
   const handleOrderNumberUpdate = async () => {
     if (!assignOrderNumberAvailable) {
-      console.error("La función assignOrderNumber no está disponible");
       alert("Error: No se puede actualizar el número de orden. La función no está disponible.");
       return;
     }
@@ -118,19 +113,15 @@ const OrderDetails = ({
     
     setIsProcessing(true);
     try {
-      console.log(`Asignando número de orden: ${newOrderNumber} a pedido ID: ${order.id}`);
       const success = await assignOrderNumber(order.id, newOrderNumber.trim());
       
       if (success) {
         setIsEditingOrderNumber(false);
-        console.log("Número de orden asignado correctamente");
         alert("Número de orden actualizado correctamente");
       } else {
-        console.error("No se pudo asignar el número de orden");
         alert("No se pudo asignar el número de orden");
       }
     } catch (error) {
-      console.error("Error al asignar número de orden:", error);
       alert(`Error al asignar número de orden: ${error.message}`);
     } finally {
       setIsProcessing(false);
@@ -216,7 +207,6 @@ const OrderDetails = ({
       setIsEditingExternalDetails(false);
       alert("Venta externa actualizada correctamente");
     } catch (error) {
-      console.error("Error actualizando venta externa:", error);
       alert("Ocurrió un error al guardar la venta externa");
     } finally {
       setIsProcessing(false);

@@ -24,8 +24,6 @@ export default function Dashboard({
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(o);
-      } else {
-        console.log("DUPLICADO IGNORADO:", { id: o?.id, orderId: o?.orderId });
       }
     }
 
@@ -46,7 +44,6 @@ const result = unique.filter((o) => {
 });
 
 
-    console.log("OPER_RESULT_COUNT", result.length);
     return result;
   }, [orders]);
 

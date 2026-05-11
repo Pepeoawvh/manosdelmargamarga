@@ -90,38 +90,12 @@ export async function generateMetadata({ params }) {
       },
     };
   } catch (error) {
-    console.error("Error generating metadata:", error);
     return {
       title: "Producto | Manos del Marga Marga",
       description: "Explora nuestro catálogo de papel artesanal hecho a mano en Chile.",
     };
   }
 }
-
-export default async function Page({ params }) {
-  const { handle } = await params;
-  const productUrl = `https://www.manosdelmargamarga.cl/producto/${handle}`;
-
-  let productData = null;
-  try {
-    const isFirestoreId = (value) => typeof value === "string" && value.length === 20;
-    if (isFirestoreId(handle)) {
-      const snap = await adminDb.collection("productosmmm").doc(handle).get();
-      if (snap.exists) {
-        productData = { id: snap.id, ...snap.data() };
-      }
-    } else {
-      const qs = await adminDb.collection("productosmmm")
-        .where("slug", "==", handle)
-        .limit(1)
-        .get();
-      if (!qs.empty) {
-        productData = { id: qs.docs[0].id, ...qs.docs[0].data() };
-      }
-    }
-  } catch (e) {
-    console.error("Error loading product:", e);
-  }
 
   return (
     <>

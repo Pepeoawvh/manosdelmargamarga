@@ -23,28 +23,7 @@ export default function HomeClient() {
       try {
         const snap = await getDoc(doc(firestoreDB, 'config', 'catalogSort'));
         if (snap.exists()) setSortConfig(snap.data().sections || {});
-      } catch (e) {
-        console.error('Error cargando config de orden:', e);
-      }
-    };
-    loadSortConfig();
-  }, []);
-
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const q = query(
-          collection(firestoreDB, "productosmmm"),
-          where("featured", "==", true)
-        );
-        const querySnapshot = await getDocs(q);
-        const products = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFeaturedProducts(products.filter((p) => Number(p.stock) > 0));
-      } catch (error) {
-        console.error("Error fetching featured products:", error);
+} catch (e) {
       } finally {
         setLoading(false);
       }

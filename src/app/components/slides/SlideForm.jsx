@@ -118,15 +118,6 @@ export default function SlideForm({ initialData, onSubmit, onCancel }) {
 
   const submit = (e) => {
     e.preventDefault();
-    console.log("📝 SlideForm enviando datos:", {
-      type: formData.type,
-      title: formData.title,
-      hasLayout: !!formData.layout,
-      layout: formData.layout,
-      hasStyling: !!formData.styling,
-      styling: formData.styling,
-      allKeys: Object.keys(formData),
-    });
     onSubmit(formData);
   };
 

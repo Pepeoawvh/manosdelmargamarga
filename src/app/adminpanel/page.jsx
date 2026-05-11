@@ -231,12 +231,6 @@ export default function AdminPanel() {
       return updateOrderStatus(orderId, newStatus);
     };
 
-    // Logging para verificar disponibilidad de la función
-    console.log(
-      "¿assignOrderNumber está disponible?",
-      typeof assignOrderNumber === "function"
-    );
-
     return (
       <div className="p-4">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

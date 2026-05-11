@@ -26,9 +26,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     slug: product?.slug || "",
   });
 
-  // console.log("ProductForm inicializado con datos:", product || "nuevo producto");
-
-  const getAvailableSubcategories = () => {
+  const availableSubcategories = getAvailableSubcategories();
     let available = [];
     formData.categories.forEach((category) => {
       if (PRODUCT_SUBCATEGORIES[category]) {

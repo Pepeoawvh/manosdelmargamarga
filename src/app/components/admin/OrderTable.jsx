@@ -69,7 +69,6 @@ const OrderTable = ({
         alert("No se pudo asignar el número de orden. Inténtelo nuevamente.");
       }
     } catch (error) {
-      console.error("Error al asignar número de orden:", error);
       alert(`Error al asignar número de orden: ${error.message}`);
     }
   };
@@ -84,7 +83,6 @@ const OrderTable = ({
       if (success) setEditingStatus(null);
       else alert("No se pudo actualizar el estado del pedido.");
     } catch (error) {
-      console.error("Error al cambiar estado:", error);
       alert(`Error al actualizar el estado del pedido: ${error.message}`);
     }
   };
@@ -327,11 +325,7 @@ const OrderTable = ({
                           value={order.status || "PENDIENTE"}
                           onChange={async (e) => {
                             const newStatus = e.target.value;
-                            try {
-                              await handleStatusChange(order.id, newStatus);
-                            } catch (error) {
-                              console.error("Error al aplicar cambio de estado:", error);
-                            }
+                            await handleStatusChange(order.id, newStatus);
                           }}
                           autoFocus
                           className="w-full py-1 px-2 text-xs border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500"

@@ -46,7 +46,6 @@ export default function CatalogSortManager({ products = [] }) {
         const snap = await getDoc(doc(firestoreDB, 'config', 'catalogSort'));
         if (snap.exists()) setConfig(snap.data().sections || {});
       } catch (e) {
-        console.error('Error cargando config de orden:', e);
       } finally {
         setLoading(false);
       }
@@ -61,7 +60,6 @@ export default function CatalogSortManager({ products = [] }) {
       setSavedOk(true);
       setTimeout(() => setSavedOk(false), 2000);
     } catch (e) {
-      console.error('Error guardando config:', e);
     } finally {
       setSaving(false);
     }
@@ -107,7 +105,6 @@ export default function CatalogSortManager({ products = [] }) {
       setConfig(updated);
       await persistConfig(updated);
     } catch (e) {
-      console.error('Error sincronizando ventas:', e);
     } finally {
       setSyncing(null);
     }
