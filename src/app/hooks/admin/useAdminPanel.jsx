@@ -78,6 +78,7 @@ export default function useAdminPanel() {
       },
       () => {}
     );
+    return () => unsubscribe();
   }, [isLoggedIn]);
 
   const fetchOrders = useCallback(async () => {

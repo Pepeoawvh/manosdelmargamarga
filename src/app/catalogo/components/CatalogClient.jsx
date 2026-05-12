@@ -57,7 +57,56 @@ export default function CatalogPageClient() {
       try {
         const snap = await getDoc(doc(firestoreDB, 'config', 'catalogSort'));
         if (snap.exists()) setSortConfig(snap.data().sections || {});
-} catch (e) {
+      } catch (e) {}
+    };
+    loadSortConfig();
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const fetchProducts = async () => {
+      try {
+        if (!firestoreDB) {
+          setLoadingError("Error de conexión a la base de datos");
+          setLoading(false);
+          return;
+        }
+
+        const productosRef = collection(firestoreDB, "productosmmm");
+        const q = query(productosRef);
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          setProducts([]);
+          setFeaturedProducts([]);
+          setOfferProducts([]);
+          setOthersPool([]);
+          setOtherProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        const data = snapshot.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => {
+            const ta = a.createdAt?.toMillis?.() ?? a.createdAt?.getTime?.() ?? 0;
+            const tb = b.createdAt?.toMillis?.() ?? b.createdAt?.getTime?.() ?? 0;
+            return tb - ta;
+          });
+        setProducts(data);
+
+        const featured = data.filter((p) => p.featured && Number(p.stock) > 0).slice(0, DESTACADOS_LIMIT);
+        setFeaturedProducts(featured);
+
+        const offersAll = data.filter((p) => p.categories?.includes("Ofertas") && Number(p.stock) > 0);
+        setOfferProducts(offersAll.slice(0, OFERTAS_LIMIT));
+
+        const baseOthers = data.filter((p) => Number(p.stock) > 0 && !p.featured && !(p.categories?.includes("Ofertas")));
+        setOthersPool(baseOthers);
+        setOtherProducts(pickRandom(baseOthers, OTROS_LIMIT));
+      } catch (err) {
+        setLoadingError(`Error al cargar productos: ${err.message}`);
       } finally {
         setLoading(false);
       }

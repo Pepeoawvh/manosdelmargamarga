@@ -92,10 +92,11 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function ProductPage({ params }) {
+export default async function ProductPage({ params }) {
+  const { handle } = await params;
   return (
     <div className="px-4 md:px-6 py-8">
-      <ProductDetails productSlug={params.handle} />
+      <ProductDetails productSlug={handle} />
     </div>
   );
 }
