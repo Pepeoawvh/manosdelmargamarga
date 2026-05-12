@@ -19,16 +19,30 @@ export default function HomeClient() {
   useEffect(() => { setIsMounted(true); }, []);
 
   useEffect(() => {
-    const loadSortConfig = async () => {
+    if (!isMounted) return;
+
+    const fetchFeaturedProducts = async () => {
       try {
         const snap = await getDoc(doc(firestoreDB, 'config', 'catalogSort'));
         if (snap.exists()) setSortConfig(snap.data().sections || {});
-} catch (e) {
-      } finally {
+      } catch (e) {}
+
+      try {
+        const q = query(
+          collection(firestoreDB, "productosmmm"),
+          where("featured", "==", true)
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((p) => Number(p.stock) > 0);
+        setFeaturedProducts(data);
+      } catch (e) {}  finally {
         setLoading(false);
       }
     };
-    if (isMounted) fetchFeaturedProducts();
+
+    fetchFeaturedProducts();
   }, [isMounted]);
 
   if (!isMounted) {
