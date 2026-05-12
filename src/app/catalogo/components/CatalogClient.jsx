@@ -40,7 +40,9 @@ export default function CatalogPageClient() {
   const [loading, setLoading] = useState(true);
   const [loadingError, setLoadingError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [showCategories, setShowCategories] = useState(true);
+  const [showCategories, setShowCategories] = useState(
+    !searchParams.get("categoria") && searchParams.get("destacados") !== "1"
+  );
   const [sortConfig, setSortConfig] = useState({});
 
   const [filters, setFilters] = useState({
@@ -51,6 +53,18 @@ export default function CatalogPageClient() {
   });
 
   useEffect(() => setIsMounted(true), []);
+
+  useEffect(() => {
+    const categoria = searchParams.get("categoria") || "";
+    const destacados = searchParams.get("destacados") === "1";
+    setFilters({
+      category: categoria,
+      subcategories: [],
+      featured: destacados,
+      inStock: false,
+    });
+    setShowCategories(!categoria && !destacados);
+  }, [searchParams]);
 
   useEffect(() => {
     const loadSortConfig = async () => {
