@@ -64,7 +64,8 @@ const ProductDetails = ({ productSlug }) => {
         if (!data) {
           setError("Producto no encontrado");
         } else {
-setProduct(data);
+          setProduct(data);
+        }
       } catch (err) {
         setError("No se pudo cargar el producto");
       } finally {
