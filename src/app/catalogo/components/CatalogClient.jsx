@@ -311,7 +311,7 @@ export default function CatalogPageClient() {
             className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-2"
             aria-label="Listas de categorías"
           >
-            {PRODUCT_CATEGORIES.map((category) => {
+            {PRODUCT_CATEGORIES.filter((category) => category !== "Ofertas").map((category) => {
               const count = products.filter((p) => matchesCategory(p, category) && Number(p.stock) > 0).length;
               const selected = filters.category === category;
               return (
