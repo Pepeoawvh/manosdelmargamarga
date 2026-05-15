@@ -19,7 +19,7 @@ export default function ClientProviders({ children }) {
         <Suspense fallback={<div className="h-16 bg-white shadow-sm" />}>
           <Navbar />
         </Suspense>
-        <main className="text-[#768651] w-full">
+        <main className="text-[#768651] w-full pt-[64px] md:pt-[144px]">
           {children}
         </main>
         <Footer />
