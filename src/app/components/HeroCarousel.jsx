@@ -11,7 +11,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 // IMPORTANTE: clases en string único para que Tailwind las detecte en build
-const heights = "h-[400px] sm:h-[380px] md:h-[420px] lg:h-[460px] xl:h-[500px]";
+const heights = "h-[400px] sm:h-[380px] md:h-[380px] lg:h-[380px] xl:h-[420px]";
 // Slides usan h-full para heredar la altura del contenedor Swiper
 const slideHeights = "h-full";
 
