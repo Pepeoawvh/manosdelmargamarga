@@ -141,8 +141,10 @@ export default function HomeClient() {
       {/* Botón flotante de WhatsApp */}
       <WspButton />
 
-      {/* Hero con carrusel optimizado */}
-      <HeroCarousel />
+      {/* Hero con carrusel optimizado — pt compensa navbar fixed expandido */}
+      <div className="pt-[70px] md:pt-[160px]">
+        <HeroCarousel />
+      </div>
 
       <BotoneraInfo />
 

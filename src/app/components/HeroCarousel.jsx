@@ -11,8 +11,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 // IMPORTANTE: clases en string único para que Tailwind las detecte en build
-// max-h limita el alto máximo relativo al viewport para no ocupar toda la pantalla
-const heights = "h-[480px] sm:h-[420px] md:h-[460px] lg:h-[500px] xl:h-[540px] 2xl:h-[580px] max-h-[70vh]";
+const heights = "h-[400px] sm:h-[380px] md:h-[420px] lg:h-[460px] xl:h-[500px]";
 // Slides usan h-full para heredar la altura del contenedor Swiper
 const slideHeights = "h-full";
 
