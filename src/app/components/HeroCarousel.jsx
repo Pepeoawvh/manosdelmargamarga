@@ -10,10 +10,9 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-// Desktop: banner horizontal ancho
-// Mobile: portrait fijo (mas alto que ancho en movil)
 // IMPORTANTE: clases en string único para que Tailwind las detecte en build
-const heights = "h-[480px] sm:h-[400px] md:h-[480px] lg:h-[520px]";
+// max-h limita el alto máximo relativo al viewport para no ocupar toda la pantalla
+const heights = "h-[480px] sm:h-[420px] md:h-[460px] lg:h-[500px] xl:h-[540px] 2xl:h-[580px] max-h-[70vh]";
 // Slides usan h-full para heredar la altura del contenedor Swiper
 const slideHeights = "h-full";
 
