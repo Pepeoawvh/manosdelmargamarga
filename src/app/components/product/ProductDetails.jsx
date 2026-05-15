@@ -207,7 +207,7 @@ const ProductDetails = ({ productSlug }) => {
                       (i) => (i - 1 + images.length) % images.length,
                     )
                   }
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-md"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-lg p-2 shadow-md"
                   aria-label="Anterior"
                 >
                   <svg
@@ -227,7 +227,7 @@ const ProductDetails = ({ productSlug }) => {
 
                 <button
                   onClick={() => setActiveImage((i) => (i + 1) % images.length)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-md"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-lg p-2 shadow-md"
                   aria-label="Siguiente"
                 >
                   <svg
@@ -300,27 +300,27 @@ const ProductDetails = ({ productSlug }) => {
 
           {/* Precio */}
           <div className="mb-6">
-            {product.oldPrice > 0 && !product.personalizable && !product.hidePrice && (
+            {product.oldPrice > 0 && !product.hidePrice && (
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm text-gray-400 line-through">
                   ${Number.parseInt(product.oldPrice)}
                 </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#eef6d6] text-[#5e8c30]">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-lg bg-[#eef6d6] text-[#5e8c30]">
                   Oferta
                 </span>
               </div>
             )}
             <div className="flex items-center gap-3">
               <span className="text-4xl font-extrabold text-[#798f38]">
-                {product.personalizable && product.hidePrice
-                  ? 'Precio a cotizar'
-                  : priceInt > 0
-                  ? `$${priceInt}`
-                  : 'Consultar precio'}
+                {product.hidePrice
+                  ? priceInt > 0
+                    ? 'Precio a cotizar'
+                    : 'Consultar precio'
+                  : `$${priceInt}`}
               </span>
             </div>
             <div className="text-sm text-gray-500 mt-1">
-              {product.personalizable ? 'Según requerimiento' : 'IVA incluido'}
+              {product.hidePrice ? 'Según requerimiento' : 'IVA incluido'}
             </div>
           </div>
 
@@ -377,12 +377,12 @@ const ProductDetails = ({ productSlug }) => {
               <>
                 <AddToCartButton
                   product={product}
-                  className="w-full bg-[#5e8c30] hover:bg-[#7fb43f] text-white py-3 rounded-md shadow"
+                  className="w-full bg-[#5e8c30] hover:bg-[#7fb43f] text-white py-3 rounded-lg shadow"
                 />
                 {product.reservable && (
                   <ReservationButton
                     product={product}
-                    className="py-3 rounded-md shadow"
+                    className="py-3 rounded-lg shadow"
                   />
                 )}
               </>

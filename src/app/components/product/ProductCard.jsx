@@ -143,12 +143,12 @@ const ProductCard = ({
       {/* Badges */}
       <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
         {personalizable && (
-          <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-full" aria-label="Producto personalizable">
+          <span className="text-xs font-medium px-2 py-1 bg-[#5e8c30] text-white rounded-lg" aria-label="Producto personalizable">
             Personalizable
           </span>
         )}
         {isOutOfStock && !isAdmin && !personalizable && (
-          <span className="text-xs font-medium px-2 py-1 bg-red-500 text-white rounded-full" aria-label="Sin stock">
+          <span className="text-xs font-medium px-2 py-1 bg-red-500 text-white rounded-lg" aria-label="Sin stock">
             Agotado
           </span>
         )}
@@ -176,9 +176,9 @@ const ProductCard = ({
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
             <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              {personalizable && hidePrice ? (
+              {hidePrice ? (
                 <span className="text-white/50 text-xs">Precio a cotizar</span>
-              ) : personalizable ? null : priceInt > 0 ? (
+              ) : priceInt > 0 ? (
                 <div className="flex flex-col items-start gap-0.5">
                   {oldPriceInt > 0 && (
                     <span className="text-xs text-white/60 line-through">
@@ -201,7 +201,7 @@ const ProductCard = ({
             <div className="flex space-x-2">
               <button
                 onClick={() => onToggleFeatured(product)}
-                className={`p-1 rounded-full ${featured ? "text-yellow-500" : "text-gray-400"}`}
+                className={`p-1 rounded-lg ${featured ? "text-yellow-500" : "text-gray-400"}`}
                 title={featured ? "Quitar de destacados" : "Marcar como destacado"}
                 aria-label={featured ? "Quitar de destacados" : "Marcar como destacado"}
               >
@@ -224,7 +224,7 @@ const ProductCard = ({
             <div className="flex gap-1.5">
               <Link
                 href={productHref}
-                className="px-3 py-[5px] bg-white/90 text-[#5e8c30] text-[11px] font-semibold rounded-full hover:bg-white transition-colors backdrop-blur-sm"
+                className="px-3 py-[5px] bg-white/90 text-[#5e8c30] text-[11px] font-semibold rounded-lg hover:bg-white transition-colors backdrop-blur-sm"
                 aria-label={`Ver detalle de ${titleText}`}
                 title={`Ver ${titleText}`}
                 prefetch
@@ -241,7 +241,7 @@ const ProductCard = ({
                 <AddToCartButton
                   product={product}
                   compact={true}
-                  className="px-3 py-[5px] text-[11px] font-semibold rounded-full"
+                  className="px-3 py-[5px] text-[11px] font-semibold rounded-lg"
                   aria-label={`Agregar ${titleText} al carrito`}
                 />
               )}

@@ -43,7 +43,7 @@ const QuoteButton = ({ product, compact = false, className = '' }) => {
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className={`inline-flex items-center gap-1 px-3 py-[5px] text-white text-[11px] font-semibold rounded-full transition-colors bg-[#5e8c30] hover:bg-[#4a7326] ${className}`}
+        className={`inline-flex items-center gap-1 px-3 py-[5px] text-white text-[11px] font-semibold rounded-lg transition-colors bg-[#5e8c30] hover:bg-[#4a7326] ${className}`}
         aria-label={`Cotizar ${product.title || 'producto'} por WhatsApp`}
         title="Cotizar por WhatsApp"
       >
@@ -60,7 +60,7 @@ const QuoteButton = ({ product, compact = false, className = '' }) => {
       href={buildWhatsappUrl()}
       target="_blank"
       rel="noopener noreferrer"
-      className={`w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-[#5e8c30] hover:bg-[#4a7326] active:bg-[#3d5e1e] text-white font-semibold rounded-md shadow transition-colors duration-200 ${className}`}
+      className={`w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-[#5e8c30] hover:bg-[#4a7326] active:bg-[#3d5e1e] text-white font-semibold rounded-lg shadow transition-colors duration-200 ${className}`}
       aria-label={`Cotizar ${product.title || 'producto'} por WhatsApp`}
     >
       {/* Icono WhatsApp */}

@@ -19,7 +19,7 @@ const Button = ({
 }) => {
   // Base accesible con ring y buen contraste sobre fondos claros del proyecto
   const base =
-    'inline-flex items-center justify-center font-medium rounded-md transition-colors ' +
+    'inline-flex items-center justify-center font-medium rounded-lg transition-colors ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5e8c30] ' +
     'disabled:opacity-60 disabled:cursor-not-allowed';
 

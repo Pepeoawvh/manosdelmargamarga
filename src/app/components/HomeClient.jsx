@@ -61,10 +61,16 @@ export default function HomeClient() {
     );
   }
 
-  const ROWS = 4;
+  const ROWS = 3;
+
+  const MAX_FEATURED = 12;
 
   function getFeaturedColumnar(pool, sc) {
     if (!pool.length) return [];
+    
+    // Limitar el pool a MAX_FEATURED productos para mantener elgrid completo
+    const limitedPool = pool.slice(0, MAX_FEATURED);
+    
     const conf = sc['Destacados'] || {};
     const getTime = (p) => p.createdAt?.toMillis?.() ?? p.createdAt?.getTime?.() ?? 0;
     const matchesCat = (p, cat) => {
@@ -78,7 +84,7 @@ export default function HomeClient() {
 
     // Columna 1 — más vendidos
     const ranking = conf.salesRanking || [];
-    const col1 = [...pool].sort((a, b) => {
+    const col1 = [...limitedPool].sort((a, b) => {
       const ia = ranking.indexOf(a.id), ib = ranking.indexOf(b.id);
       if (ia === -1 && ib === -1) return getTime(b) - getTime(a);
       if (ia === -1) return 1;
@@ -88,13 +94,13 @@ export default function HomeClient() {
     col1.forEach((p) => used.add(p.id));
 
     // Columna 2 — más recientes (excluye col1)
-    const col2 = exclude([...pool].sort((a, b) => getTime(b) - getTime(a)), used).slice(0, ROWS);
+    const col2 = exclude([...limitedPool].sort((a, b) => getTime(b) - getTime(a)), used).slice(0, ROWS);
     col2.forEach((p) => used.add(p.id));
 
     // Columna 3 — categoría elegida en admin (excluye col1+col2)
     const col3Cat = conf.col3Category;
     const col3 = exclude(
-      (col3Cat ? pool.filter((p) => matchesCat(p, col3Cat)) : [...pool])
+      (col3Cat ? limitedPool.filter((p) => matchesCat(p, col3Cat)) : [...limitedPool])
         .sort((a, b) => getTime(b) - getTime(a)),
       used
     ).slice(0, ROWS);
@@ -103,7 +109,7 @@ export default function HomeClient() {
     // Columna 4 — categoría elegida en admin (excluye col1+col2+col3)
     const col4Cat = conf.col4Category;
     const col4 = exclude(
-      (col4Cat ? pool.filter((p) => matchesCat(p, col4Cat)) : [...pool])
+      (col4Cat ? limitedPool.filter((p) => matchesCat(p, col4Cat)) : [...limitedPool])
         .sort((a, b) => getTime(b) - getTime(a)),
       used
     ).slice(0, ROWS);
@@ -116,7 +122,18 @@ export default function HomeClient() {
       if (col3[i]) result.push(col3[i]);
       if (col4[i]) result.push(col4[i]);
     }
-    return result;
+
+    // Rellenar hasta MAX_FEATURED con los productos que no hayan aparecido aún
+    if (result.length < MAX_FEATURED) {
+      const usedInResult = new Set(result.map((p) => p.id));
+      const remaining = pool.filter((p) => !usedInResult.has(p.id));
+      for (const p of remaining) {
+        if (result.length >= MAX_FEATURED) break;
+        result.push(p);
+      }
+    }
+
+    return result.slice(0, MAX_FEATURED);
   }
 
   return (

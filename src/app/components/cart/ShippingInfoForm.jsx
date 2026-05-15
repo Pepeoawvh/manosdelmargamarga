@@ -374,7 +374,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
           <label className="block font-medium text-gray-700">
             Tipo de envío:
           </label>
-          <span className="inline-flex items-center py-0.5 px-2 rounded-full text-xs font-medium bg-[#b4cf66] text-[#533021]">
+          <span className="inline-flex items-center py-0.5 px-2 rounded-lg text-xs font-medium bg-[#b4cf66] text-[#533021]">
             {shippingInfo.shippingType}
           </span>
         </div>
@@ -444,7 +444,7 @@ const ShippingInfoForm = ({ shippingInfo, setShippingInfo }) => {
                     setShowTooltip({ ...showTooltip, rut: !showTooltip.rut })
                   }
                 >
-                  <span className="w-4 h-4 flex items-center justify-center border border-gray-400 rounded-full text-xs">
+                  <span className="w-4 h-4 flex items-center justify-center border border-gray-400 rounded-lg text-xs">
                     i
                   </span>
                 </button>

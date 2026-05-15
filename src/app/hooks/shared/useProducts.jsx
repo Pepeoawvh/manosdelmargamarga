@@ -23,7 +23,8 @@ export const CATEGORY_ALIASES = {
 export const PRODUCT_SUBCATEGORIES = {
   Papeles: ["Con semilla", "Sin semilla", "Oficio", "Crudo", "Colores"],
   Corporativo: ["Etiquetas", "Credenciales", "Pulseras"],
-  Celebraciones: ["Agradecimientos", "Bodas", "Credenciales", "Invitaciones", "Saludos"],
+  Celebraciones: ["Agradecimientos", "Bodas", "Invitaciones", "Saludos"],
+  Souvenirs: ["Libretas", "Postales", "Marcadores de página"],
   Figuras: ["Troqueladas", "Origami"],
   "Hazlo tu mismo": ["Imprimir", "Pegar", "Timbrar"],
   Tarjetas: ["Tarjetas de Presentación", "Tarjetones"],
