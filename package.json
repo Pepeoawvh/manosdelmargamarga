@@ -3,10 +3,10 @@
   "version": "0.4.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "sh node_modules/.bin/next dev --turbopack",
+    "build": "sh node_modules/.bin/next build",
+    "start": "sh node_modules/.bin/next start",
+    "lint": "sh node_modules/.bin/next lint"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
