@@ -130,6 +130,13 @@ const ProductDetails = ({ productSlug }) => {
           sku: product.id,
           brand: { "@type": "Brand", name: "Manos del Marga Marga" },
           category: (product.categories || []).join(", "),
+          aggregateRating: product.rating && product.rating.count > 0 ? {
+            "@type": "AggregateRating",
+            ratingValue: product.rating.avg,
+            reviewCount: product.rating.count,
+            bestRating: 5,
+            worstRating: 1,
+          } : undefined,
           offers: {
             "@type": "Offer",
             url: canonicalUrl,
@@ -141,6 +148,10 @@ const ProductDetails = ({ productSlug }) => {
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
             itemCondition: "https://schema.org/NewCondition",
+            seller: {
+              "@type": "Organization",
+              name: "Manos del Marga Marga",
+            },
           },
         })}
       </Script>

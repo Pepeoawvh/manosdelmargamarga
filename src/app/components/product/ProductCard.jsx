@@ -173,9 +173,24 @@ const ProductCard = ({
           {titleText}
         </h3>
 
+        {product.rating && product.rating.count > 0 && (
+          <div className="flex items-center gap-1 mb-1" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+            <meta itemProp="ratingValue" content={String(product.rating.avg)} />
+            <meta itemProp="reviewCount" content={String(product.rating.count)} />
+            <meta itemProp="bestRating" content="5" />
+            <span className="text-yellow-400 text-xs">★</span>
+            <span className="text-white/70 text-xs">{product.rating.avg}</span>
+            <span className="text-white/50 text-xs">({product.rating.count})</span>
+          </div>
+        )}
+
         <div className="flex justify-between items-end mt-2">
           {showInfo && (
             <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+              <meta itemProp="priceCurrency" content="CLP" />
+              <meta itemProp="price" content={String(priceInt)} />
+              <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
+              <link itemProp="url" href={`https://www.manosdelmargamarga.cl${productHref}`} />
               {hidePrice ? (
                 <span className="text-white/50 text-xs">Precio a cotizar</span>
               ) : priceInt > 0 ? (
@@ -185,15 +200,14 @@ const ProductCard = ({
                       ${oldPriceInt}
                     </span>
                   )}
-                  <span itemProp="price" content={String(priceInt)} className="text-base leading-tight">
-                    <span itemProp="priceCurrency" content="CLP" className="text-xs font-normal mr-0.5">CLP</span>
+                  <span className="text-base leading-tight">
+                    <span className="text-xs font-normal mr-0.5">CLP</span>
                     {`$${priceInt}`}
                   </span>
                 </div>
               ) : (
                 <span className="text-sm">Consultar precio</span>
               )}
-              <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
             </div>
           )}
 
