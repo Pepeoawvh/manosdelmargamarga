@@ -93,7 +93,7 @@ export default function NosotrasPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECCIÓN 1 — HERO
           ═══════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-[50vh] md:min-h-[55vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[35vh] md:min-h-[38vh] flex items-center justify-center overflow-hidden">
         {/* Imagen de fondo */}
         <div className="absolute inset-0">
           <Image
@@ -333,7 +333,7 @@ export default function NosotrasPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECCIÓN 6 — CTA FINAL
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-gradient-to-r from-[#5e8c30] to-[#4a7025] py-16 md:py-20 px-4 md:px-6">
+      <section className="bg-gradient-to-r from-[#5e8c30] to-[#4a7025] py-5 md:py-7 px-4 md:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             initial="hidden"
