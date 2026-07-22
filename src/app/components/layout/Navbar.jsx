@@ -96,8 +96,6 @@ const Navbar = () => {
       color: "gray",
       submenu: PRODUCT_CATEGORIES,
     },
-    // { name: "Nosotras", path: "/nosotras", color: "pink" },
-    // { name: "Sostenible", path: "/sostenible", color: "green" },
     {
       name: "Tutoriales",
       path: "/tutoriales",
@@ -109,6 +107,7 @@ const Navbar = () => {
       ],
     },
     { name: "Contacto", path: "/contacto", color: "gray" },
+    { name: "Nosotras", path: "/nosotras", color: "pink" },
     { name: "Ofertas", path: "/catalogo?categoria=Ofertas", color: "orange" },
   ];
 
