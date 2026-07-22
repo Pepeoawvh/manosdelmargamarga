@@ -107,7 +107,7 @@ const Navbar = () => {
       ],
     },
     { name: "Contacto", path: "/contacto", color: "gray" },
-    { name: "Nosotras", path: "/nosotras", color: "pink" },
+    { name: "Nosotras", path: "/nosotras", color: "gray" },
     { name: "Ofertas", path: "/catalogo?categoria=Ofertas", color: "orange" },
   ];
 
