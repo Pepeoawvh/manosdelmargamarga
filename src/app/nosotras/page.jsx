@@ -56,7 +56,7 @@ const certificaciones = [
     text: "Reconocidas oficialmente como empresa liderada por mujeres, impulsando la equidad en la cadena de suministro estatal.",
   },
   {
-    img: "/images/nosotras/MChile.svg",
+    img: "/images/nosotras/MChile.webp",
     alt: "Sello Marca Chile",
     title: "Sello Marca Chile",
     text: "Nuestra producción artesanal cuenta con el respaldo de la marca país, certificando origen, calidad y valor local.",
@@ -310,12 +310,12 @@ export default function NosotrasPage() {
                   transition={{ duration: 0.45, delay: i * 0.07 }}
                   className="flex gap-4 items-start bg-gray-50 rounded-xl p-5 border border-gray-100"
                 >
-                  <div className="w-11 h-11 rounded-full bg-[#cde582]/40 flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-14 h-14 rounded-full bg-[#cde582]/40 flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src={cert.img}
                       alt={cert.alt}
-                      width={28}
-                      height={28}
+                      width={36}
+                      height={36}
                       className="object-contain"
                     />
                   </div>
