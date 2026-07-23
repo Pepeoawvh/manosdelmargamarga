@@ -8,13 +8,6 @@ import {
   FaFemale,
   FaSun,
   FaHeart,
-  FaBuilding,
-  FaStar,
-  FaFlag,
-  FaLeaf,
-  FaClock,
-  FaTrophy,
-  FaChartLine,
   FaWhatsapp,
 } from "react-icons/fa";
 
@@ -51,37 +44,44 @@ const pilares = [
 /* ─── Datos de certificaciones ─── */
 const certificaciones = [
   {
-    icon: FaBuilding,
+    img: "/images/nosotras/CLcom.svg",
+    alt: "Mercado Público",
     title: "Mercado Público",
     text: "Habilitada para contratar con el Estado, facilitando la compra pública sostenible y transparente.",
   },
   {
-    icon: FaStar,
+    img: "/images/nosotras/mujerE.png",
+    alt: "Sello Mujeres Proveedoras",
     title: "Sello Mujeres Proveedoras",
     text: "Reconocidas oficialmente como empresa liderada por mujeres, impulsando la equidad en la cadena de suministro estatal.",
   },
   {
-    icon: FaFlag,
+    img: "/images/nosotras/MChile.svg",
+    alt: "Sello Marca Chile",
     title: "Sello Marca Chile",
     text: "Nuestra producción artesanal cuenta con el respaldo de la marca país, certificando origen, calidad y valor local.",
   },
   {
-    icon: FaLeaf,
+    img: "/images/nosotras/Rsernatur.png",
+    alt: "Sello R – SERNATUR",
     title: "Sello R – SERNATUR",
     text: "Formamos parte del Registro Nacional de Prestadores de Servicios Turísticos, garantizando confianza y formalidad legal.",
   },
   {
-    icon: FaClock,
+    img: "/images/nosotras/40hr.png",
+    alt: "Certificación 40 Horas",
     title: "Certificación 40 Horas",
     text: "Nuestro equipo opera con una jornada de 35 horas semanales, priorizando la calidad de vida y el talento humano.",
   },
   {
-    icon: FaTrophy,
+    img: "/images/nosotras/nnd.png",
+    alt: "Finalistas Nada Nos Detiene",
     title: "Finalistas \"Nada Nos Detiene\"",
     text: "Destacados entre los mejores emprendimientos del país por nuestra innovación y potencial de impacto socioambiental (G100).",
   },
   {
-    icon: FaChartLine,
+    img: "/images/nosotras/cdn.svg",
+    alt: "Asesoría Centro de Negocios",
     title: "Asesoría Centro de Negocios",
     text: "Contamos con el respaldo técnico de Sercotec para asegurar una gestión empresarial sólida y profesional.",
   },
@@ -300,9 +300,7 @@ export default function NosotrasPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificaciones.map((cert, i) => {
-              const Icon = cert.icon;
-              return (
+            {certificaciones.map((cert, i) => (
                 <motion.div
                   key={cert.title}
                   initial="hidden"
@@ -312,8 +310,14 @@ export default function NosotrasPage() {
                   transition={{ duration: 0.45, delay: i * 0.07 }}
                   className="flex gap-4 items-start bg-gray-50 rounded-xl p-5 border border-gray-100"
                 >
-                  <div className="w-11 h-11 rounded-full bg-[#cde582]/40 flex items-center justify-center shrink-0">
-                    <Icon className="text-[#5e8c30] text-lg" />
+                  <div className="w-11 h-11 rounded-full bg-[#cde582]/40 flex items-center justify-center shrink-0 overflow-hidden">
+                    <Image
+                      src={cert.img}
+                      alt={cert.alt}
+                      width={28}
+                      height={28}
+                      className="object-contain"
+                    />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-gray-800 mb-1">
@@ -324,8 +328,7 @@ export default function NosotrasPage() {
                     </p>
                   </div>
                 </motion.div>
-              );
-            })}
+              ))}
           </div>
         </div>
       </section>
