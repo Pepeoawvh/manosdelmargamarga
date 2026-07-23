@@ -185,7 +185,7 @@ export default function NosotrasPage() {
           >
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
               <Image
-                src="/images/nosotras/taller-historia.jpg"
+                src="/images/nosotras/hero-nosotras2.jpg"
                 alt="Artesana elaborando papel semilla en el taller Manos del Marga Marga"
                 fill
                 className="object-cover"
@@ -264,7 +264,7 @@ export default function NosotrasPage() {
           className="relative h-[300px] md:h-[420px] lg:h-[500px] rounded-2xl overflow-hidden shadow-lg"
         >
           <Image
-            src="/images/nosotras/taller-fullwidth.jpg"
+            src="/images/nosotras/hero-nosotras3.jpg"
             alt="Vista panorámica del taller de papel artesanal Manos del Marga Marga"
             fill
             className="object-cover"
