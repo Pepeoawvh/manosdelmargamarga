@@ -100,7 +100,8 @@ export default function NosotrasPage() {
             src="/images/nosotras/hero-nosotras.jpg"
             alt="Taller de papel artesanal Manos del Marga Marga"
             fill
-            className="object-cover"
+            className="object-cover object-[center_34%]
+            "
             priority
             sizes="100vw"
           />
@@ -267,7 +268,8 @@ export default function NosotrasPage() {
             src="/images/nosotras/hero-nosotras3.jpg"
             alt="Vista panorámica del taller de papel artesanal Manos del Marga Marga"
             fill
-            className="object-cover"
+            className="object-cover object-[center_43%] opacity-85
+            "
             sizes="100vw"
           />
         </motion.div>
