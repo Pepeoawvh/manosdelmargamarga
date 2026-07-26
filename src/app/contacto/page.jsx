@@ -14,7 +14,7 @@ export default function ContactoPage() {
                 src="/images/contacto/contactoimg.svg"
                 alt="Ilustración de contacto Manos del Marga Marga"
                 fill
-                className="object-cover object-[50%_75%]"
+                className="object-cover object-[50%_50%]"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
@@ -29,7 +29,7 @@ export default function ContactoPage() {
               </div>
             </div>
 
-            <h3 className="text-2xl text-center font-semibold text-[#3f4f1c]">
+            <h3 className="text-ml text-center font-semibold text-[#3f4f1c]">
               Déjanos tu mensaje
             </h3>
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-4">

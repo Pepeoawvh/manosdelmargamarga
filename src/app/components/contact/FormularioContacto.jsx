@@ -255,7 +255,7 @@ export default function FormularioContacto() {
           name="message"
           value={form.message}
           onChange={onChange}
-          rows={6}
+          rows={5}
           className={`${inputCls} resize-y`}
           placeholder="Escribe tu mensaje..."
           required
