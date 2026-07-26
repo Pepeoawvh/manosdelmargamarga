@@ -2,10 +2,10 @@
 import React from "react";
 
 const inputCls =
-  "border rounded px-3 py-2 bg-[#] outline-none text-white bg-[#5e5e6e]  placeholder-stone-200";
-const labelCls = "text-sm font-medium text-gray-700";
+  "border border-gray-200 rounded-lg px-4 py-2.5 bg-white outline-none text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#5e8c30]/30 focus:border-[#5e8c30] transition-colors";
+const labelCls = "text-sm font-medium text-gray-600";
 const btnCls =
-  "px-4 py-2 text-gray-700 rounded w-full bg-[#96cbfb] hover:opacity-90 disabled:opacity-60";
+  "px-4 py-2.5 text-white rounded-lg w-full bg-[#5e8c30] hover:bg-[#4a7025] disabled:opacity-60 font-medium transition-colors";
 
 const WINDOW_MS = 2 * 60 * 30 * 1000; // 30 minutos
 
@@ -147,7 +147,7 @@ export default function FormularioContacto() {
   return (
     <form
       onSubmit={onSubmit}
-      className="text-white grid gap-4"
+      className="grid gap-4"
       role="form"
       aria-label="Formulario de contacto"
       noValidate
