@@ -10,13 +10,13 @@ export default function ContactoPage() {
           {/* Columna izquierda: frase e ilustración */}
           <div className="space-y-8">
 
-            <div className="w-full aspect-[4/3] rounded  grid place-items-center text-stone-600">
+            <div className="w-full aspect-[4/3]  grid place-items-center">
               <Image
                 src="/images/contacto/contactoimg.svg"
-                alt=""
+                alt="Ilustración de contacto Manos del Marga Marga"
                 width={1000}
                 height={1000}
-                className=""
+                className="object-cover object-top"
               />
             </div>
           </div>
