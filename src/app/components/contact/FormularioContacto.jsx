@@ -2,7 +2,7 @@
 import React from "react";
 
 const inputCls =
-  "border border-gray-200 rounded-lg px-4 py-2.5 bg-white outline-none text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#5e8c30]/30 focus:border-[#5e8c30] transition-colors";
+  "border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 outline-none text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#5e8c30]/30 focus:border-[#5e8c30] transition-colors";
 const labelCls = "text-sm font-medium text-gray-600";
 const btnCls =
   "px-4 py-2.5 text-white rounded-lg w-full bg-[#5e8c30] hover:bg-[#4a7025] disabled:opacity-60 font-medium transition-colors";
