@@ -375,7 +375,7 @@ export default function CatalogPageClient() {
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {getFeaturedColumnar().map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -397,7 +397,7 @@ export default function CatalogPageClient() {
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {applySort(offerProducts, 'Ofertas').map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -419,7 +419,7 @@ export default function CatalogPageClient() {
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {sortedOtherProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -455,7 +455,7 @@ export default function CatalogPageClient() {
                     Ver solo {category}
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   {categoryProducts.map((p) => (
                     <div key={p.id} className="min-h-[360px]">
                       <ProductCard product={p} showInfo />
@@ -485,7 +485,7 @@ export default function CatalogPageClient() {
             </nav>
           )}
 
-          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
+          <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
             {applySort(filteredProducts, filters.featured ? 'Destacados' : filters.category || '').map((product) => (
               <div key={product.id} className="min-h-[360px]">
                 <ProductCard product={product} showInfo />
