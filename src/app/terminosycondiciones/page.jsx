@@ -32,13 +32,8 @@ export default function TermsPage() {
                     </tr>
                     <tr className="border-t">
                       <td className="py-2 align-top">Cambio Voluntario</td>
-                      <td className="py-2 align-top">30 Días para cambiar el producto si no te satisface.</td>
+                      <td className="py-2 align-top">10 Días para cambiar el producto si no te satisface. No implica devolución monetaria.</td>
                       <td className="py-2 align-top">El producto debe estar sin uso, en su empaque original, sin imprimir y en perfecto estado. El costo de envío de retorno es tuyo.</td>
-                    </tr>
-                    <tr className="border-t">
-                      <td className="py-2 align-top">Derecho a Retracto</td>
-                      <td className="py-2 align-top">10 Días para anular la compra online.</td>
-                      <td className="py-2 align-top">No aplica si el papel germinable presenta deterioro por humedad o manipulación. El costo de envío de retorno es tuyo.</td>
                     </tr>
                     <tr className="border-t">
                       <td className="py-2 align-top">Ley Aplicable</td>
@@ -93,7 +88,7 @@ export default function TermsPage() {
                 <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">Paso 1: Envío de Antecedentes (Apertura del Caso)</h3>
                 <p>Envía un correo a <a className="text-[#3f4f1c] font-medium" href="mailto:contacto@manosdelmargamarga.cl">contacto@manosdelmargamarga.cl</a> indicando claramente el motivo de tu solicitud:</p>
                 <ul>
-                  <li>Motivo: Retracto, Garantía Legal por Falla o Devolución/Cambio Voluntario</li>
+                  <li>Motivo: Garantía Legal por Falla o Devolución/Cambio Voluntario</li>
                   <li>Identificación: Número de pedido y tus datos de contacto.</li>
                   <li>Fotografías Esenciales: Adjunta imágenes claras del producto que muestren:</li>
                   <ul>
@@ -113,22 +108,12 @@ export default function TermsPage() {
                 <p>Tu Opción: Si el producto presenta fallas o defectos de fabricación (ej: perforaciones, roturas, humedad que lo inutilice) dentro de los 3 meses siguientes a la recepción, tienes derecho a optar por la reparación gratuita, el cambio o la devolución del dinero. En caso de devolución del dinero por Retracto o Voluntaria, a banco de otras plazas diferentes a Banco Estado, aplicará descuento por recargo de transacción sistema bancario y costos de envio no asumidos por el consumidor.</p>
                 <p>Costos de Traslado: Si la falla es confirmada por la empresa, Manos del Marga Marga SpA asume el costo de transporte para el retorno del producto.</p>
 
-                <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">2. Derecho a Retracto (10 Días)</h3>
-                <p>Plazo Legal: Tienes un plazo de 10 días corridos para anular la compra online desde que recibes el producto.</p>
-                <p>Condición Excluyente (Protección del Producto Delicado): Dado el carácter artesanal y la delicadeza de nuestro papel con semillas, no podrás ejercer el retracto si el bien se ha deteriorado por una acción tuya. Esto incluye:</p>
-                <ul>
-                  <li>Humedad, Manchas, Cortes o Dobleces Permanentes.</li>
-                  <li>Impresión, Uso o Manipulación de las Semillas.</li>
-                  <li>Daños en el Embalaje de Protección que comprometan la viabilidad del producto.</li>
-                </ul>
-                <p>Costos de Traslado: En caso de retracto, el costo de envío del producto de vuelta a nuestra bodega es asumido por el cliente.</p>
-
-                <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">3. Cambios o Devoluciones Voluntarias (30 Días por Disconformidad)</h3>
-                <p>Plazo: Tienes hasta 30 días desde la recepción para solicitar un cambio o devolución si el producto no te satisface.</p>
+                <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">2. Cambios o Devoluciones Voluntarias (10 Días por Disconformidad)</h3>
+                <p>Plazo: Tienes hasta 10 días desde la recepción para solicitar un cambio o devolución si el producto no te satisface. Esta gestión no implica devolución monetaria.</p>
                 <p>Condición: El producto debe estar sin uso, en su empaque original, sin imprimir y con todos sus embalajes originales en perfecto estado.</p>
                 <p>Costos de Traslado: El costo de transporte para la devolución o cambio es asumido por el cliente.</p>
 
-                <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">4. Devolución de Dinero</h3>
+                <h3 className="text-xl font-medium mt-6 mb-2 text-[#3f4f1c]">3. Devolución de Dinero</h3>
                 <p>Una vez que se verifique la condición del producto en nuestra bodega, realizaremos el reembolso en un plazo no superior a 72 horas hábiles a tu medio de pago.</p>
 
                 <h2 className="text-2xl font-semibold mt-10 mb-4 text-[#3f4f1c]">Octavo: Otras disposiciones</h2>

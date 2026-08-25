@@ -113,3 +113,20 @@ Estado inicial documentado del proyecto.
 - Agregar campo `rating: { avg, count }` a documentos Firestore para aggregateRating
 - Auditar alt texts en todas las imágenes
 - Expandir sitemap con rutas faltantes
+
+---
+
+## [0.4.4] - 2026-07-23
+
+### Changed
+
+- **Términos y Condiciones — Cambio Voluntario:** Plazo reducido de 30 a 10 días. Agregada aclaración "No implica devolución monetaria" en tabla resumen y sección de detalle.
+
+- **Términos y Condiciones — Derecho a Retracto eliminado:** Se eliminó la fila de la tabla resumen, la sección completa "2. Derecho a Retracto (10 Días)" y la mención en el procedimiento de apertura de caso. Las secciones restantes fueron renumeradas (2→2, 3→2, 4→3).
+
+- **Checkout — Nota de retracto pre-pago:** Se agregó nota legal antes del botón "Pagar con Webpay": "Al realizar esta compra, aceptas nuestros Términos y Condiciones. Conforme al Art. 3° bis de la Ley N° 19.496, manifestamos expresamente que no nos adherimos al Derecho a Retracto en compras a distancia. Tampoco aplica el retracto para productos elaborados a pedido o personalizados."
+
+### Archivos modificados
+
+- `src/app/terminosycondiciones/page.jsx`
+- `src/app/components/cart/CheckOut.jsx`

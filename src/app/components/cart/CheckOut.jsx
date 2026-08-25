@@ -338,6 +338,12 @@ const CheckOut = () => {
               <div className="grid w-full justify-center space-y-4 mt-4">
                 {!isReservation ? (
                   <>
+                    <p className="text-xs text-gray-500 text-center leading-relaxed">
+                      Al realizar esta compra, aceptas nuestros{" "}
+                      <Link href="/terminosycondiciones" className="underline hover:text-gray-700">
+                        Términos y Condiciones
+                      </Link>. Conforme al Art. 3° bis de la Ley N° 19.496, manifestamos expresamente que no nos adherimos al Derecho a Retracto en compras a distancia. Tampoco aplica el retracto para productos elaborados a pedido o personalizados.
+                    </p>
                     <Button
                       type="button"
                       className="w-full bg-[#5e8c30] hover:bg-[#4d7528] py-3 items-center justify-center text-white rounded"
