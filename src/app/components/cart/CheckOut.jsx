@@ -382,13 +382,6 @@ const CheckOut = () => {
             </p>
           )}
           
-          {!reservationSuccess && !isReservation && (
-            <p className="text-xs text-gray-500 mt-4 text-center">
-              Al completar la compra, aceptas nuestros <Link href="/terminosycondiciones">Términos y Condiciones</Link> y política de
-              privacidad.
-            </p>
-          )}
-          
           {!reservationSuccess && isReservation && (
             <p className="text-xs text-gray-500 mt-4 text-center">
               Al confirmar la reserva, aceptas que te contactemos por medio de Correo electrónico o Whatsapp para coordinar los detalles de tu reserva.
