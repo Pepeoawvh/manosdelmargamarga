@@ -179,7 +179,7 @@ const ProductDetails = ({ productSlug }) => {
           <p className="text-gray-400 italic text-sm mt-1">{product.subtitle}</p>
         )}
         <div className="mt-2 flex justify-end">
-          <ShareButton title={product.title || ""} />
+          <ShareButton title={product.title || ""} url={canonicalUrl} label="Compartir" />
         </div>
       </div>
 
@@ -314,7 +314,7 @@ const ProductDetails = ({ productSlug }) => {
                     <p className="text-gray-400 italic mt-1">{product.subtitle}</p>
                   )}
                 </div>
-                <ShareButton title={product.title || ""} />
+                <ShareButton title={product.title || ""} url={canonicalUrl} label="Compartir" />
               </div>
             </div>
 

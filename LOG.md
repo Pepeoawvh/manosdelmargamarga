@@ -152,3 +152,26 @@ Estado inicial documentado del proyecto.
 - `src/app/components/product/ShareButton.jsx` (nuevo)
 - `src/app/components/product/ProductCard.jsx`
 - `src/app/components/product/ProductDetails.jsx`
+
+---
+
+## [0.4.6] - 2026-07-23
+
+### Mejoras al botón de compartir
+
+- **Más redes:** se agregan **Pinterest**, **LinkedIn** e **Instagram** al menú (WhatsApp, Facebook, X, Email y "Copiar enlace" se mantienen). Instagram no tiene diálogo web de compartir, así que el enlace abre instagram.com con el contexto del producto.
+- **Botón "Compartir" visible en el detalle:** en `ProductDetails` el botón ahora es una píldora con fondo `#eef6d6` que dice **"Compartir"** + icono (móvil y desktop). Las tarjetas siguen con icono solo.
+- **URL canónica del producto:** "Copiar enlace" y todas las redes comparten la URL **del producto** (`https://www.manosdelmargamarga.cl/producto/[handle]`), no la URL de la página actual. Se pasa vía prop `url` desde `ProductCard` y `ProductDetails` (fallback a `window.location.href`).
+- **Tamaño:** botón 3px menor (píldora 33px alto en detalle; icono 24px en tarjetas, círculo contenedor también 24px).
+
+### Layout móvil de tarjetas (2 columnas)
+
+- **`ProductCard`:** overlay reorganizado en móvil — precio en su línea y botones ("Ver detalle" + "Agregar"/"Cotizar") en fila completa debajo repartiéndose el ancho (`flex-1`), para que no se salgan de la tarjeta en 2 columnas. Tipografías/padding compactados en móvil y rating oculto; altura de tarjeta `h-[375px]` móvil / `360px` desktop.
+- **Portada (`HomeClient`):** productos destacados en **2 columnas en móvil** (`grid-cols-2` desde `< sm`), manteniendo 4 en desktop y `gap-4 md:gap-8`.
+
+### Archivos
+
+- `src/app/components/product/ShareButton.jsx`
+- `src/app/components/product/ProductCard.jsx`
+- `src/app/components/product/ProductDetails.jsx`
+- `src/app/components/HomeClient.jsx`

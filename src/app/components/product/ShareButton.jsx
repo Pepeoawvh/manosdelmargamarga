@@ -7,22 +7,22 @@ import {
   FaLink,
   FaShareAlt,
   FaCheck,
+  FaPinterest,
+  FaLinkedin,
+  FaInstagram,
 } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-const ShareButton = ({ title = "", compact = false }) => {
+const ShareButton = ({ title = "", compact = false, url = "", label = "" }) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef(null);
 
-  const getUrl = () => {
-    if (typeof window === "undefined") return "";
-    return window.location.href;
-  };
+  const shareUrl =
+    url || (typeof window === "undefined" ? "" : window.location.href);
 
-  const url = getUrl();
   const shareText = title || "Manos del Marga Marga";
-  const encodedUrl = encodeURIComponent(url);
+  const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
 
   // Cerrar al hacer clic fuera del menú
@@ -42,11 +42,12 @@ const ShareButton = ({ title = "", compact = false }) => {
   };
 
   const copyLink = async () => {
+    const target = shareUrl;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(target);
     } catch {
       const ta = document.createElement("textarea");
-      ta.value = url;
+      ta.value = target;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
@@ -80,6 +81,27 @@ const ShareButton = ({ title = "", compact = false }) => {
       hover: "hover:bg-gray-100",
     },
     {
+      name: "Pinterest",
+      href: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedText}`,
+      icon: FaPinterest,
+      color: "text-[#E60023]",
+      hover: "hover:bg-[#E60023]/10",
+    },
+    {
+      name: "LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      icon: FaLinkedin,
+      color: "text-[#0A66C2]",
+      hover: "hover:bg-[#0A66C2]/10",
+    },
+    {
+      name: "Instagram",
+      href: `https://www.instagram.com/?url=${encodedUrl}`,
+      icon: FaInstagram,
+      color: "text-[#E4405F]",
+      hover: "hover:bg-[#E4405F]/10",
+    },
+    {
       name: "Email",
       href: `mailto:?subject=${encodedText}&body=${encodedText}%20${encodedUrl}`,
       icon: FaEnvelope,
@@ -98,10 +120,15 @@ const ShareButton = ({ title = "", compact = false }) => {
         aria-haspopup="menu"
         aria-expanded={open}
         className={`flex items-center justify-center text-[#798f38] hover:text-[#5e8c30] hover:bg-[#eef6d6] transition-colors rounded-full ${
-          compact ? "w-8 h-8 text-sm" : "w-9 h-9 text-base"
+          label
+            ? "gap-1.5 px-3 h-[33px] text-sm font-medium bg-[#eef6d6] hover:bg-[#cde582]"
+            : compact
+              ? "w-[24px] h-[24px] text-[12px]"
+              : "w-[33px] h-[33px] text-[15px]"
         }`}
       >
         <FaShareAlt />
+        {label && <span>{label}</span>}
       </button>
 
       {open && (
