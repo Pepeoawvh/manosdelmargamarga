@@ -15,6 +15,7 @@ import { firestoreDB } from "../../../lib/firebase/config";
 import AddToCartButton from "../cart/AddToCartButton";
 import ReservationButton from "../cart/ReservationButton";
 import QuoteButton from "../cart/QuoteButton";
+import ShareButton from "./ShareButton";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -177,6 +178,9 @@ const ProductDetails = ({ productSlug }) => {
         {product.subtitle && (
           <p className="text-gray-400 italic text-sm mt-1">{product.subtitle}</p>
         )}
+        <div className="mt-2 flex justify-end">
+          <ShareButton title={product.title || ""} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 p-3 pt-2 md:p-6">
@@ -287,27 +291,32 @@ const ProductDetails = ({ productSlug }) => {
         {/* Columna de información */}
         <div className="flex flex-col space-y-4">
           {/* Encabezado: solo visible en desktop (en móvil se muestra arriba del grid) */}
-          <div className="hidden md:block mb-4">
-            {product.categories && product.categories.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                {product.categories.map((category) => (
-                  <Link
-                    key={category}
-                    href={`/catalogo?categoria=${encodeURIComponent(category)}`}
-                    className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
-                  >
-                    {category}
-                  </Link>
-                ))}
+            <div className="hidden md:block mb-4">
+              {product.categories && product.categories.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {product.categories.map((category) => (
+                    <Link
+                      key={category}
+                      href={`/catalogo?categoria=${encodeURIComponent(category)}`}
+                      className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
+                    >
+                      {category}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">
+                    {product.title}
+                  </h1>
+                  {product.subtitle && (
+                    <p className="text-gray-400 italic mt-1">{product.subtitle}</p>
+                  )}
+                </div>
+                <ShareButton title={product.title || ""} />
               </div>
-            )}
-            <h1 className="text-2xl font-bold text-gray-800">
-              {product.title}
-            </h1>
-            {product.subtitle && (
-              <p className="text-gray-400 italic mt-1">{product.subtitle}</p>
-            )}
-          </div>
+            </div>
 
           {/* Precio */}
           <div className="mb-6">

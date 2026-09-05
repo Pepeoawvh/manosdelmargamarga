@@ -130,3 +130,25 @@ Estado inicial documentado del proyecto.
 
 - `src/app/terminosycondiciones/page.jsx`
 - `src/app/components/cart/CheckOut.jsx`
+
+---
+
+## [0.4.5] - 2026-07-23
+
+### Added
+
+- **Botón de compartir (`ShareButton.jsx`)** en el detalle y tarjetas de producto:
+  - **Web Share API nativa** (`navigator.share()`) en dispositivos móviles: abre el panel de compartir del sistema (WhatsApp, Gmail, etc.).
+  - **Fallback en desktop** (donde la API no está disponible): menú desplegable con iconos de WhatsApp, Facebook, X (Twitter), Email y "Copiar enlace" (con confirmación visual "Enlace copiado").
+  - Sin librerías externas; usa `react-icons/fa` ya disponible en el proyecto. Aprovecha el color verde de la paleta (`#798f38`/`#5e8c30`).
+
+### Ubicación
+
+- **`ProductCard.jsx`:** botón en la esquina superior derecha de la tarjeta (modo público, `z-20` sobre el link de la imagen).
+- **`ProductDetails.jsx`:** junto al título del producto, tanto en el encabezado móvil como en el de escritorio.
+
+### Archivos
+
+- `src/app/components/product/ShareButton.jsx` (nuevo)
+- `src/app/components/product/ProductCard.jsx`
+- `src/app/components/product/ProductDetails.jsx`

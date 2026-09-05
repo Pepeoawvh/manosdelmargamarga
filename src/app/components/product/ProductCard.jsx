@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import AddToCartButton from "../cart/AddToCartButton";
 import QuoteButton from "../cart/QuoteButton";
+import ShareButton from "./ShareButton";
 
 const ProductCard = ({
   product = {},
@@ -164,6 +165,15 @@ const ProductCard = ({
               clipRule="evenodd"
             />
           </svg>
+        </div>
+      )}
+
+      {/* Botón compartir: arriba a la derecha (modo público) — z alto sobre el link */}
+      {!isAdmin && (
+        <div className="absolute top-2 right-2 z-20">
+          <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors">
+            <ShareButton title={titleText} compact />
+          </div>
         </div>
       )}
 
