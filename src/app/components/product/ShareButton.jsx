@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   FaWhatsapp,
   FaFacebookF,
-  FaX,
+  FaTwitter,
   FaEnvelope,
   FaLink,
   FaShareAlt,
@@ -83,7 +83,7 @@ const ShareButton = ({ title = "", compact = false }) => {
     {
       name: "X",
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
-      icon: FaX,
+      icon: FaTwitter,
       color: "text-gray-800",
       hover: "hover:bg-gray-100",
     },
