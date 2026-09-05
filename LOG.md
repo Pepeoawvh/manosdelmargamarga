@@ -138,9 +138,9 @@ Estado inicial documentado del proyecto.
 ### Added
 
 - **Botón de compartir (`ShareButton.jsx`)** en el detalle y tarjetas de producto:
-  - **Web Share API nativa** (`navigator.share()`) en dispositivos móviles: abre el panel de compartir del sistema (WhatsApp, Gmail, etc.).
-  - **Fallback en desktop** (donde la API no está disponible): menú desplegable con iconos de WhatsApp, Facebook, X (Twitter), Email y "Copiar enlace" (con confirmación visual "Enlace copiado").
-  - Sin librerías externas; usa `react-icons/fa` ya disponible en el proyecto. Aprovecha el color verde de la paleta (`#798f38`/`#5e8c30`).
+  - Menú desplegable al hacer clic: WhatsApp, Facebook, **X** (logo actualizado vía `react-icons/si`, ya que `FaX`/`FaTwitter` no sirven), Email y "Copiar enlace" (con confirmación visual "Enlace copiado").
+  - Sin librerías externas; usa `react-icons/fa` + `react-icons/si` ya disponibles en el proyecto. Aprovecha el color verde de la paleta (`#798f38`/`#5e8c30`).
+  - **Nota:** se eliminó el uso de `navigator.share()` (Web Share API) porque en desktop abría la ventana nativa del sistema además del menú. Ahora **solo** se despliega el menú del navegador en todas las plataformas.
 
 ### Ubicación
 

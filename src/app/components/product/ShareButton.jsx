@@ -3,12 +3,12 @@ import { useState, useEffect, useRef } from "react";
 import {
   FaWhatsapp,
   FaFacebookF,
-  FaTwitter,
   FaEnvelope,
   FaLink,
   FaShareAlt,
   FaCheck,
 } from "react-icons/fa";
+import { SiX } from "react-icons/si";
 
 const ShareButton = ({ title = "", compact = false }) => {
   const [open, setOpen] = useState(false);
@@ -37,15 +37,7 @@ const ShareButton = ({ title = "", compact = false }) => {
     return () => document.removeEventListener("click", handle);
   }, [open]);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: shareText, url });
-        return;
-      } catch {
-        // usuario canceló o falló — mostrar menú de fallback
-      }
-    }
+  const handleShare = () => {
     setOpen((prev) => !prev);
   };
 
@@ -83,7 +75,7 @@ const ShareButton = ({ title = "", compact = false }) => {
     {
       name: "X",
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
-      icon: FaTwitter,
+      icon: SiX,
       color: "text-gray-800",
       hover: "hover:bg-gray-100",
     },
