@@ -15,7 +15,7 @@ export async function generateMetadata({ searchParams }) {
     return {
       title: "Catálogo completo de papel artesanal y papel semilla | Manos del Marga Marga",
       description: "Explora todas las categorías de papel artesanal, papel reciclado y papel semilla germinable hechos a mano en Chile. Invitaciones personalizadas, packaging sostenible, sobres, etiquetas y productos ecológicos con envío a todo Chile.",
-      keywords: ["catálogo completo papel artesanal", "papel reciclado Chile", "papel semilla germinable", "todas las categorías", "invitaciones papel artesanal", "packaging sostenible", "papel hecho a mano Chile"],
+      keywords: ["catálogo completo papel artesanal", "papel reciclado Chile", "papel semilla germinable", "papel con semillas", "papel germinado", "papel ecológico", "todas las categorías", "invitaciones papel artesanal", "packaging sostenible", "papel hecho a mano Chile"],
       alternates: { canonical: `${site}/catalogo?vista=todo` },
       openGraph: {
         type: "website",
@@ -51,10 +51,10 @@ export async function generateMetadata({ searchParams }) {
 
   // Keywords dinámicas según categoría
   const keywords = categoria
-    ? [`papel artesanal ${categoria}`, `${categoria} papel reciclado`, `${categoria} papel semilla`, "papel hecho a mano Chile"]
+    ? [`papel artesanal ${categoria}`, `${categoria} papel reciclado`, `${categoria} papel semilla`, "papel con semillas", "papel germinado", "papel ecológico", "papel hecho a mano Chile"]
     : destacados
-    ? ["papel artesanal destacado", "papel semilla popular", "invitaciones papel reciclado", "packaging sostenible"]
-    : ["catálogo papel artesanal", "papel reciclado Chile", "papel semilla germinable", "invitaciones papel artesanal", "packaging sostenible", "papel hecho a mano"];
+    ? ["papel artesanal destacado", "papel semilla popular", "papel con semillas", "papel germinado", "papel ecológico", "invitaciones papel reciclado", "packaging sostenible"]
+    : ["catálogo papel artesanal", "papel reciclado Chile", "papel semilla germinable", "papel con semillas", "papel germinado", "papel ecológico", "invitaciones papel artesanal", "packaging sostenible", "papel hecho a mano"];
 
   const canonicalPath = categoria
     ? `/catalogo?categoria=${encodeURIComponent(categoria)}`

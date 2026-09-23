@@ -7,6 +7,9 @@ export const metadata = {
   keywords: [
     "papel artesanal Chile",
     "papel semilla germinable",
+    "papel con semillas",
+    "papel germinado",
+    "papel ecológico",
     "invitaciones papel reciclado",
     "papel hecho a mano",
     "packaging sostenible",
