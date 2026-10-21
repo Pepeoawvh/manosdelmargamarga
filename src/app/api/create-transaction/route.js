@@ -13,25 +13,20 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "El carrito está vacío" }, { status: 400 });
     }
 
-    if (!summary?.total || typeof summary.total !== "number" || summary.total <= 0) {
-      return NextResponse.json({ success: false, error: "Monto total inválido" }, { status: 400 });
+    const validation = await validateCartAgainstFirestore(cart);
+    if (!validation.ok) {
+      return NextResponse.json(
+        { success: false, error: validation.error },
+        { status: 400 },
+      );
     }
-
-    let orderCart = cart;
-    let orderSummary = summary;
-    const serverValidationEnabled =
-      process.env.ENABLE_SERVER_CART_VALIDATION === "true";
-
-    if (serverValidationEnabled) {
-      const validation = await validateCartAgainstFirestore(cart);
-      if (!validation.ok) {
-        return NextResponse.json(
-          { success: false, error: validation.error },
-          { status: 400 },
-        );
-      }
-      orderCart = validation.cart;
-      orderSummary = validation.summary;
+    const orderCart = validation.cart;
+    const orderSummary = validation.summary;
+    if (orderSummary.total <= 0) {
+      return NextResponse.json(
+        { success: false, error: "El monto total debe ser mayor que cero" },
+        { status: 400 },
+      );
     }
 
     // === IDs válidos según Transbank ===
