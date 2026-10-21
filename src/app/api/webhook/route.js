@@ -77,6 +77,22 @@ async function maybeUpdateOrderFromWebhook(body) {
 
 export async function POST(request) {
   try {
+    const configuredSecret = process.env.WEBPAY_WEBHOOK_SECRET;
+    if (configuredSecret) {
+      const receivedSecret = request.headers.get("x-webpay-secret") || "";
+      const expected = Buffer.from(configuredSecret);
+      const received = Buffer.from(receivedSecret);
+      if (
+        expected.length !== received.length ||
+        !crypto.timingSafeEqual(expected, received)
+      ) {
+        return NextResponse.json(
+          { success: false, message: "No autorizado" },
+          { status: 401 }
+        );
+      }
+    }
+
     // Leer crudo para poder firmar/deduplicar
     const raw = await request.text();
     const contentType = request.headers.get("content-type") || "application/json";
