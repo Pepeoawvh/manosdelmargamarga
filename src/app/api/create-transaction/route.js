@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import admin, { adminDb } from "../../../lib/firebase/admin";
 import { WebpayPlus, Options, Environment } from "transbank-sdk";
+import { validateCartAgainstFirestore } from "../../../lib/orders/validateCart";
 
 export async function POST(req) {
   try {
@@ -16,12 +17,29 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "Monto total inválido" }, { status: 400 });
     }
 
+    let orderCart = cart;
+    let orderSummary = summary;
+    const serverValidationEnabled =
+      process.env.ENABLE_SERVER_CART_VALIDATION === "true";
+
+    if (serverValidationEnabled) {
+      const validation = await validateCartAgainstFirestore(cart);
+      if (!validation.ok) {
+        return NextResponse.json(
+          { success: false, error: validation.error },
+          { status: 400 },
+        );
+      }
+      orderCart = validation.cart;
+      orderSummary = validation.summary;
+    }
+
     // === IDs válidos según Transbank ===
     const timestamp = Date.now();
     const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
     const buyOrder = `${timestamp}${randomSuffix}`; // sin guiones, solo números
     const sessionId = `S${timestamp}${randomSuffix}`;
-    const amount = Math.round(summary.total);
+    const amount = Math.round(orderSummary.total);
     const trace = `${timestamp}-${randomSuffix}`;
 
     // === URLs de retorno controladas ===
@@ -35,9 +53,9 @@ export async function POST(req) {
     const orderData = {
       buy_order: buyOrder,
       session_id: sessionId,
-      cart,
+      cart: orderCart,
       customer,
-      summary,
+      summary: orderSummary,
       paymentMethod: "webpay",
       paymentStatus: "pending",
       isApproved: false,

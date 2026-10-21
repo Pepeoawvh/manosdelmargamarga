@@ -69,7 +69,8 @@ const ProductCard = ({
 
   // Imagen fallback
   const handleImgError = (e) => {
-    e.currentTarget.src = "/images/placeholder-product.jpg";
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = "/images/logos/mmm.png";
   };
 
   return (
@@ -85,7 +86,7 @@ const ProductCard = ({
         {/* Imagen base */}
         <div className="absolute inset-0 w-full h-full">
           <img
-            src={image || "/images/placeholder-product.jpg"}
+            src={image || "/images/logos/mmm.png"}
             alt={altText}
             title={titleText}
             className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"

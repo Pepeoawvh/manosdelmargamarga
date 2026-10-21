@@ -52,7 +52,7 @@ const AddToCartButton = ({ product, quantity = 1, compact = false, className = '
         id: product.id,
         title: product.title || '',
         price: parseFloat(product.price) || 0,
-        image: product.image || '/placeholder.png',
+        image: product.image || '/images/logos/mmm.png',
         stock: product.stock || 0,
         sku: product.sku || ''
       };

@@ -16,7 +16,6 @@ import AddToCartButton from "../cart/AddToCartButton";
 import ReservationButton from "../cart/ReservationButton";
 import QuoteButton from "../cart/QuoteButton";
 import ShareButton from "./ShareButton";
-import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 
@@ -201,13 +200,12 @@ const ProductDetails = ({ productSlug }) => {
             aria-label="Imágenes del producto"
           >
             {images[activeImage] ? (
-              <Image
+              <img
                 src={images[activeImage]}
                 alt={product.title || "Producto"}
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
+                className="absolute inset-0 h-full w-full object-contain"
+                loading="eager"
+                decoding="async"
               />
             ) : (
               <div className="w-full h-full bg-gray-100" />
@@ -275,12 +273,12 @@ const ProductDetails = ({ productSlug }) => {
                   }`}
                   aria-label={`Miniatura ${idx + 1}`}
                 >
-                  <Image
+                  <img
                     src={img}
                     alt={`Miniatura ${idx + 1} - ${product.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="56px"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </button>
               ))}
