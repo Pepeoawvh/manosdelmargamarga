@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import admin, { adminDb } from "../../../lib/firebase/admin";
+import { decrementInventoryForOrder } from "../../../lib/orders/decrementInventory";
 
 // Utilidad: guardar evento con idempotencia
 async function saveWebhookEvent({ provider, raw, body, headers }) {
@@ -69,7 +70,12 @@ async function maybeUpdateOrderFromWebhook(body) {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    return { updated: true, orderId: doc.id, paymentStatus, isApproved };
+    let inventory = { adjusted: false, alreadyAdjusted: false };
+    if (isApproved) {
+      inventory = await decrementInventoryForOrder(doc.id);
+    }
+
+    return { updated: true, orderId: doc.id, paymentStatus, isApproved, inventory };
   } catch (e) {
     return { updated: false, error: e?.message || String(e) };
   }
