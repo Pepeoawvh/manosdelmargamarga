@@ -16,6 +16,7 @@ import AddToCartButton from "../cart/AddToCartButton";
 import ReservationButton from "../cart/ReservationButton";
 import QuoteButton from "../cart/QuoteButton";
 import ShareButton from "./ShareButton";
+import RelatedProducts from "./RelatedProducts";
 import Link from "next/link";
 import Script from "next/script";
 
@@ -450,6 +451,8 @@ const ProductDetails = ({ productSlug }) => {
           </div>
         </div>
       </div>
+
+      <RelatedProducts product={product} />
     </div>
   );
 };
