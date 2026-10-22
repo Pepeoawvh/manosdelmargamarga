@@ -118,6 +118,28 @@ const ProductDetails = ({ productSlug }) => {
   const priceValidUntilDate = new Date();
   priceValidUntilDate.setFullYear(priceValidUntilDate.getFullYear() + 1);
   const priceValidUntil = priceValidUntilDate.toISOString().split("T")[0];
+  const categoryButtons = (
+    <div className="flex flex-wrap gap-2 mb-3">
+      {product.categories?.map((category) => (
+        <Link
+          key={`category-${category}`}
+          href={`/catalogo?categoria=${encodeURIComponent(category)}`}
+          className="inline-flex items-center rounded-full border border-[#cde582] bg-[#eef6d6] px-3 py-1 text-xs font-medium text-[#5e8c30] transition-colors hover:bg-[#dcecb5] focus:outline-none focus:ring-2 focus:ring-[#798f38] focus:ring-offset-1"
+        >
+          {category}
+        </Link>
+      ))}
+      {product.subcategories?.map((subcategory) => (
+        <Link
+          key={`subcategory-${subcategory}`}
+          href={`/catalogo?categoria=${encodeURIComponent(product.categories?.[0] || "")}`}
+          className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#798f38] focus:ring-offset-1"
+        >
+          {subcategory}
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <div className="bg-white mt-12 rounded-lg shadow-sm overflow-hidden">
@@ -159,19 +181,7 @@ const ProductDetails = ({ productSlug }) => {
 
       {/* Encabezado: siempre visible arriba (especialmente en móvil) */}
       <div className="px-4 pt-4 md:hidden">
-        {product.categories && product.categories.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {product.categories.map((category) => (
-              <Link
-                key={category}
-                href={`/catalogo?categoria=${encodeURIComponent(category)}`}
-                className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
-              >
-                {category}
-              </Link>
-            ))}
-          </div>
-        )}
+        {categoryButtons}
         <h1 className="text-xl font-bold text-gray-800 leading-tight">
           {product.title}
         </h1>
@@ -291,19 +301,7 @@ const ProductDetails = ({ productSlug }) => {
         <div className="flex flex-col space-y-4">
           {/* Encabezado: solo visible en desktop (en móvil se muestra arriba del grid) */}
             <div className="hidden md:block mb-4">
-              {product.categories && product.categories.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {product.categories.map((category) => (
-                    <Link
-                      key={category}
-                      href={`/catalogo?categoria=${encodeURIComponent(category)}`}
-                      className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200"
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              {categoryButtons}
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-800">
@@ -372,19 +370,16 @@ const ProductDetails = ({ productSlug }) => {
             )}
           </div>
 
-          {/* Características */}
-          {product.subcategories && product.subcategories.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Características
-              </h3>
-              <ul className="list-disc pl-5 text-gray-600 text-sm">
-                {product.subcategories.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
+          {/* Área de detalles adicionales */}
+          <div className="border-t border-gray-100 pt-5">
+            <div className="bg-gray-50 rounded-xl p-4">
+              <ul className="flex flex-row flex-wrap items-center justify-between gap-3 text-sm">
+                <li className="text-gray-600">Envío a todo Chile</li>
+                <li className="text-gray-600">3–5 días hábiles para entrega</li>
+                <li className="text-gray-600">Compras seguras con WebPay</li>
               </ul>
             </div>
-          )}
+          </div>
 
           {/* Añadir al carrito, Reservar o Cotizar */}
           <div className="mt-auto space-y-3">
@@ -406,48 +401,6 @@ const ProductDetails = ({ productSlug }) => {
                 )}
               </>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Área de detalles adicionales */}
-      <div className="border-t border-gray-100 px-4 py-6 md:px-6">
-        <h2 className="text-xs uppercase tracking-widest font-semibold text-[#798f38] mb-5">
-          Información adicional
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-5">
-          {/* Envío y entrega */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <h3 className="text-xs uppercase tracking-widest font-semibold text-gray-400 mb-3">
-              Envío y entrega
-            </h3>
-            <ul className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:space-x-6 text-sm">
-              <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#eef6d6] flex items-center justify-center">
-                  <svg className="h-4 w-4 text-[#5e8c30]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
-                  </svg>
-                </span>
-                <span className="text-gray-600">Envío a todo Chile</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#eef6d6] flex items-center justify-center">
-                  <svg className="h-4 w-4 text-[#5e8c30]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </span>
-                <span className="text-gray-600">3–5 días hábiles para entrega</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#eef6d6] flex items-center justify-center">
-                  <svg className="h-4 w-4 text-[#5e8c30]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </span>
-                <span className="text-gray-600">Compras seguras con WebPay</span>
-              </li>
-            </ul>
           </div>
         </div>
       </div>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, A11y } from "swiper/modules";
+import { A11y } from "swiper/modules";
 import { firestoreDB } from "../../../lib/firebase/config";
 import ProductCard from "./ProductCard";
 import "swiper/css";
@@ -35,6 +35,7 @@ const getRecommendationScore = (candidate, currentProduct) => {
 
 export default function RelatedProducts({ product }) {
   const [products, setProducts] = useState([]);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,17 +91,39 @@ export default function RelatedProducts({ product }) {
         >
           También te puede interesar
         </h2>
+        {relatedProducts.length > 1 && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => swiperRef.current?.slidePrev()}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#798f38] text-[#798f38] transition-colors hover:bg-[#798f38] hover:text-white"
+              aria-label="Ver recomendaciones anteriores"
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => swiperRef.current?.slideNext()}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#798f38] text-[#798f38] transition-colors hover:bg-[#798f38] hover:text-white"
+              aria-label="Ver más recomendaciones"
+            >
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <Swiper
-        modules={[Navigation, A11y]}
-        navigation
+        modules={[A11y]}
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper;
+        }}
         spaceBetween={16}
-        slidesPerView={1}
+        slidesPerView={1.15}
         breakpoints={{
-          640: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
-          1280: { slidesPerView: 4 },
+          640: { slidesPerView: 2.15 },
+          1024: { slidesPerView: 3.15 },
+          1280: { slidesPerView: 3.35 },
         }}
         className="related-products-swiper !pb-2"
       >
