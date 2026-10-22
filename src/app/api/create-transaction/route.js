@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import admin, { adminDb } from "../../../lib/firebase/admin";
 import { WebpayPlus, Options, Environment } from "transbank-sdk";
+import { validateCartAgainstFirestore } from "../../../lib/orders/validateCart";
 
 export async function POST(req) {
   try {
@@ -12,8 +13,20 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "El carrito está vacío" }, { status: 400 });
     }
 
-    if (!summary?.total || typeof summary.total !== "number" || summary.total <= 0) {
-      return NextResponse.json({ success: false, error: "Monto total inválido" }, { status: 400 });
+    const validation = await validateCartAgainstFirestore(cart);
+    if (!validation.ok) {
+      return NextResponse.json(
+        { success: false, error: validation.error },
+        { status: 400 },
+      );
+    }
+    const orderCart = validation.cart;
+    const orderSummary = validation.summary;
+    if (orderSummary.total <= 0) {
+      return NextResponse.json(
+        { success: false, error: "El monto total debe ser mayor que cero" },
+        { status: 400 },
+      );
     }
 
     // === IDs válidos según Transbank ===
@@ -21,7 +34,7 @@ export async function POST(req) {
     const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
     const buyOrder = `${timestamp}${randomSuffix}`; // sin guiones, solo números
     const sessionId = `S${timestamp}${randomSuffix}`;
-    const amount = Math.round(summary.total);
+    const amount = Math.round(orderSummary.total);
     const trace = `${timestamp}-${randomSuffix}`;
 
     // === URLs de retorno controladas ===
@@ -35,9 +48,9 @@ export async function POST(req) {
     const orderData = {
       buy_order: buyOrder,
       session_id: sessionId,
-      cart,
+      cart: orderCart,
       customer,
-      summary,
+      summary: orderSummary,
       paymentMethod: "webpay",
       paymentStatus: "pending",
       isApproved: false,

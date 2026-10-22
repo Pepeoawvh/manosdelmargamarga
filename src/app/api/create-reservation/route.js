@@ -7,18 +7,46 @@ export async function POST(req) {
     const { items, customer, cartTotal, timestamp } = body;
 
     // Validaciones básicas
-    if (!items || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
       return Response.json(
-        { error: "No hay productos para reservar" },
+        { error: "La reserva debe contener entre 1 y 50 productos" },
         { status: 400 }
       );
     }
 
-    if (!customer || !customer.email) {
+    if (
+      !customer ||
+      typeof customer !== "object" ||
+      typeof customer.email !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email) ||
+      customer.email.length > 254
+    ) {
       return Response.json(
         { error: "Datos del cliente inválidos" },
         { status: 400 }
       );
+    }
+
+    const validItems = items.every((item) => {
+      const quantity = Number(item?.quantity || 1);
+      const price = Number(item?.productPrice);
+      return (
+        item &&
+        typeof item.productId === "string" &&
+        item.productId.length <= 200 &&
+        typeof item.productTitle === "string" &&
+        item.productTitle.length <= 300 &&
+        Number.isSafeInteger(quantity) &&
+        quantity > 0 &&
+        quantity <= 1000 &&
+        Number.isFinite(price) &&
+        price >= 0 &&
+        price <= 100000000
+      );
+    });
+
+    if (!validItems) {
+      return Response.json({ error: "Datos de productos inválidos" }, { status: 400 });
     }
 
     // Crear un documento de reserva por cada producto
@@ -28,9 +56,9 @@ export async function POST(req) {
       const reservationData = {
         productId: item.productId,
         productTitle: item.productTitle,
-        productPrice: item.productPrice,
-        quantity: item.quantity || 1,
-        total: item.total || (item.productPrice * (item.quantity || 1)),
+        productPrice: Number(item.productPrice),
+        quantity: Number(item.quantity || 1),
+        total: Number(item.productPrice) * Number(item.quantity || 1),
         customerFirstName: customer.firstName,
         customerLastName: customer.lastName,
         customerEmail: customer.email,

@@ -96,8 +96,6 @@ const Navbar = () => {
       color: "gray",
       submenu: PRODUCT_CATEGORIES,
     },
-    // { name: "Nosotras", path: "/nosotras", color: "pink" },
-    // { name: "Sostenible", path: "/sostenible", color: "green" },
     {
       name: "Tutoriales",
       path: "/tutoriales",
@@ -109,6 +107,7 @@ const Navbar = () => {
       ],
     },
     { name: "Contacto", path: "/contacto", color: "gray" },
+    { name: "Nosotras", path: "/nosotras", color: "gray" },
     { name: "Ofertas", path: "/catalogo?categoria=Ofertas", color: "orange" },
   ];
 
@@ -564,17 +563,16 @@ const Navbar = () => {
                                 title={`Ver ${p.title} - Manos del Marga Marga`}
                               >
                                 <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
-                                  <Image
+                                  <img
                                     src={
                                       p.images?.[0] ||
                                       p.image ||
-                                      "/images/placeholder.png"
+                                      "/images/logos/mmm.png"
                                     }
                                     alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
-                                    fill
-                                    sizes="40px"
-                                    className="object-cover"
+                                    className="absolute inset-0 h-full w-full object-cover"
                                     loading="lazy"
+                                    decoding="async"
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -801,17 +799,16 @@ const Navbar = () => {
                                   title={`Ver ${p.title} - Manos del Marga Marga`}
                                 >
                                   <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
-                                    <Image
+                                    <img
                                       src={
                                         p.images?.[0] ||
                                         p.image ||
-                                        "/images/placeholder.png"
+                                        "/images/logos/mmm.png"
                                       }
                                       alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
-                                      fill
-                                      sizes="40px"
-                                      className="object-cover"
+                                      className="absolute inset-0 h-full w-full object-cover"
                                       loading="lazy"
+                                      decoding="async"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -1078,17 +1075,16 @@ const Navbar = () => {
                               title={`Ver ${p.title} - Manos del Marga Marga`}
                             >
                               <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border">
-                                <Image
+                                <img
                                   src={
                                     p.images?.[0] ||
                                     p.image ||
-                                    "/images/placeholder.png"
+                                    "/images/logos/mmm.png"
                                   }
                                   alt={p.title ? `${p.title} - Producto Manos del Marga Marga` : "Producto Manos del Marga Marga"}
-                                  fill
-                                  sizes="40px"
-                                  className="object-cover"
+                                  className="absolute inset-0 h-full w-full object-cover"
                                   loading="lazy"
+                                  decoding="async"
                                 />
                               </div>
                               <div className="flex-1 min-w-0">

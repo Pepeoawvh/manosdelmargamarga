@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import admin, { adminDb } from "../../../lib/firebase/admin";
+import { decrementInventoryForOrder } from "../../../lib/orders/decrementInventory";
 
 // Utilidad: guardar evento con idempotencia
 async function saveWebhookEvent({ provider, raw, body, headers }) {
@@ -69,7 +70,12 @@ async function maybeUpdateOrderFromWebhook(body) {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    return { updated: true, orderId: doc.id, paymentStatus, isApproved };
+    let inventory = { adjusted: false, alreadyAdjusted: false };
+    if (isApproved) {
+      inventory = await decrementInventoryForOrder(doc.id);
+    }
+
+    return { updated: true, orderId: doc.id, paymentStatus, isApproved, inventory };
   } catch (e) {
     return { updated: false, error: e?.message || String(e) };
   }
@@ -77,6 +83,22 @@ async function maybeUpdateOrderFromWebhook(body) {
 
 export async function POST(request) {
   try {
+    const configuredSecret = process.env.WEBPAY_WEBHOOK_SECRET;
+    if (configuredSecret) {
+      const receivedSecret = request.headers.get("x-webpay-secret") || "";
+      const expected = Buffer.from(configuredSecret);
+      const received = Buffer.from(receivedSecret);
+      if (
+        expected.length !== received.length ||
+        !crypto.timingSafeEqual(expected, received)
+      ) {
+        return NextResponse.json(
+          { success: false, message: "No autorizado" },
+          { status: 401 }
+        );
+      }
+    }
+
     // Leer crudo para poder firmar/deduplicar
     const raw = await request.text();
     const contentType = request.headers.get("content-type") || "application/json";

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import admin, { adminDb } from "../../../lib/firebase/admin";
 import { Environment, Options, WebpayPlus } from "transbank-sdk";
+import { decrementInventoryForOrder } from "../../../lib/orders/decrementInventory";
 
 // Configuración explícita para PRODUCCIÓN
 const webpayOptions = new Options(
@@ -59,6 +60,11 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
     }
 
+    let inventory = { adjusted: false, alreadyAdjusted: false };
+    if (isApproved) {
+      inventory = await decrementInventoryForOrder(orderData.id);
+    }
+
     // Disparar notificaciones por correo con trazas (no bloquea la respuesta)
     try {
       const url = `${process.env.BASE_URL}/api/notify-order`;
@@ -94,6 +100,7 @@ export async function POST(req) {
       order: orderData,
       status,
       isApproved,
+      inventory,
       details: {
         response_code: transactionResult.response_code,
         authorization_code: transactionResult.authorization_code,
