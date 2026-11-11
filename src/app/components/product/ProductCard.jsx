@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import AddToCartButton from "../cart/AddToCartButton";
 import QuoteButton from "../cart/QuoteButton";
+import ShareButton from "./ShareButton";
 
 const ProductCard = ({
   product = {},
@@ -68,12 +69,13 @@ const ProductCard = ({
 
   // Imagen fallback
   const handleImgError = (e) => {
-    e.currentTarget.src = "/images/placeholder-product.jpg";
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = "/images/logos/mmm.png";
   };
 
   return (
     <article
-      className="relative rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 h-[360px] w-full max-w-xs mx-auto group"
+      className="relative rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 h-[375px] md:h-[360px] w-full max-w-xs mx-auto group"
       onMouseEnter={() => !isAdmin && setIsHovered(true)}
       onMouseLeave={() => !isAdmin && setIsHovered(false)}
       itemScope
@@ -84,7 +86,7 @@ const ProductCard = ({
         {/* Imagen base */}
         <div className="absolute inset-0 w-full h-full">
           <img
-            src={image || "/images/placeholder-product.jpg"}
+            src={image || "/images/logos/mmm.png"}
             alt={altText}
             title={titleText}
             className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -167,15 +169,39 @@ const ProductCard = ({
         </div>
       )}
 
+      {/* Botón compartir: arriba a la derecha (modo público) — z alto sobre el link */}
+      {!isAdmin && (
+        <div className="absolute top-2 right-2 z-20">
+          <div className="w-[24px] h-[24px] rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors">
+            <ShareButton title={titleText} compact url={`https://www.manosdelmargamarga.cl${productHref}`} />
+          </div>
+        </div>
+      )}
+
       {/* Información */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-        <h3 className="font-semibold text-lg mb-1 line-clamp-1" itemProp="name">
+      <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
+        <h3 className="font-semibold text-[13px] leading-tight sm:text-lg mb-1 line-clamp-1" itemProp="name">
           {titleText}
         </h3>
 
-        <div className="flex justify-between items-end mt-2">
+        {product.rating && product.rating.count > 0 && (
+          <div className="hidden sm:flex items-center gap-1 mb-1" itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+            <meta itemProp="ratingValue" content={String(product.rating.avg)} />
+            <meta itemProp="reviewCount" content={String(product.rating.count)} />
+            <meta itemProp="bestRating" content="5" />
+            <span className="text-yellow-400 text-xs">★</span>
+            <span className="text-white/70 text-xs">{product.rating.avg}</span>
+            <span className="text-white/50 text-xs">({product.rating.count})</span>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 mt-2 sm:flex-row sm:justify-between sm:items-end">
           {showInfo && (
             <div className="font-bold text-white" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+              <meta itemProp="priceCurrency" content="CLP" />
+              <meta itemProp="price" content={String(priceInt)} />
+              <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
+              <link itemProp="url" href={`https://www.manosdelmargamarga.cl${productHref}`} />
               {hidePrice ? (
                 <span className="text-white/50 text-xs">Precio a cotizar</span>
               ) : priceInt > 0 ? (
@@ -185,15 +211,14 @@ const ProductCard = ({
                       ${oldPriceInt}
                     </span>
                   )}
-                  <span itemProp="price" content={String(priceInt)} className="text-base leading-tight">
-                    <span itemProp="priceCurrency" content="CLP" className="text-xs font-normal mr-0.5">CLP</span>
+                  <span className="text-[15px] leading-tight sm:text-base">
+                    <span className="text-xs font-normal mr-0.5">CLP</span>
                     {`$${priceInt}`}
                   </span>
                 </div>
               ) : (
                 <span className="text-sm">Consultar precio</span>
               )}
-              <link itemProp="availability" href={isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"} />
             </div>
           )}
 
@@ -224,7 +249,7 @@ const ProductCard = ({
             <div className="flex gap-1.5">
               <Link
                 href={productHref}
-                className="px-3 py-[5px] bg-white/90 text-[#5e8c30] text-[11px] font-semibold rounded-lg hover:bg-white transition-colors backdrop-blur-sm"
+                className="flex-1 sm:flex-none justify-center text-center px-2 sm:px-3 py-[5px] bg-white/90 text-[#5e8c30] text-[11px] font-semibold rounded-lg hover:bg-white transition-colors backdrop-blur-sm whitespace-nowrap"
                 aria-label={`Ver detalle de ${titleText}`}
                 title={`Ver ${titleText}`}
                 prefetch
@@ -235,13 +260,14 @@ const ProductCard = ({
                 <QuoteButton
                   product={product}
                   compact={true}
+                  className="flex-1 sm:flex-none justify-center px-2 sm:px-3"
                   aria-label={`Cotizar ${titleText}`}
                 />
               ) : (
                 <AddToCartButton
                   product={product}
                   compact={true}
-                  className="px-3 py-[5px] text-[11px] font-semibold rounded-lg"
+                  className="flex-1 sm:flex-none justify-center px-2 sm:px-3 text-[11px] font-semibold rounded-lg whitespace-nowrap"
                   aria-label={`Agregar ${titleText} al carrito`}
                 />
               )}

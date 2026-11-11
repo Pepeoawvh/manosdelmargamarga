@@ -97,7 +97,7 @@ export function CartProvider({ children }) {
           id: product.id,
           title: product.title || product.name || "Producto",
           price: parseFloat(product.price) || 0,
-          image: product.image || product.images?.[0] || "/placeholder.png",
+          image: product.image || product.images?.[0] || "/images/logos/mmm.png",
           quantity: initialQty,
           sku: product.sku || "",
           stock: maxStock,

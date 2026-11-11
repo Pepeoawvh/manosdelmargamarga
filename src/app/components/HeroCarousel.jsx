@@ -1,7 +1,6 @@
 ﻿// src/components/HeroCarousel.jsx
 "use client";
 import React, { useMemo, useEffect, useState } from "react";
-import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -36,8 +35,8 @@ function DualImage({ desktopSrc, mobileSrc, alt, priority, desktopObjectPosition
   const mSrc = mobileSrc || desktopSrc;
   return (
     <>
-      <Image src={mSrc} alt={alt} fill className="object-cover object-center md:hidden" priority={priority} sizes="100vw" />
-      <Image src={desktopSrc} alt={alt} fill className="hidden md:block object-cover" style={{ objectPosition: pos }} priority={priority} sizes="100vw" />
+      <img src={mSrc} alt={alt} className="absolute inset-0 h-full w-full object-cover object-center md:hidden" fetchPriority={priority ? "high" : "auto"} />
+      <img src={desktopSrc} alt={alt} className="absolute inset-0 hidden h-full w-full object-cover md:block" style={{ objectPosition: pos }} fetchPriority={priority ? "high" : "auto"} />
     </>
   );
 }

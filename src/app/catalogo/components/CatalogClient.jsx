@@ -41,7 +41,7 @@ export default function CatalogPageClient() {
   const [loadingError, setLoadingError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const [showCategories, setShowCategories] = useState(
-    !searchParams.get("categoria") && searchParams.get("destacados") !== "1"
+    searchParams.get("vista") !== "todo" && !searchParams.get("categoria") && searchParams.get("destacados") !== "1"
   );
   const [sortConfig, setSortConfig] = useState({});
 
@@ -57,13 +57,18 @@ export default function CatalogPageClient() {
   useEffect(() => {
     const categoria = searchParams.get("categoria") || "";
     const destacados = searchParams.get("destacados") === "1";
+    const vista = searchParams.get("vista");
     setFilters({
       category: categoria,
       subcategories: [],
       featured: destacados,
       inStock: false,
     });
-    setShowCategories(!categoria && !destacados);
+    if (vista === "todo") {
+      setShowCategories(false);
+    } else {
+      setShowCategories(!categoria && !destacados);
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -295,7 +300,7 @@ export default function CatalogPageClient() {
     : null;
 
   return (
-    <div className="min-h-screen text-[#535550] mt-4 pt-4 px-4 md:px-6 bg-gray-50">
+    <div className="min-h-screen text-[#535550] mt-4 pt-4 px-4 md:px-6 bg-gray-50 max-w-7xl mx-auto">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJson }} />
       {itemListJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: itemListJson }} />}
 
@@ -370,7 +375,7 @@ export default function CatalogPageClient() {
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {getFeaturedColumnar().map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -392,7 +397,7 @@ export default function CatalogPageClient() {
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                     {applySort(offerProducts, 'Ofertas').map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -407,14 +412,14 @@ export default function CatalogPageClient() {
                       Otros productos
                     </h2>
                     <Button
-                      onClick={() => { router.push("/catalogo?vista=todo"); }}
+                      onClick={() => { setShowCategories(false); router.push("/catalogo?vista=todo"); }}
                       variant="text" size="sm" className="!bg-[#96bf49] !text-white hover:!bg-[#7fb43f]"
                       aria-label="Ver todo el catálogo" title="Ver todo el catálogo"
                     >
                       Ver todos
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {sortedOtherProducts.map((p) => (
                       <div key={p.id} className="min-h-[360px]"><ProductCard product={p} showInfo /></div>
                     ))}
@@ -450,7 +455,7 @@ export default function CatalogPageClient() {
                     Ver solo {category}
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   {categoryProducts.map((p) => (
                     <div key={p.id} className="min-h-[360px]">
                       <ProductCard product={p} showInfo />
@@ -480,7 +485,7 @@ export default function CatalogPageClient() {
             </nav>
           )}
 
-          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
+          <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resultados filtrados del catálogo">
             {applySort(filteredProducts, filters.featured ? 'Destacados' : filters.category || '').map((product) => (
               <div key={product.id} className="min-h-[360px]">
                 <ProductCard product={product} showInfo />

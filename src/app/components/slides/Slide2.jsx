@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 const Slide2 = ({ 
@@ -39,15 +38,15 @@ const Slide2 = ({
 
   return (
     <div className="relative h-[70vh] md:h-[70vh] w-full bg-[#ffffff86]">
-      <Image
+      <img
         src={currentImage}
         alt="Background"
-        fill
-        priority
+        className="absolute inset-0 h-full w-full"
         style={{ 
           objectFit,
           objectPosition 
         }}
+        fetchPriority="high"
       />
       <div className={`absolute inset-0 bg-gradient-to-r ${overlayGradient}`}>
         <div className={`h-full flex items-center ${

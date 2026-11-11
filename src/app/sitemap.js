@@ -16,7 +16,8 @@ export default async function sitemap() {
     "", // Home
     "/catalogo",
     "/nosotras",
-    "/tutoriales/como-plantar",
+    "/tutoriales",
+    "/como-plantar-papel-germinable-manos-del-marga-marga",
     "/tutoriales/protocolo-grafico",
     "/tutoriales/como-trabajamos",
     "/contacto",

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 const Slide3 = ({ 
@@ -28,12 +27,11 @@ const Slide3 = ({
 
   return (
     <div className="relative h-[70vh] w-full">
-      <Image
+      <img
         src={currentImage}
         alt="Background"
-        fill
-        priority
-        className="object-cover"
+        className="absolute inset-0 h-full w-full object-cover"
+        fetchPriority="high"
       />
       <div className="absolute inset-0 flex items-center">
         <div className={`max-w-md p-5 sm:p-8 rounded-lg ${

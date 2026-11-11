@@ -54,6 +54,8 @@ export async function generateMetadata({ params }) {
         url: productUrl,
         title,
         description,
+        siteName: "Manos del Marga Marga",
+        locale: "es_CL",
         images: [
           {
             url: mainImage,
@@ -68,20 +70,12 @@ export async function generateMetadata({ params }) {
             alt: `${product.title} - imagen adicional`,
           })),
         ],
-        siteName: "Manos del Marga Marga",
-        locale: "es_CL",
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
         images: [mainImage],
-      },
-      other: {
-        "product:price:amount": price,
-        "product:price:currency": "CLP",
-        "product:availability": stock > 0 ? "in stock" : "out of stock",
-        "product:category": product.categories?.join(", ") || "",
       },
     };
   } catch (error) {

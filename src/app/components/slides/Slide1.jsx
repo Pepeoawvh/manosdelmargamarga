@@ -1,15 +1,13 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 const Slide1 = ({ title, description, imageUrl, buttons }) => {
   return (
     <div className="relative h-[50vh] w-full flex items-center justify-center">
-      <Image
+      <img
         src={imageUrl}
         alt="Background"
-        fill
-        priority
-        className="object-cover z-[-1]"
+        className="absolute inset-0 h-full w-full object-cover z-[-1]"
+        fetchPriority="high"
       />
       <div className="text-center space-y-6 max-w-4xl mx-auto px-4">
         <h1 className="text-4xl font-bold text-[#3a5729]">

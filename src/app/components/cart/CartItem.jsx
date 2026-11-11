@@ -67,11 +67,12 @@ export default function CartItem({ item }) {
     <div className="flex items-center gap-3 border rounded p-2">
       <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
         <img
-          src={item.image || "/placeholder.png"}
+          src={item.image || "/images/logos/mmm.png"}
           alt={item.title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.currentTarget.src = "/placeholder.png";
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/images/logos/mmm.png";
           }}
         />
       </div>

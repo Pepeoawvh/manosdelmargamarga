@@ -97,14 +97,11 @@
             {/* Cabecera */}
             <div className="p-4 border-b flex items-center justify-between">
               <h2 className="text-lg font-medium text-gray-900">Tu Carrito ({itemCount})</h2>
-              <button 
+              <button
                 onClick={closeCart}
-                className="p-1 text-gray-500 hover:text-gray-700"
-                aria-label="Cerrar carrito"
+                className="text-sm font-medium text-[#5e8c30] hover:text-[#4a7326] transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                Seguir comprando
               </button>
             </div>
             

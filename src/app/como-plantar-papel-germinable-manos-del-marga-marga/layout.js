@@ -10,6 +10,8 @@ export const metadata = {
     "como plantar papel germinable",
     "papel semilla",
     "papel con semillas",
+    "papel germinado",
+    "papel ecológico",
     "plantar papel",
     "papel biodegradable con semillas",
     "tutorial papel germinable",
